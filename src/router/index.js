@@ -55,6 +55,14 @@ const routes = [
   },
   {
     meta: {
+      title: 'Spots',
+    },
+    patch: '/spots',
+    name: 'spots',
+    component: () => import('@/views/SpotsView.vue'),
+  },
+  {
+    meta: {
       title: 'Responsive layout',
     },
     path: '/responsive',
