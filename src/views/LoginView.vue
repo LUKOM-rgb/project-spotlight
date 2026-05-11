@@ -1,66 +1,75 @@
 <script setup>
 import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { mdiAccount, mdiAsterisk } from '@mdi/js'
-import SectionFullScreen from '@/components/SectionFullScreen.vue'
 import CardBox from '@/components/CardBox.vue'
-import FormCheckRadio from '@/components/FormCheckRadio.vue'
 import FormField from '@/components/FormField.vue'
 import FormControl from '@/components/FormControl.vue'
-import BaseButton from '@/components/BaseButton.vue'
-import BaseButtons from '@/components/BaseButtons.vue'
-import LayoutGuest from '@/layouts/LayoutGuest.vue'
 
-const form = reactive({
-  login: 'john.doe',
-  pass: 'highly-secure-password-fYjUw-',
-  remember: true,
+const registerForm = reactive({
+  name: '',
+  password: '',
+  isArtist: null,
+  acceptLicense: false,
 })
 
-const router = useRouter()
-
-const submit = () => {
-  router.push('/dashboard')
+const submitRegister = () => {
+  console.log('Register form submitted:', registerForm)
+  // Lógica de registo aqui
 }
 </script>
 
 <template>
-  <LayoutGuest>
-    <SectionFullScreen v-slot="{ cardClass }" bg="purplePink">
-      <CardBox :class="cardClass" is-form @submit.prevent="submit">
-        <FormField label="Login" help="Please enter your login">
-          <FormControl
-            v-model="form.login"
-            :icon="mdiAccount"
-            name="login"
-            autocomplete="username"
-          />
-        </FormField>
+  <div class="flex min-h-screen items-center justify-center bg-amber-50 p-4">
+    <CardBox
+      class="w-full max-w-md rounded-lg bg-slate-800 shadow-xl"
+      is-form
+      @submit.prevent="submitRegister"
+    >
+      <!-- Título -->
+      <h1 class="mb-8 text-center text-3xl font-light tracking-widest text-teal-400">SPOTLIGHT</h1>
 
-        <FormField label="Password" help="Please enter your password">
-          <FormControl
-            v-model="form.pass"
-            :icon="mdiAsterisk"
-            type="password"
-            name="password"
-            autocomplete="current-password"
-          />
-        </FormField>
-
-        <FormCheckRadio
-          v-model="form.remember"
-          name="remember"
-          label="Remember"
-          :input-value="true"
+      <!-- Campo Name -->
+      <FormField label="Name:" label-class="text-gray-400 text-sm">
+        <FormControl
+          v-model="registerForm.name"
+          name="name"
+          class="rounded border-slate-600 bg-slate-700 text-white"
+          required
         />
+      </FormField>
 
-        <template #footer>
-          <BaseButtons>
-            <BaseButton type="submit" color="info" label="Login" />
-            <BaseButton to="/dashboard" color="info" outline label="Back" />
-          </BaseButtons>
-        </template>
-      </CardBox>
-    </SectionFullScreen>
-  </LayoutGuest>
+      <!-- Campo E-mail -->
+
+      <!-- Campo Password -->
+      <FormField label="Password:" label-class="text-gray-400 text-sm">
+        <FormControl
+          v-model="registerForm.password"
+          type="password"
+          name="password"
+          class="rounded border-slate-600 bg-slate-700 text-white"
+          required
+        />
+      </FormField>
+
+      <!-- Botão Create Account -->
+      <div class="mb-4 flex justify-center">
+        <button
+          type="submit"
+          class="rounded bg-teal-600 px-6 py-3 text-white transition-colors hover:bg-teal-700"
+        >
+          Create<br />Account
+        </button>
+      </div>
+    </CardBox>
+  </div>
 </template>
+
+<style scoped>
+/* Estilos adicionais se necessário */
+input[type='text'],
+input[type='email'],
+input[type='password'] {
+  background-color: rgb(55, 65, 81);
+  border-color: rgb(30, 41, 59);
+  color: white;
+}
+</style>

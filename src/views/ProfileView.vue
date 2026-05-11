@@ -1,136 +1,138 @@
 <script setup>
 import { reactive } from 'vue'
-import { useMainStore } from '@/stores/main'
-import { mdiAccount, mdiMail, mdiAsterisk, mdiFormTextboxPassword, mdiGithub } from '@mdi/js'
-import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
-import BaseDivider from '@/components/BaseDivider.vue'
 import FormField from '@/components/FormField.vue'
 import FormControl from '@/components/FormControl.vue'
-import FormFilePicker from '@/components/FormFilePicker.vue'
-import BaseButton from '@/components/BaseButton.vue'
-import BaseButtons from '@/components/BaseButtons.vue'
-import UserCard from '@/components/UserCard.vue'
-import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
-import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
 
-const mainStore = useMainStore()
-
-const profileForm = reactive({
-  name: mainStore.userName,
-  email: mainStore.userEmail,
-})
-
-const passwordForm = reactive({
-  password_current: '',
+const registerForm = reactive({
+  name: '',
+  email: '',
   password: '',
-  password_confirmation: '',
+  isArtist: null,
+  acceptLicense: false,
 })
 
-const submitProfile = () => {
-  mainStore.setUser(profileForm)
+const setArtistStatus = (value) => {
+  registerForm.isArtist = value
 }
 
-const submitPass = () => {
-  //
+const submitRegister = () => {
+  console.log('Register form submitted:', registerForm)
+  // Lógica de registo aqui
 }
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiAccount" title="Profile" main>
-        <BaseButton
-          href="https://github.com/justboil/admin-one-vue-tailwind"
-          target="_blank"
-          :icon="mdiGithub"
-          label="Star on GitHub"
-          color="contrast"
-          rounded-full
-          small
+  <div class="flex min-h-screen items-center justify-center bg-amber-50 p-4">
+    <CardBox
+      class="w-full max-w-md rounded-lg bg-slate-800 shadow-xl"
+      is-form
+      @submit.prevent="submitRegister"
+    >
+      <!-- Título -->
+      <h1 class="mb-8 text-center text-3xl font-light tracking-widest text-teal-400">SPOTLIGHT</h1>
+
+      <!-- Campo Name -->
+      <FormField label="Name:" label-class="text-gray-400 text-sm">
+        <FormControl
+          v-model="registerForm.name"
+          name="name"
+          class="rounded border-slate-600 bg-slate-700 text-white"
+          required
         />
-      </SectionTitleLineWithButton>
+      </FormField>
 
-      <UserCard class="mb-6" />
+      <!-- Campo E-mail -->
+      <FormField label="E-mail:" label-class="text-gray-400 text-sm">
+        <FormControl
+          v-model="registerForm.email"
+          type="email"
+          name="email"
+          class="rounded border-slate-600 bg-slate-700 text-white"
+          required
+        />
+      </FormField>
 
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <CardBox is-form @submit.prevent="submitProfile">
-          <FormField label="Avatar" help="Max 500kb">
-            <FormFilePicker label="Upload" />
-          </FormField>
+      <!-- Campo Password -->
+      <FormField label="Password:" label-class="text-gray-400 text-sm">
+        <FormControl
+          v-model="registerForm.password"
+          type="password"
+          name="password"
+          class="rounded border-slate-600 bg-slate-700 text-white"
+          required
+        />
+      </FormField>
 
-          <FormField label="Name" help="Required. Your name">
-            <FormControl
-              v-model="profileForm.name"
-              :icon="mdiAccount"
-              name="username"
-              required
-              autocomplete="username"
-            />
-          </FormField>
-          <FormField label="E-mail" help="Required. Your e-mail">
-            <FormControl
-              v-model="profileForm.email"
-              :icon="mdiMail"
-              type="email"
-              name="email"
-              required
-              autocomplete="email"
-            />
-          </FormField>
-
-          <template #footer>
-            <BaseButtons>
-              <BaseButton color="info" type="submit" label="Submit" />
-              <BaseButton color="info" label="Options" outline />
-            </BaseButtons>
-          </template>
-        </CardBox>
-
-        <CardBox is-form @submit.prevent="submitPass">
-          <FormField label="Current password" help="Required. Your current password">
-            <FormControl
-              v-model="passwordForm.password_current"
-              :icon="mdiAsterisk"
-              name="password_current"
-              type="password"
-              required
-              autocomplete="current-password"
-            />
-          </FormField>
-
-          <BaseDivider />
-
-          <FormField label="New password" help="Required. New password">
-            <FormControl
-              v-model="passwordForm.password"
-              :icon="mdiFormTextboxPassword"
-              name="password"
-              type="password"
-              required
-              autocomplete="new-password"
-            />
-          </FormField>
-
-          <FormField label="Confirm password" help="Required. New password one more time">
-            <FormControl
-              v-model="passwordForm.password_confirmation"
-              :icon="mdiFormTextboxPassword"
-              name="password_confirmation"
-              type="password"
-              required
-              autocomplete="new-password"
-            />
-          </FormField>
-
-          <template #footer>
-            <BaseButtons>
-              <BaseButton type="submit" color="info" label="Submit" />
-              <BaseButton color="info" label="Options" outline />
-            </BaseButtons>
-          </template>
-        </CardBox>
+      <!-- Are you an artist? -->
+      <div class="mb-4">
+        <label class="mb-2 block text-sm text-gray-400">Are you an artist?</label>
+        <div class="flex gap-4">
+          <button
+            type="button"
+            :class="[
+              'rounded px-8 py-2 font-medium transition-colors',
+              registerForm.isArtist === true
+                ? 'bg-green-600 text-white'
+                : 'bg-green-700/50 text-green-300 hover:bg-green-600',
+            ]"
+            @click="setArtistStatus(true)"
+          >
+            YES
+          </button>
+          <button
+            type="button"
+            :class="[
+              'rounded px-8 py-2 font-medium transition-colors',
+              registerForm.isArtist === false
+                ? 'bg-red-600 text-white'
+                : 'bg-red-700/50 text-red-300 hover:bg-red-600',
+            ]"
+            @click="setArtistStatus(false)"
+          >
+            NO
+          </button>
+        </div>
       </div>
-    </SectionMain>
-  </LayoutAuthenticated>
+
+      <!-- License checkbox -->
+      <div class="mb-6">
+        <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-400">
+          <span>License:</span>
+          <input
+            v-model="registerForm.acceptLicense"
+            type="checkbox"
+            class="h-4 w-4 rounded border-slate-600 bg-slate-700 text-teal-500 focus:ring-teal-500"
+          />
+        </label>
+      </div>
+
+      <!-- Botão Create Account -->
+      <div class="mb-4 flex justify-center">
+        <button
+          type="submit"
+          class="rounded bg-teal-600 px-6 py-3 text-white transition-colors hover:bg-teal-700"
+        >
+          Create<br />Account
+        </button>
+      </div>
+
+      <!-- Link Login -->
+      <p class="text-center text-sm text-gray-400">
+        Already have an account?
+        <router-link to="/login" class="text-teal-400 hover:text-teal-300"> Login! </router-link>
+      </p>
+    </CardBox>
+  </div>
 </template>
+
+<style scoped>
+/* Estilos adicionais se necessário */
+input[type='text'],
+input[type='email'],
+input[type='password'] {
+  background-color: rgb(55, 65, 81);
+  border-color: rgb(30, 41, 59);
+  color: white;
+}
+</style>

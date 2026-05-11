@@ -85,6 +85,14 @@ const routes = [
     name: 'error',
     component: () => import('@/views/ErrorView.vue'),
   },
+  {
+    meta: {
+      title: 'Error',
+    },
+    path: '/error',
+    name: 'error',
+    component: () => import('@/views/PerfiladminView.vue'),
+  },
 ]
 
 const router = createRouter({

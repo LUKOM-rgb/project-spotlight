@@ -10,7 +10,6 @@ import {
   mdiLogout,
   mdiCity,
   mdiShieldCheck,
-  mdiHelpCircle,
 } from '@mdi/js'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionMain from '@/components/SectionMain.vue'
