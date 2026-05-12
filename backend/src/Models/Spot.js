@@ -1,4 +1,5 @@
-module.exports = (sequelize, DataTypes) => {
+import { DataTypes } from 'sequelize'
+import sequelize from '../config/database.js'
   const Spot = sequelize.define('Spot', {
     id_spot: {
       type: DataTypes.INTEGER,
@@ -26,5 +27,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },});
 
-  return Spot;
-};
+    Spot.associate=(models=>{
+      Spot.hasMany(models.Reserva,{
+        foreignKey:'id_spot',
+      })
+      Spot.hasMany(models.Ocorrencia,{
+        foreignKey:'id_spot',
+      })
+    })
+export default Spot
