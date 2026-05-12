@@ -10,11 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   });
-  Categoria.associate = (models) => {
-    Categoria.hasMany(models.Artista, {
-      foreignKey: 'categoria_id',
-    });
-  }
+  
   return Categoria;
 };
 

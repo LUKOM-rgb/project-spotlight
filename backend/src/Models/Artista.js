@@ -22,7 +22,23 @@ module.exports = (sequelize, DataTypes) => {
         key: 'categoria_id',
       },
     },
-  });
-
-  return Artista;
-};
+  })
+  Artista.associate = (models) => {
+    Artista.hasOne(models.Categoria, {
+      foreignKey: 'categoria_id',
+    })
+  }
+  // Acho que não é isso
+  Artista.associate = (models) => {
+    Artista.hasOne(models.Conta_global, {
+      foreignKey: 'conta_id',
+    })
+    Artista.hasMany(models.Seguidor, {
+      foreignKey: 'id_artista',
+    })
+    Artista.hasMany(models.Reserva, {
+      foreignKey: 'id_artista',
+    })
+  }
+  return Artista
+}
