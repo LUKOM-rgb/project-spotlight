@@ -1,23 +1,27 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../config/database.js'
 
-const Utilizador = sequelize.define('Utilizador', {
-  utilizador_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Utilizador = sequelize.define(
+  'Utilizador',
+  {
+    id_conta: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+    },
+    nif: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  nif: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  {
+    tableName: 'Utilizador',
+    freezeTableName: true,
+    timestamps: false,
   },
-})
+)
 Utilizador.associate = (models) => {
   Utilizador.hasMany(models.Seguidor, {
-    foreignKey: 'utilizador_id',
-  })
-  Utilizador.belongsTo(models.Conta_global, {
-    foreignKey: 'conta_id',
+    foreignKey: 'id_conta',
   })
 }
 export default Utilizador
