@@ -3,7 +3,7 @@ import sequelize from '../config/database.js'
 const Seguidor = sequelize.define(
   'Seguidor',
   {
-    utilizador_id: {
+    id_conta: {
       type: DataTypes.INTEGER,
       primaryKey: true,
     },
@@ -17,12 +17,14 @@ const Seguidor = sequelize.define(
     },
   },
   {
+    tableName: 'Seguidor',
+    freezeTableName: true,
     timestamps: false,
-  }
+  },
 )
 Seguidor.associate = (models) => {
   Seguidor.belongsTo(models.Utilizador, {
-    foreignKey: 'utilizador_id',
+    foreignKey: 'id_conta',
   })
   Seguidor.belongsTo(models.Artista, {
     foreignKey: 'id_artista',

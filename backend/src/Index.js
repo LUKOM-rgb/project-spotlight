@@ -19,7 +19,7 @@ const models = {
   Reserva,
 }
 
-console.log(typeof Artista+"hello")
+
 try {
   await sequelize.authenticate()
   console.log('Database connected.')
@@ -31,7 +31,7 @@ try {
     }
   })
 
-  await sequelize.sync()
+  await sequelize.sync({ force: true })
   console.log('Tables created.')
 } catch (error) {
   console.error(error)
