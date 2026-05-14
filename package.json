@@ -14,10 +14,12 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.4.0",
     "@mdi/js": "^7.4.47",
     "axios": "^1.8.1",
     "chart.js": "^4.4.0",
     "dotenv": "^17.4.2",
+    "faker": "^6.6.6",
     "express": "^5.2.1",
     "mysql2": "^3.22.2",
     "numeral": "^2.0.6",
