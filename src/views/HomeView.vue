@@ -1,45 +1,17 @@
 <script setup>
 import { ref } from 'vue'
-import {
-  mdiMapMarker,
-  mdiEmail,
-  mdiMusicNote,
-  mdiAccountGroup,
-  mdiLogout,
-  mdiCity,
-  mdiShieldCheck,
-  mdiAccountCircle,
-  mdiThemeLightDark, // Importado para o modo light/dark
-} from '@mdi/js'
+import { mdiMusicNote, mdiCity, mdiShieldCheck } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
-import { useDarkModeStore } from '@/stores/darkMode.js'
-
-const darkModeStore = useDarkModeStore()
-
-// 1. Corrigida a função para alternar o modo corretamente
-const toggleDarkMode = () => {
-  darkModeStore.set(null, true)
-}
+import Navbar from '@/components/NavBar.vue' // Importação do novo componente
 
 const popularArtists = ref([
   { name: 'Chiquinho Taquinas', followers: 10000 },
   { name: 'Homem do piano', followers: 13000 },
   { name: 'Mia_Rap', followers: 9000 },
 ])
-
-const navItems = [
-  { icon: mdiMapMarker, label: 'LOGO' },
-  { icon: mdiAccountCircle, label: '' },
-  { icon: mdiAccountGroup, label: '' },
-  { icon: mdiEmail, label: '' },
-  { icon: mdiMusicNote, label: '' },
-  // 2. Adicionada a propriedade "action" a este ícone específico
-  { icon: mdiThemeLightDark, label: '', action: toggleDarkMode },
-  { icon: mdiLogout, label: '' },
-]
 
 const problemCards = ref([
   {
@@ -67,28 +39,7 @@ const formatFollowers = (num) => {
 
 <template>
   <SectionMain class="min-h-screen bg-[#f5f0e6]">
-    <CardBox class="mb-6 rounded-full bg-[#e8e0d0] px-6 py-2">
-      <nav class="flex items-center justify-between">
-        <div class="flex items-center gap-6">
-          <img src="/src/img/Logo.png" alt="Logo" class="h-8 w-auto object-contain" />
-          <div class="flex items-center gap-4">
-            <BaseIcon
-              v-for="(item, index) in navItems.slice(1, 6)"
-              :key="index"
-              :path="item.icon"
-              class="cursor-pointer text-[#40798C] transition-colors hover:text-gray-800"
-              size="20"
-              @click="item.action ? item.action() : null"
-            />
-          </div>
-        </div>
-        <BaseIcon
-          :path="mdiLogout"
-          class="cursor-pointer text-[#40798C] transition-colors hover:text-gray-800"
-          size="20"
-        />
-      </nav>
-    </CardBox>
+    <Navbar />
 
     <div class="relative mb-8 overflow-hidden rounded-lg">
       <div
@@ -110,8 +61,8 @@ const formatFollowers = (num) => {
           </p>
           <BaseButton
             label="Pick a spot!"
-            color="info"
-            class="w-fit rounded-lg border-none bg-[#40798C] hover:bg-[#0B2027]"
+            color=""
+            class="w-fit rounded-lg border-none bg-[#40798C] text-white hover:bg-[#0B2027]"
             href="SpotsView.vue"
           />
         </div>
@@ -154,7 +105,3 @@ const formatFollowers = (num) => {
     </div>
   </SectionMain>
 </template>
-
-<style scoped>
-/* Custom styles for the landing page */
-</style>

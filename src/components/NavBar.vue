@@ -1,50 +1,70 @@
 <script setup>
-import { ref } from 'vue'
-import { mdiClose, mdiDotsVertical } from '@mdi/js'
-import { containerMaxW } from '@/config.js'
+import { useRouter } from 'vue-router'
+import { useDarkModeStore } from '@/stores/darkMode.js'
+import {
+  mdiEmail,
+  mdiMusicNote,
+  mdiAccountGroup,
+  mdiLogout,
+  mdiAccountCircle,
+  mdiThemeLightDark,
+} from '@mdi/js'
+import CardBox from '@/components/CardBox.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
-import NavBarMenuList from '@/components/NavBarMenuList.vue'
-import NavBarItemPlain from '@/components/NavBarItemPlain.vue'
-import PremiumVersionBadge from './PremiumVersionBadge.vue'
 
-defineProps({
-  menu: {
-    type: Array,
-    required: true,
-  },
-})
+const router = useRouter()
+const darkModeStore = useDarkModeStore()
 
-const emit = defineEmits(['menu-click'])
-
-const menuClick = (event, item) => {
-  emit('menu-click', event, item)
+const toggleDarkMode = () => {
+  darkModeStore.set(null, true)
 }
 
-const isMenuNavBarActive = ref(false)
+const navItems = [
+  {
+    icon: mdiAccountCircle,
+    label: 'Perfil',
+    action: () => router.push('/src/views/ProfileView.vue'),
+  },
+  { icon: mdiAccountGroup, label: 'Comunidade', action: () => router.push('/tables') },
+  { icon: mdiEmail, label: 'Mensagens', action: () => router.push('/forms') },
+  { icon: mdiMusicNote, label: 'Música', action: () => router.push('/') },
+  { icon: mdiThemeLightDark, label: 'Modo', action: toggleDarkMode },
+]
+
+const logout = () => {
+  router.push('/login')
+}
 </script>
 
 <template>
-  <nav
-    class="fixed inset-x-0 top-0 z-30 h-14 w-screen bg-gray-50 transition-(--transition-position) lg:w-auto dark:bg-slate-800"
+  <CardBox
+    class="mb-6 rounded-full bg-[#e8e0d0] px-6 py-2 shadow-md transition-colors dark:bg-slate-800"
   >
-    <div class="flex lg:items-stretch" :class="containerMaxW">
-      <div class="flex h-14 flex-1 items-stretch">
-        <slot />
-      </div>
-      <div class="flex h-14 flex-none items-stretch lg:hidden">
-        <NavBarItemPlain @click.prevent="isMenuNavBarActive = !isMenuNavBarActive">
-          <BaseIcon :path="isMenuNavBarActive ? mdiClose : mdiDotsVertical" size="24" />
-        </NavBarItemPlain>
-      </div>
-      <div
-        class="absolute top-14 left-0 max-h-[calc(100dvh-(--spacing(14)))] w-screen overflow-y-auto bg-gray-50 shadow-lg lg:static lg:flex lg:w-auto lg:overflow-visible lg:shadow-none dark:bg-slate-800"
-        :class="[isMenuNavBarActive ? 'block' : 'hidden']"
-      >
-        <div class="flex items-center px-3 py-2">
-          <PremiumVersionBadge />
+    <nav class="flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <img
+          src="/src/img/Logo.png"
+          alt="Logo"
+          class="h-8 w-auto cursor-pointer object-contain"
+          @click="router.push('/dashboard')"
+        />
+        <div class="flex items-center gap-4">
+          <BaseIcon
+            v-for="(item, index) in navItems"
+            :key="index"
+            :path="item.icon"
+            class="cursor-pointer text-[#40798C] transition-colors hover:text-gray-800 dark:hover:text-white"
+            size="20"
+            @click="item.action ? item.action() : null"
+          />
         </div>
-        <NavBarMenuList :menu="menu" @menu-click="menuClick" />
       </div>
-    </div>
-  </nav>
+      <BaseIcon
+        :path="mdiLogout"
+        class="cursor-pointer text-[#40798C] transition-colors hover:text-gray-800 dark:hover:text-white"
+        size="20"
+        @click="logout"
+      />
+    </nav>
+  </CardBox>
 </template>
