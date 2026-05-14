@@ -1,5 +1,9 @@
-module.exports = (sequelize, DataTypes) => {
-  const Artista = sequelize.define('Artista', {
+import { DataTypes } from 'sequelize'
+import sequelize from '../config/database.js'
+
+const Artista = sequelize.define(
+  'Artista',
+  {
     numero_licenca: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -18,11 +22,27 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Categorias',
+        model: 'Categoria',
         key: 'categoria_id',
       },
     },
-  });
+  },
+  {
+    tableName: 'Artista',
+    freezeTableName: true,
+    timestamps: false,
+  },
+)
+Artista.associate = (models) => {
+  Artista.belongsTo(models.Categoria, {
+    foreignKey: 'categoria_id',
+  })
+  Artista.hasMany(models.Seguidor, {
+    foreignKey: 'id_artista',
+  })
+  Artista.hasMany(models.Reserva, {
+    foreignKey: 'id_artista',
+  })
+}
 
-  return Artista;
-};
+export default Artista

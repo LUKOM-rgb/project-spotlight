@@ -1,5 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
-  const Categoria = sequelize.define('Categoria', {
+import { DataTypes } from 'sequelize'
+import sequelize from '../config/database.js'
+const Categoria = sequelize.define(
+  'Categoria',
+  {
     categoria_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -9,11 +12,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-  });
-  Categoria.associate = (models) => {
-    Categoria.hasMany(models.Artista, {
-      foreignKey: 'categoria_id',
-    });
-  }
-  return Categoria;
-};
+  },
+  {
+    tableName: 'Categoria',
+    freezeTableName: true,
+    timestamps: false,
+  },
+)
+Categoria.associate = (models) => {
+  Categoria.hasMany(models.Artista, {
+    foreignKey: 'categoria_id',
+  })
+}
+export default Categoria
