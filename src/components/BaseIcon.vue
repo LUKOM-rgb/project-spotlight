@@ -9,11 +9,11 @@ const props = defineProps({
   },
   w: {
     type: String,
-    default: 'w-6',
+    default: 'w-8',
   },
   h: {
     type: String,
-    default: 'h-6',
+    default: 'h-8',
   },
   size: [String, Number],
   to: {
