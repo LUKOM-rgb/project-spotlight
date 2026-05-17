@@ -1,8 +1,8 @@
 // backend/src/Controllers/auth.controller.js
-import { ContaGlobal } from '../Models/ContaGlobal.js'
-import { Utilizador } from '../Models/Utilizador.js'
-import { hashPassword, comparePassword, generateToken } from '../utils/auth.utils.js'
-import { validationError, unauthorizedError } from '../utils/error.utils.js'
+import ContaGlobal from '../Models/ContaGlobal.js'
+import Utilizador from '../Models/Utilizador.js'
+import { hashPassword, comparePassword, generateToken } from '../utilis/auth.utils.js'
+import { validationError, unauthorizedError } from '../utilis/error.utils.js'
 
 // POST /users - Registar Conta
 export const register = async (req, res, next) => {
