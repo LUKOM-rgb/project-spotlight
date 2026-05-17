@@ -1,1 +1,1 @@
-export const containerMaxW = 'xl:max-w-6xl xl:mx-auto'
+export const containerMaxW = 'xl:max-w-7.5xl xl:mx-auto'

@@ -43,7 +43,7 @@ export const getButtonColor = (color, isOutlined, hasHover, isActive = false) =>
       success: 'ring-emerald-300 dark:ring-emerald-700',
       danger: 'ring-red-300 dark:ring-red-700',
       warning: 'ring-yellow-300 dark:ring-yellow-700',
-      info: 'ring-blue-300 dark:ring-blue-700',
+      info: '#40798C dark:#0B2027',
     },
     active: {
       white: 'bg-gray-100',
@@ -63,7 +63,7 @@ export const getButtonColor = (color, isOutlined, hasHover, isActive = false) =>
       success: 'bg-emerald-600 dark:bg-emerald-500 text-white',
       danger: 'bg-red-600 dark:bg-red-500 text-white',
       warning: 'bg-yellow-600 dark:bg-yellow-500 text-white',
-      info: 'bg-blue-600 dark:bg-blue-500 text-white',
+      info: '#40798C dark: #0B2027',
     },
     bgHover: {
       white: 'hover:bg-gray-100',
@@ -76,7 +76,7 @@ export const getButtonColor = (color, isOutlined, hasHover, isActive = false) =>
         'hover:bg-red-700 hover:border-red-700 dark:hover:bg-red-600 dark:hover:border-red-600',
       warning:
         'hover:bg-yellow-700 hover:border-yellow-700 dark:hover:bg-yellow-600 dark:hover:border-yellow-600',
-      info: 'hover:bg-blue-700 hover:border-blue-700 dark:hover:bg-blue-600 dark:hover:border-blue-600',
+      info: '#0B2027 dark: #40798C',
     },
     borders: {
       white: 'border-white',
@@ -93,7 +93,7 @@ export const getButtonColor = (color, isOutlined, hasHover, isActive = false) =>
       success: 'text-emerald-600 dark:text-emerald-500',
       danger: 'text-red-600 dark:text-red-500',
       warning: 'text-yellow-600 dark:text-yellow-500',
-      info: 'text-blue-600 dark:text-blue-500',
+      info: 'white dark:text-white',
     },
     outlineHover: {
       contrast:
