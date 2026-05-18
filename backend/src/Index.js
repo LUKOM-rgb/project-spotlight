@@ -7,6 +7,7 @@ import Seguidor from './Models/Seguidor.js'
 import Ocorrencia from './Models/Ocorrencia.js'
 import Spot from './Models/Spot.js'
 import Reserva from './Models/Reservas.js'
+import app from './app.js'
 
 const models = {
   Utilizador,
@@ -18,7 +19,6 @@ const models = {
   Spot,
   Reserva,
 }
-
 
 try {
   await sequelize.authenticate()

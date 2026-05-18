@@ -1,20 +1,15 @@
-// backend/src/app.js
 import express from 'express'
 import cors from 'cors'
 import sequelize from './config/database.js'
 import 'dotenv/config'
-
-// Importação das Tabelas/Modelos para garantir que o Sequelize as conhece e associa
-import { ContaGlobal } from './Models/ContaGlobal.js'
-import { Utilizador } from './Models/Utilizador.js'
-import { Artista } from './Models/Artista.js'
-import { Spot } from './Models/Spot.js'
-import { Categorias } from './Models/Categorias.js'
-import { Reservas } from './Models/Reservas.js'
-import { Ocorrencia } from './Models/Ocorrencia.js'
-import { Seguidor } from './Models/Seguidor.js'
-
-// Importação das Rotas da API
+import ContaGlobal from './Models/ContaGlobal.js'
+import Utilizador from './Models/Utilizador.js'
+import Artista from './Models/Artista.js'
+import Spot from './Models/Spot.js'
+import Categorias from './Models/Categorias.js'
+import Reservas from './Models/Reservas.js'
+import Ocorrencia from './Models/Ocorrencia.js'
+import Seguidor from './Models/Seguidor.js'
 import authRoutes from './routes/auth.routes.js'
 
 const app = express()

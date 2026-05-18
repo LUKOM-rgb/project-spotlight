@@ -1,4 +1,3 @@
-// backend/src/Routes/auth.routes.js
 import { Router } from 'express'
 import { register, login } from '../controllers/auth.controller.js'
 

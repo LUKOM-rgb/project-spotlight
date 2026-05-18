@@ -1,10 +1,9 @@
-// backend/src/Controllers/auth.controller.js
 import ContaGlobal from '../Models/ContaGlobal.js'
 import Utilizador from '../Models/Utilizador.js'
 import { hashPassword, comparePassword, generateToken } from '../utilis/auth.utils.js'
 import { validationError, unauthorizedError } from '../utilis/error.utils.js'
 
-// POST /users - Registar Conta
+// tentativa do POST /users - Registar Conta
 export const register = async (req, res, next) => {
   try {
     const { email, password, nome, username, data_nascimento, telemovel } = req.body
@@ -59,7 +58,7 @@ export const register = async (req, res, next) => {
   }
 }
 
-// POST /users/login - Autenticar Utilizador
+// tentativa do POST /users/login - Autenticar Utilizador
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body

@@ -1,6 +1,3 @@
-// backend/src/utilis/error.utils.js
-
-// Função modelo para construir qualquer objeto de erro na API
 function createError({ status, description, errors }) {
   const error = new Error(description)
   error.status = status
