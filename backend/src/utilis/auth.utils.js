@@ -1,4 +1,3 @@
-// backend/src/utils/auth.utils.js
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
