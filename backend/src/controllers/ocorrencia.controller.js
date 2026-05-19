@@ -1,7 +1,10 @@
-import db from '../Models/db.js'
+import RelatorioOcorrencia from '../Models/RelatorioOcorrencia.js'
+import ContaGlobal from '../Models/ContaGlobal.js'
+import Spot from '../Models/Spot.js' // Assumindo que tens este modelo para validar o spot
+import { validationError } from '../utilis/error.utils.js'
 
-// 1. Criar Relatório (POST)
-export const createRelatorio = async (req, res) => {
+// POST /relatorios - Criar nova ocorrência
+export const createOcorrencia = async (req, res, next) => {
   try {
     const {
       data_ocorrencia,
@@ -13,92 +16,137 @@ export const createRelatorio = async (req, res) => {
       id_spot,
     } = req.body
 
-    const sql = `INSERT INTO relatorio_ocorrencia
-                     (data_ocorrencia, hora_ocorrencia, local_ocorrencia, descricao, estado, id_conta, id_spot)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    // 1. Validações básicas de campos obrigatórios
+    const errors = {}
+    if (!descricao) errors.descricao = ['O campo descrição é obrigatório.']
+    if (!local_ocorrencia) errors.local_ocorrencia = ['O local da ocorrência é obrigatório.']
+    if (!id_conta) errors.id_conta = ['O ID da conta é obrigatório.']
+    if (!id_spot) errors.id_spot = ['O ID do spot é obrigatório.']
 
-    const [result] = await db.query(sql, [
-      data_ocorrencia,
+    if (Object.keys(errors).length > 0) {
+      throw validationError(errors)
+    }
+
+    // Verificar se o id_conta e id_spot realmente existem na Base de Dados
+    const [contaExiste, spotExiste] = await Promise.all([
+      ContaGlobal.findByPk(id_conta),
+      Spot.findByPk(id_spot),
+    ])
+
+    if (!contaExiste) throw validationError({ id_conta: ['A conta especificada não existe.'] })
+    if (!spotExiste) throw validationError({ id_spot: ['O spot especificado não existe.'] })
+
+    // 3. Criar o relatório na base de dados
+    const novoRelatorio = await RelatorioOcorrencia.create({
+      data_ocorrencia: data_ocorrencia || new Date(), // Se não vier data, assume hoje
       hora_ocorrencia,
       local_ocorrencia,
       descricao,
-      estado,
+      estado: estado || 'Pendente', // Valor por defeito
       id_conta,
       id_spot,
-    ])
+    })
 
-    res.status(201).json({
-      mensagem: 'Relatório criado com sucesso!',
-      id_ocorrencia: result.insertId,
+    // 4. Responder com 201 Created
+    return res.status(201).json({
+      message: 'Relatório de ocorrência registado com sucesso!',
+      data: novoRelatorio,
     })
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao criar relatório', detalhes: error.message })
+    next(error) // Encaminha para o middleware global de erros
   }
 }
 
-// 2. Listar Todos os Relatórios (GET)
-export const getAllRelatorios = async (req, res) => {
+// GET /relatorios - Obter todas as ocorrências
+export const getAllOcorrencias = async (req, res, next) => {
   try {
-    const [rows] = await db.query('SELECT * FROM relatorio_ocorrencia')
-    res.status(200).json(rows)
+    // Podes ler parâmetros da query (ex: /relatorios?estado=Pendente)
+    const { estado, id_spot } = req.query
+    const whereClause = {}
+
+    if (estado) whereClause.estado = estado
+    if (id_spot) whereClause.id_spot = id_spot
+
+    const relatorios = await RelatorioOcorrencia.findAll({
+      where: whereClause,
+    })
+
+    return res.status(200).json({
+      message: 'Relatórios obtidos com sucesso.',
+      data: relatorios,
+    })
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao procurar relatórios', detalhes: error.message })
+    next(error)
   }
 }
 
-// 3. Obter um Relatório por ID (GET)
-export const getRelatorioById = async (req, res) => {
+// GET /relatorios/:id - Obter uma ocorrência específica
+export const getOcorrenciaById = async (req, res, next) => {
   try {
     const { id } = req.params
-    const [rows] = await db.query('SELECT * FROM relatorio_ocorrencia WHERE id_ocorrencia = ?', [
-      id,
-    ])
 
-    if (rows.length === 0) {
-      return res.status(404).json({ mensagem: 'Relatório não encontrado' })
+    const relatorio = await RelatorioOcorrencia.findByPk(id)
+
+    if (!relatorio) {
+      // Se tiveres um notFoundError nos teus error.utils, usa-o aqui. Senão:
+      return res.status(404).json({ message: 'Relatório não encontrado.' })
     }
-    res.status(200).json(rows[0])
+
+    return res.status(200).json({
+      message: 'Relatório obtido com sucesso.',
+      data: relatorio,
+    })
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao procurar o relatório', detalhes: error.message })
+    next(error)
   }
 }
 
-// 4. Atualizar o Estado do Relatório (PATCH)
-
-export const updateEstadoRelatorio = async (req, res) => {
+// PATCH /relatorios/:id/estado - Atualizar o estado da ocorrência
+export const updateEstadoOcorrencia = async (req, res, next) => {
   try {
     const { id } = req.params
     const { estado } = req.body
 
-    const [result] = await db.query(
-      'UPDATE relatorio_ocorrencia SET estado = ? WHERE id_ocorrencia = ?',
-      [estado, id],
-    )
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ mensagem: 'Relatório não encontrado' })
+    if (!estado) {
+      throw validationError({ estado: ['O novo estado é obrigatório.'] })
     }
-    res.status(200).json({ mensagem: 'Estado atualizado com sucesso!' })
+
+    const relatorio = await RelatorioOcorrencia.findByPk(id)
+
+    if (!relatorio) {
+      return res.status(404).json({ message: 'Relatório não encontrado.' })
+    }
+
+    // Atualizar e guardar
+    relatorio.estado = estado
+    await relatorio.save()
+
+    return res.status(200).json({
+      message: 'Estado do relatório atualizado com sucesso!',
+      data: relatorio,
+    })
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao atualizar relatório', detalhes: error.message })
+    next(error)
   }
 }
 
-// 5. Eliminar um Relatório (DELETE)
-export const deleteRelatorio = async (req, res) => {
+// DELETE /relatorios/:id - Eliminar uma ocorrência
+export const deleteOcorrencia = async (req, res, next) => {
   try {
     const { id } = req.params
-    const [result] = await db.query('DELETE FROM relatorio_ocorrencia WHERE id_ocorrencia = ?', [
-      id,
-    ])
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ mensagem: 'Relatório não encontrado' })
+    const relatorio = await RelatorioOcorrencia.findByPk(id)
+
+    if (!relatorio) {
+      return res.status(404).json({ message: 'Relatório não encontrado.' })
     }
-    res.status(200).json({ mensagem: 'Relatório eliminado com sucesso!' })
+
+    await relatorio.destroy()
+
+    return res.status(200).json({
+      message: 'Relatório de ocorrência eliminado com sucesso.',
+    })
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao eliminar relatório', detalhes: error.message })
+    next(error)
   }
 }
-// No fim do ocorrencia.controller.js, exporte um objeto com as funções
-export default { createRelatorio, getAllRelatorios, getRelatorioById, updateEstadoRelatorio, deleteRelatorio };
