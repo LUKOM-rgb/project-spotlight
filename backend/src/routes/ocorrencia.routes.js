@@ -1,12 +1,20 @@
 import express from 'express'
-import ocorrenciaController from '../controllers/ocorrenciaController.js'
+// Importamos explicitamente cada função usando chaves
+import {
+  createRelatorio,
+  getAllRelatorios,
+  getRelatorioById,
+  updateEstadoRelatorio,
+  deleteRelatorio
+} from '../Controllers/ocorrencia.controller.js'
 
 const router = express.Router()
 
-router.post('/', ocorrenciaController.createRelatorio)
-router.get('/', ocorrenciaController.getAllRelatorios)
-router.get('/:id', ocorrenciaController.getRelatorioById)
-router.patch('/:id/estado', ocorrenciaController.updateEstadoRelatorio)
-router.delete('/:id', ocorrenciaController.deleteRelatorio)
+// Passamos as funções diretamente (sem o prefixo do objeto)
+router.post('/', createRelatorio)
+router.get('/', getAllRelatorios)
+router.get('/:id', getRelatorioById)
+router.patch('/:id/estado', updateEstadoRelatorio)
+router.delete('/:id', deleteRelatorio)
 
 export default router

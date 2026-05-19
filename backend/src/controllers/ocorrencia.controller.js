@@ -1,4 +1,4 @@
-import db from '../db.js'
+import db from '../Models/db.js'
 
 // 1. Criar Relatório (POST)
 export const createRelatorio = async (req, res) => {
@@ -100,3 +100,5 @@ export const deleteRelatorio = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao eliminar relatório', detalhes: error.message })
   }
 }
+// No fim do ocorrencia.controller.js, exporte um objeto com as funções
+export default { createRelatorio, getAllRelatorios, getRelatorioById, updateEstadoRelatorio, deleteRelatorio };

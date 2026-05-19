@@ -1,37 +1,11 @@
-import sequelize from './config/database.js'
-import Utilizador from './Models/Utilizador.js'
-import Artista from './Models/Artista.js'
-import Conta_global from './Models/ContaGlobal.js'
-import Categoria from './Models/Categorias.js'
-import Seguidor from './Models/Seguidor.js'
-import Ocorrencia from './Models/Ocorrencia.js'
-import Spot from './Models/Spot.js'
-import Reserva from './Models/Reservas.js'
+import dotenv from 'dotenv'
+dotenv.config()
 
-const models = {
-  Utilizador,
-  Artista,
-  Conta_global,
-  Categoria,
-  Seguidor,
-  Ocorrencia,
-  Spot,
-  Reserva,
-}
+import app from './server.js' // 💡 IMPORTANTE: Use 'import' e adicione o '.js' no final!
 
-try {
-  await sequelize.authenticate()
-  console.log('Database connected.')
+const port = process.env.PORT || 3000
+const host = process.env.HOST || 'localhost'
 
-  // IMPORTANT: run associations
-  Object.values(models).forEach((model) => {
-    if (model.associate) {
-      model.associate(models)
-    }
-  })
-
-  await sequelize.sync({ force: true })
-  console.log('Tables created.')
-} catch (error) {
-  console.error(error)
-}
+app.listen(port, host, () => {
+    console.log(`App listening at http://${host}:${port}/`)
+})
