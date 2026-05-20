@@ -1,4 +1,4 @@
-import RelatorioOcorrencia from '../Models/RelatorioOcorrencia.js'
+import RelatorioOcorrencia from '../Models/Ocorrencia.js'
 import ContaGlobal from '../Models/ContaGlobal.js'
 import Spot from '../Models/Spot.js' // Assumindo que tens este modelo para validar o spot
 import { validationError } from '../utilis/error.utils.js'

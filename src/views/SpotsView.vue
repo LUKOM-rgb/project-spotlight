@@ -1,11 +1,13 @@
 <script setup>
 import { ref } from 'vue'
+import { onMounted } from 'vue'
 import { mdiMapMarker, mdiClose, mdiMapMarkerRadius, mdiClock, mdiAccountMultiple } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
-import Navbar from '@/components/Navbar.vue' // Importação da nova Navbar
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 
 // Dados dos spots no mapa
 const spots = ref([
@@ -75,91 +77,54 @@ const reserveSpot = () => {
     // Aqui implementarias a lógica de reserva
   }
 }
+// Mapa
+onMounted(() => {
+  const map = L.map('map').setView([41.1579, -8.6291], 13)
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+  }).addTo(map)
+})
 </script>
 
 <template>
   <SectionMain class="min-h-screen bg-[#f5f0e6]">
-    <Navbar />
 
     <div class="mb-4 flex items-center gap-4">
       <span class="text-sm text-gray-600">⚡ Spots</span>
       <div class="flex gap-2">
-        <button
-          v-for="filter in filters"
-          :key="filter.id"
-          :class="[
-            'rounded-full px-4 py-1 text-sm transition-colors',
-            activeFilter === filter.id
-              ? 'bg-[#e8e0d0] text-gray-700'
-              : 'bg-transparent text-gray-500 hover:bg-[#e8e0d0]/50',
-          ]"
-          @click="activeFilter = filter.id"
-        >
+        <button v-for="filter in filters" :key="filter.id" :class="[
+          'rounded-full px-4 py-1 text-sm transition-colors',
+          activeFilter === filter.id
+            ? 'bg-[#e8e0d0] text-gray-700'
+            : 'bg-transparent text-gray-500 hover:bg-[#e8e0d0]/50',
+        ]" @click="activeFilter = filter.id">
           {{ filter.label }}
         </button>
       </div>
     </div>
 
     <div class="relative flex gap-4">
-      <CardBox
-        :class="[
-          'overflow-hidden rounded-2xl transition-all duration-300',
-          showSidebar ? 'flex-1' : 'w-full',
-        ]"
-      >
-        <div
-          class="relative h-[500px] bg-cover bg-center"
-          style="
-            background-image: url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1200&auto=format&fit=crop&q=60');
-          "
-        >
-          <div
-            v-for="spot in spots"
-            :key="spot.id"
-            :style="{ top: spot.position.top, left: spot.position.left }"
-            :class="[
-              'absolute -translate-x-1/2 -translate-y-1/2 transform cursor-pointer transition-transform hover:scale-110',
-              selectedSpot?.id === spot.id ? 'z-10 scale-125' : '',
-            ]"
-            @click="selectSpot(spot)"
-          >
-            <div
-              :class="[
-                'flex h-8 w-8 items-center justify-center rounded-full shadow-lg',
-                spot.status === 'open' ? 'bg-red-500' : 'bg-gray-500',
-              ]"
-            >
-              <BaseIcon :path="mdiMapMarker" class="text-white" size="20" />
-            </div>
-            <div
-              v-if="selectedSpot?.id === spot.id"
-              class="absolute inset-0 h-8 w-8 animate-ping rounded-full bg-red-500 opacity-30"
-            ></div>
-          </div>
-        </div>
+      <CardBox :class="[
+        'overflow-hidden rounded-2xl transition-all duration-300',
+        showSidebar ? 'flex-1' : 'w-full',
+      ]">
+        <div id="map" class="h-[500px] w-full"></div>
       </CardBox>
 
       <transition name="slide">
-        <CardBox
-          v-if="showSidebar && selectedSpot"
-          class="w-80 flex-shrink-0 overflow-hidden rounded-2xl bg-white"
-        >
+        <CardBox v-if="showSidebar && selectedSpot" class="w-80 flex-shrink-0 overflow-hidden rounded-2xl bg-white">
           <div class="flex justify-end p-2">
             <button
               class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
-              @click="closeSidebar"
-            >
+              @click="closeSidebar">
               <BaseIcon :path="mdiClose" class="text-gray-500" size="18" />
             </button>
           </div>
 
           <div class="space-y-3 px-4">
-            <div
-              v-for="(image, index) in selectedSpot.images"
-              :key="index"
-              class="h-32 rounded-xl bg-cover bg-center"
-              :style="{ backgroundImage: `url('${image}')` }"
-            >
+            <div v-for="(image, index) in selectedSpot.images" :key="index" class="h-32 rounded-xl bg-cover bg-center"
+              :style="{ backgroundImage: `url('${image}')` }">
               <div v-if="index === 0" class="relative h-full">
                 <div class="absolute top-4 right-4">
                   <div class="flex h-6 w-6 items-center justify-center rounded-full bg-red-500">
@@ -172,9 +137,7 @@ const reserveSpot = () => {
 
           <div class="space-y-3 p-4">
             <div class="flex items-start gap-3">
-              <div
-                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]"
-              >
+              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]">
                 <BaseIcon :path="mdiMapMarkerRadius" class="text-gray-600" size="16" />
               </div>
               <div>
@@ -184,15 +147,11 @@ const reserveSpot = () => {
             </div>
 
             <div class="flex items-center gap-3">
-              <div
-                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]"
-              >
-                <div
-                  :class="[
-                    'h-3 w-3 rounded-full',
-                    selectedSpot.status === 'open' ? 'bg-green-500' : 'bg-red-500',
-                  ]"
-                ></div>
+              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]">
+                <div :class="[
+                  'h-3 w-3 rounded-full',
+                  selectedSpot.status === 'open' ? 'bg-green-500' : 'bg-red-500',
+                ]"></div>
               </div>
               <p class="text-sm text-gray-700">
                 {{ selectedSpot.status === 'open' ? 'Open' : 'Closed' }}
@@ -200,18 +159,14 @@ const reserveSpot = () => {
             </div>
 
             <div class="flex items-center gap-3">
-              <div
-                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]"
-              >
+              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]">
                 <BaseIcon :path="mdiClock" class="text-gray-600" size="16" />
               </div>
               <p class="text-sm text-gray-700">{{ selectedSpot.hours }}</p>
             </div>
 
             <div class="flex items-center gap-3">
-              <div
-                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]"
-              >
+              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]">
                 <BaseIcon :path="mdiAccountMultiple" class="text-gray-600" size="16" />
               </div>
               <p class="text-sm text-gray-700">
@@ -221,13 +176,9 @@ const reserveSpot = () => {
           </div>
 
           <div class="p-4 pt-0">
-            <BaseButton
-              label="Reserve"
-              color=""
+            <BaseButton label="Reserve" color=""
               class="w-full rounded-lg border-none bg-[#40798C] text-white hover:bg-[#0B2027]"
-              :disabled="selectedSpot.status === 'closed'"
-              @click="reserveSpot"
-            />
+              :disabled="selectedSpot.status === 'closed'" @click="reserveSpot" />
           </div>
         </CardBox>
       </transition>
@@ -250,6 +201,7 @@ const reserveSpot = () => {
 
 /* Pulse animation */
 @keyframes ping {
+
   75%,
   100% {
     transform: scale(2);

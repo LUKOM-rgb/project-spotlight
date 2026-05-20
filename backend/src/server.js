@@ -11,15 +11,21 @@ const host= process.env.HOST
 app.use(express.json())
 // Importar Rota
 import relatorios from './routes/ocorrencia.routes.js'
+import spots from './routes/Spot.routes.js'
+import reservas from './routes/Reservas.routes.js'
 // Middlewares Globais
 
 
 // Middlewares
 app.use(cors())
 
-
 // Registar as Rotas
 app.use('/relatorios',relatorios)
+app.use('/spots',spots)
+app.use('/reservas',reservas)
+
+
+
 
 app.use((req,res,next)=>{
   res.status(404).json({message: 'Endpoint não encontrado'})
