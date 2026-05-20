@@ -30,10 +30,6 @@ export class Person extends ModuleBase {
     return this.getEntry(this.faker.definitions.person?.last_name, sex)
   }
 
-  middleName(sex: SexType): string {
-    return this.getEntry(this.faker.definitions.person?.middle_name, sex)
-  }
-
   prefix(sex: SexType): string {
     return this.getEntry(this.faker.definitions.person?.prefix, sex)
   }
@@ -64,7 +60,6 @@ export class Person extends ModuleBase {
     const fullName = this.faker.helpers.mustache(fullNamePattern, {
       'person.prefix': () => this.prefix(sex),
       'person.firstName': () => firstName,
-      'person.middleName': () => this.middleName(sex),
       'person.lastName': () => lastName,
       'person.suffix': () => this.suffix(),
     })
@@ -74,5 +69,131 @@ export class Person extends ModuleBase {
 
   gender(): string {
     return this.faker.helpers.arrayElement(this.faker.definitions.person?.gender ?? [])
+  }
+
+  private cleanName(name: string): string {
+    return name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove accents/diacritics
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '.')
+      .replace(/[^a-z0-9.]/g, '') // keep only lowercase alphanumeric and dots
+  }
+
+  email(
+    options: {
+      firstName?: string
+      lastName?: string
+      sex?: SexType
+    } = {},
+  ): string {
+    const {
+      sex = this.faker.helpers.arrayElement([Sex.Female, Sex.Male]),
+      firstName = this.firstName(sex),
+      lastName = this.lastName(sex),
+    } = options
+
+    const cleanFirst = this.cleanName(firstName)
+    const cleanLast = this.cleanName(lastName)
+
+    return `${cleanFirst}.${cleanLast}@example.pt`
+  }
+
+  username(
+    options: {
+      firstName?: string
+      lastName?: string
+      sex?: SexType
+    } = {},
+  ): string {
+    const {
+      sex = this.faker.helpers.arrayElement([Sex.Female, Sex.Male]),
+      firstName = this.firstName(sex),
+      lastName = this.lastName(sex),
+    } = options
+
+    const cleanFirst = this.cleanName(firstName)
+    const cleanLast = this.cleanName(lastName)
+
+    const nicknameStyles = [
+      () => `${cleanFirst}.${cleanLast}`,
+      () => `${cleanFirst}_${cleanLast}`,
+      () => `${cleanFirst}${cleanLast}`,
+      () => `${cleanFirst}${Math.floor(Math.random() * 90 + 10)}`, // e.g. maria92
+      () => `${cleanFirst.charAt(0)}${cleanLast}`, // e.g. msilva
+      () => `${cleanFirst}${cleanLast.charAt(0)}`, // e.g. marias
+    ]
+
+    return this.faker.helpers.arrayElement(nicknameStyles)()
+  }
+
+  password(length: number = 12): string {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz'
+    const numbers = '0123456789'
+    const symbols = '!@#$%^&*()_+~|}{[]:;?><,./-='
+    const allChars = uppercase + lowercase + numbers + symbols
+
+    // Guarantee at least one char of each type to ensure a strong password
+    let password = ''
+    password += this.faker.helpers.arrayElement(uppercase.split(''))
+    password += this.faker.helpers.arrayElement(lowercase.split(''))
+    password += this.faker.helpers.arrayElement(numbers.split(''))
+    password += this.faker.helpers.arrayElement(symbols.split(''))
+
+    for (let i = password.length; i < length; i++) {
+      password += this.faker.helpers.arrayElement(allChars.split(''))
+    }
+
+    // Shuffle final password
+    return password
+      .split('')
+      .sort(() => 0.5 - Math.random())
+      .join('')
+  }
+
+  account(
+    options: {
+      sex?: SexType
+      role?: 'normal' | 'artista'
+    } = {},
+  ) {
+    const sex = options.sex ?? this.faker.helpers.arrayElement([Sex.Female, Sex.Male])
+    const firstName = this.firstName(sex)
+    const lastName = this.lastName(sex)
+    const fullName = this.fullName({ firstName, lastName, sex })
+    const role = options.role ?? (Math.random() < 0.25 ? 'artista' : 'normal')
+
+    const baseAccount: Record<string, any> = {
+      fullName,
+      firstName,
+      lastName,
+      sex,
+      username: this.username({ firstName, lastName, sex }),
+      email: this.email({ firstName, lastName, sex }),
+      password: this.password(),
+      role,
+    }
+
+    if (role === 'artista') {
+      // 8-digit random license number
+      let licenseNumber = ''
+      for (let i = 0; i < 8; i++) {
+        licenseNumber += Math.floor(Math.random() * 10)
+      }
+
+      // Validity date (1 to 5 years in future: YYYY-MM-DD)
+      const today = new Date()
+      const futureYear = today.getFullYear() + Math.floor(Math.random() * 5) + 1
+      const futureMonth = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')
+      const futureDay = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')
+      const licenseValidity = `${futureYear}-${futureMonth}-${futureDay}`
+
+      baseAccount.licenseNumber = licenseNumber
+      baseAccount.licenseValidity = licenseValidity
+    }
+
+    return baseAccount
   }
 }

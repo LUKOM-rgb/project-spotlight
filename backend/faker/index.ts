@@ -2,6 +2,13 @@
 // correspondem aos nomes exatos dos teus ficheiros
 import type { LocaleDefinition } from './definitions.ts'
 import { MyFaker, Person } from './faker'
+import fs from 'node:fs'
+import path from 'node:path'
+
+const __dirname = process.cwd().endsWith('faker')
+  ? process.cwd()
+  : path.join(process.cwd(), 'backend', 'faker')
+
 
 // 1. Criar a nossa "Base de Dados" de teste
 const pt_PT: LocaleDefinition = {
@@ -320,7 +327,6 @@ const pt_PT: LocaleDefinition = {
         'Vieira',
       ],
     },
-    suffix: ['Jr.', 'Neto', 'Filho'],
 
     // Os nossos padrões de Mustache com pesos
     name: [
@@ -343,12 +349,21 @@ const pt_PT: LocaleDefinition = {
 // 2. Inicializar o nosso Faker personalizado com os dados
 const myFakerInstance = new MyFaker(pt_PT)
 const personFaker = new Person(myFakerInstance)
+console.log('\n--- Gerar e Guardar Utilizadores em JSON ---')
+const count = 100
+const users = []
 
-// 3. Imprimir os resultados na consola!
-console.log('=== A Iniciar ===')
-console.log('Nome 100% Aleatório:', personFaker.fullName())
-console.log('Outro Nome Aleatório:', personFaker.fullName())
-console.log('Nome Feminino:', personFaker.fullName({ sex: 'female' }))
-console.log('Nome Masculino:', personFaker.fullName({ sex: 'male' }))
-console.log('Nome c/ primeiro nome fixo:', personFaker.fullName({ firstName: 'Adamastor' }))
-console.log('Género Aleatório:', personFaker.gender())
+// Calcula exatamente quantos artistas devem ser gerados (pelo menos 1)
+const targetArtistsCount = Math.max(1, Math.round(count * 0.25))
+
+for (let i = 0; i < count; i++) {
+  // Os primeiros utilizadores do loop serão artistas para garantir a proporção correta
+  const role = i < targetArtistsCount ? 'artista' : 'normal'
+  users.push(personFaker.account({ role }))
+}
+
+const outputPath = path.join(__dirname, 'users.json')
+fs.writeFileSync(outputPath, JSON.stringify(users, null, 2), 'utf-8')
+
+console.log(`✓ Sucesso: ${count} utilizadores gerados e guardados em: ${outputPath}`)
+console.log('\nPré-visualização do primeiro utilizador:', users[0])
