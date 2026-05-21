@@ -13,6 +13,9 @@ app.use(express.json())
 import relatorios from './routes/ocorrencia.routes.js'
 import spots from './routes/Spot.routes.js'
 import reservas from './routes/Reservas.routes.js'
+import authRoutes from './routes/auth.routes.js'
+import userRoutes from './routes/user.routes.js'
+import './Models/db.js' // Inicializa as associações!
 // Middlewares Globais
 
 
@@ -23,6 +26,8 @@ app.use(cors())
 app.use('/relatorios',relatorios)
 app.use('/spots',spots)
 app.use('/reservas',reservas)
+app.use('/api', authRoutes)
+app.use('/api/users', userRoutes)
 
 
 
@@ -77,9 +82,10 @@ app.use((err, req, res, next) => {
     }
   }
   // other errors
-  res.status(err.statusCode || 500).json({
-    error: "Internal server error",
+  res.status(err.status || err.statusCode || 500).json({
+    error: err.description || "Internal server error",
     message: err.message,
+    details: err.errors || null
   });
 });
 

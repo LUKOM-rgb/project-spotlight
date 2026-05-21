@@ -6,15 +6,14 @@ import { validationError, unauthorizedError } from '../utilis/error.utils.js'
 // tentativa do POST /users - Registar Conta
 export const register = async (req, res, next) => {
   try {
-    const { email, password, nome, username, data_nascimento, telemovel } = req.body
+    const { email, password, nome_utilizador, nif, numero_telemovel } = req.body
 
     // 1. Validações básicas de campos obrigatórios
     const errors = {}
     if (!email) errors.email = ['O campo email é obrigatório.']
     if (!password || password.length < 6)
       errors.password = ['A password deve ter pelo menos 6 caracteres.']
-    if (!nome) errors.nome = ['O campo nome é obrigatório.']
-    if (!username) errors.username = ['O campo username é obrigatório.']
+    if (!nome_utilizador) errors.nome_utilizador = ['O campo nome_utilizador é obrigatório.']
 
     if (Object.keys(errors).length > 0) {
       throw validationError(errors)
@@ -31,26 +30,26 @@ export const register = async (req, res, next) => {
     const novaConta = await ContaGlobal.create({
       email,
       password: hashedPassword,
-      tipo_utilizador: 'utilizador', // Padrão inicial
+      tipo: 'utilizador', // Corrigido de tipo_utilizador para tipo
+      data_registo: new Date(),
+      nome_utilizador,
+      numero_telemovel
     })
 
     // 4. Criar o perfil específico na tabela Utilizador
     const novoUtilizador = await Utilizador.create({
-      id_user: novaConta.id_conta, // Chave estrangeira ligada à ContaGlobal
-      nome,
-      username,
-      data_nascimento,
-      telemovel,
+      id_conta: novaConta.id_conta, // Corrigido de id_user para id_conta
+      nif
     })
 
     // 5. Responder com 201 Created (Sucesso no Postman)
     return res.status(201).json({
       message: 'Utilizador registado com sucesso!',
       data: {
-        id_user: novoUtilizador.id_user,
-        nome: novoUtilizador.nome,
-        username: novoUtilizador.username,
+        id_conta: novaConta.id_conta,
+        nome_utilizador: novaConta.nome_utilizador,
         email: novaConta.email,
+        nif: novoUtilizador.nif
       },
     })
   } catch (error) {

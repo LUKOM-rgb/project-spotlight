@@ -11,6 +11,8 @@ import Reservas from './Models/Reservas.js'
 import Ocorrencia from './Models/Ocorrencia.js'
 import Seguidor from './Models/Seguidor.js'
 import authRoutes from './routes/auth.routes.js'
+import userRoutes from './routes/user.routes.js'
+import './Models/db.js'
 
 const app = express()
 
@@ -20,6 +22,7 @@ app.use(express.json()) // Permite ler o Body em formato JSON enviado pelo Postm
 
 // Definição do Prefixo Base das Rotas da API
 app.use('/api', authRoutes) // Disponibiliza /api/users e /api/users/login
+app.use('/api/users', userRoutes)
 
 // Rota base de teste rápido para verificar no Postman se a API está online
 app.get('/', (req, res) => {
