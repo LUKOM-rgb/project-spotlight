@@ -3,12 +3,12 @@ import Utilizador from '../Models/Utilizador.js'
 import { hashPassword, comparePassword, generateToken } from '../utilis/auth.utils.js'
 import { validationError, unauthorizedError } from '../utilis/error.utils.js'
 
-// tentativa do POST /users - Registar Conta
+// Registar Conta
 export const register = async (req, res, next) => {
   try {
     const { email, password, nome_utilizador, nif, numero_telemovel } = req.body
 
-    // 1. Validações básicas de campos obrigatórios
+    // campos obrigatórios
     const errors = {}
     if (!email) errors.email = ['O campo email é obrigatório.']
     if (!password || password.length < 6)

@@ -21,8 +21,8 @@ app.use(cors())
 app.use(express.json()) // Permite ler o Body em formato JSON enviado pelo Postman
 
 // Definição do Prefixo Base das Rotas da API
-app.use('/api', authRoutes) // Disponibiliza /api/users e /api/users/login
-app.use('/api/users', userRoutes)
+app.use('/', authRoutes) // Disponibiliza /api/users e /api/users/login
+app.use('/users', userRoutes)
 
 // Rota base de teste rápido para verificar no Postman se a API está online
 app.get('/', (req, res) => {

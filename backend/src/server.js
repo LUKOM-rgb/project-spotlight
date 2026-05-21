@@ -26,8 +26,8 @@ app.use(cors())
 app.use('/relatorios',relatorios)
 app.use('/spots',spots)
 app.use('/reservas',reservas)
-app.use('/api', authRoutes)
-app.use('/api/users', userRoutes)
+app.use('/auth', authRoutes)
+app.use('/users', userRoutes)
 
 
 
@@ -92,7 +92,7 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(port, host, () => {
   console.log(`Server running on host ${host} and port ${port}`)
-  console.log(`Access: http://localhost:${port}/api/relatorios`)
+  console.log(`Access: http://localhost:${port}/relatorios`)
 })
 
 export default app
