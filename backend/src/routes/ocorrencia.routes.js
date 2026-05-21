@@ -6,7 +6,7 @@ import {
   getOcorrenciaById,
   updateEstadoOcorrencia,
   deleteOcorrencia
-} from '../Controllers/ocorrencia.controller.js'
+} from '../controllers/ocorrencia.controller.js'
 
 const router = express.Router()
 
