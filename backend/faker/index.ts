@@ -2,23 +2,12 @@
 // correspondem aos nomes exatos dos teus ficheiros
 import type { LocaleDefinition } from './definitions.ts'
 import { MyFaker, Person } from './faker'
-import fs from 'node:fs'
-import path from 'node:path'
-
-const __dirname = process.cwd().endsWith('faker')
-  ? process.cwd()
-  : path.join(process.cwd(), 'backend', 'faker')
-
 
 // 1. Criar a nossa "Base de Dados" de teste
 const pt_PT: LocaleDefinition = {
   person: {
     gender: ['Mulher', 'Homem', 'Não-binário', 'Género Fluido'],
     sex: ['female', 'male'],
-    prefix: {
-      female: ['Sra.', 'Dra.', 'Enga.'],
-      male: ['Sr.', 'Dr.', 'Eng.'],
-    },
     first_name: {
       female: [
         'Maria',
@@ -331,7 +320,7 @@ const pt_PT: LocaleDefinition = {
     // Os nossos padrões de Mustache com pesos
     name: [
       { value: '{{person.firstName}} {{person.lastName}}', weight: 10 },
-      { value: '{{person.prefix}} {{person.firstName}} {{person.lastName}}', weight: 3 },
+      { value: '{{person.firstName}} {{person.lastName}}', weight: 3 },
       { value: '{{person.firstName}}  {{person.lastName}}', weight: 5 },
     ],
     last_name_pattern: { generic: [{ value: '{{person.lastName}}', weight: 1 }] },
@@ -342,28 +331,9 @@ const pt_PT: LocaleDefinition = {
     job_area: [],
     job_type: [],
     job_title_pattern: [],
-    western_zodiac_sign: [],
   },
 }
 
 // 2. Inicializar o nosso Faker personalizado com os dados
 const myFakerInstance = new MyFaker(pt_PT)
 const personFaker = new Person(myFakerInstance)
-console.log('\n--- Gerar e Guardar Utilizadores em JSON ---')
-const count = 100
-const users = []
-
-// Calcula exatamente quantos artistas devem ser gerados (pelo menos 1)
-const targetArtistsCount = Math.max(1, Math.round(count * 0.25))
-
-for (let i = 0; i < count; i++) {
-  // Os primeiros utilizadores do loop serão artistas para garantir a proporção correta
-  const role = i < targetArtistsCount ? 'artista' : 'normal'
-  users.push(personFaker.account({ role }))
-}
-
-const outputPath = path.join(__dirname, 'users.json')
-fs.writeFileSync(outputPath, JSON.stringify(users, null, 2), 'utf-8')
-
-console.log(`✓ Sucesso: ${count} utilizadores gerados e guardados em: ${outputPath}`)
-console.log('\nPré-visualização do primeiro utilizador:', users[0])
