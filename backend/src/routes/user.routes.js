@@ -3,11 +3,7 @@ import {
   getAllUsers, 
   getUserById, 
   updateUser, 
-  deleteUser, 
-  becomeArtist,
-  updateArtistData,
-  followArtist,
-  unfollowArtist
+  deleteUser
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -18,12 +14,6 @@ router.get('/:id', getUserById);                    // Mostrar info de um espec�
 router.put('/:id', updateUser);                     // Mudar dados básicos de utilizador
 router.delete('/:id', deleteUser);                  // Apagar utilizador
 
-// Rotas específicas do domínio de Artistas
-router.post('/:id/become-artist', becomeArtist);    // Definir que este utilizador passa a ser artista
-router.put('/:id/artist-profile', updateArtistData); // Alterar os dados do artista
-
-// Rotas de Seguir Artistas
-router.post('/:id/follow/:artistId', followArtist);    // Seguir um artista
-router.delete('/:id/follow/:artistId', unfollowArtist); // Deixar de seguir um artista
+// (Rotas de artistas foram removidas e movidas para /api/artistas)
 
 export default router;

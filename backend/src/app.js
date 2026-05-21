@@ -13,6 +13,7 @@ import spots from './routes/Spot.routes.js'
 import reservas from './routes/Reservas.routes.js'
 import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
+import artistaRoutes from './routes/artista.routes.js'
 
 // Inicializar Associações dos Modelos
 import './Models/db.js'
@@ -26,9 +27,10 @@ app.use(cors())
 app.use(express.json()) // Permite ler o Body em formato JSON enviado pelos clientes/Postman
 
 // Registo de Rotas
-app.use('api/relatorios', relatorios)
+app.use('/api/relatorios', relatorios)
 app.use('/api/spots', spots)
 app.use('/api/reservas', reservas)
+app.use('/api/artistas', artistaRoutes)
 app.use('/api', authRoutes)
 app.use('/api/users', userRoutes)
 
