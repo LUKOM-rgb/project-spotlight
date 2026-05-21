@@ -4,95 +4,116 @@ import dotenv from 'dotenv'
 dotenv.config()
 import process from 'process'
 
+// Importar ligação do Sequelize para a Base de Dados
+import sequelize from './config/database.js'
 
-const app = express()
-const port= process.env.PORT
-const host= process.env.HOST
-app.use(express.json())
-// Importar Rota
+// Importar as Rotas da API
 import relatorios from './routes/ocorrencia.routes.js'
 import spots from './routes/Spot.routes.js'
 import reservas from './routes/Reservas.routes.js'
 import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
-import './Models/db.js' // Inicializa as associações!
+
+// Inicializar Associações dos Modelos
+import './Models/db.js'
+
+const app = express()
+const port = process.env.PORT || 3000
+const host = process.env.HOST || 'localhost'
+
 // Middlewares Globais
-
-
-// Middlewares
 app.use(cors())
+app.use(express.json()) // Permite ler o Body em formato JSON enviado pelos clientes/Postman
 
-// Registar as Rotas
-app.use('/relatorios',relatorios)
-app.use('/spots',spots)
-app.use('/reservas',reservas)
-app.use('/auth', authRoutes)
-app.use('/users', userRoutes)
+// Registo de Rotas
+app.use('api/relatorios', relatorios)
+app.use('/api/spots', spots)
+app.use('/api/reservas', reservas)
+app.use('/api', authRoutes)
+app.use('/api/users', userRoutes)
 
-
-
-
-app.use((req,res,next)=>{
-  res.status(404).json({message: 'Endpoint não encontrado'})
+// Rota base de teste rápido para verificar no browser ou Postman se a API está online
+app.get('/', (req, res) => {
+  return res.status(200).json({
+    message: 'API do Project Spotlight está a correr com sucesso!',
+  })
 })
 
+// Middleware para endpoints não encontrados (404)
+app.use((req, res, next) => {
+  res.status(404).json({ message: 'Endpoint não encontrado' })
+})
+
+// Middleware Global de Tratamento de Erros (Consolidado e Robusto)
 app.use((err, req, res, next) => {
-  // !Uncomment this line to log the error details to the server console!
-  console.error(err);
+  console.error(err)
 
-  // error thrown by express.json() middleware when the request body is not valid JSON
-  if (err.type === "entity.parse.failed")
+  // Erro do middleware express.json() se o body não for JSON válido
+  if (err.type === 'entity.parse.failed') {
     return res.status(400).json({
-      error: "Invalid JSON payload! Check if your body data is a valid JSON.",
-    });
+      error: 'Payload JSON inválido! Verifique se os dados estão no formato correto.',
+      message: err.message,
+    })
+  }
 
-  // Sequelize validation errors (ALL models)
-  if (
-    err.name === "SequelizeValidationError" ||
-    err.name === "SequelizeUniqueConstraintError"
-  ) {
+  // Erros de Validação do Sequelize (todos os Modelos)
+  if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
     return res.status(400).json({
-      error: "Validation error",
+      error: 'Erro de Validação',
+      message: 'Os dados fornecidos não cumprem os requisitos do sistema.',
       details: err.errors.map((e) => ({
         field: e.path,
         message: e.message,
       })),
-    });
+    })
   }
 
-  // SequelizeDatabaseError related to an invalid ENUM value (utilizador table -> role field)
-  if (err.name === "SequelizeDatabaseError") {
-    if (err.original.code === "ER_CHECK_CONSTRAINT_VIOLATED") {
+  // Erros de base de dados do Sequelize/MySQL
+  if (err.name === 'SequelizeDatabaseError' && err.original) {
+    if (err.original.code === 'ER_CHECK_CONSTRAINT_VIOLATED') {
       return res.status(400).json({
-        error: "Invalid value for enumerated field",
+        error: 'Valor inválido para campo enumerado',
         message: err.message,
-      });
+      })
     }
-    if (err.original.code === "ER_BAD_NULL_ERROR") {
+    if (err.original.code === 'ER_BAD_NULL_ERROR') {
       return res.status(400).json({
-        error: "Missing mandatory field",
+        error: 'Campo obrigatório em falta na base de dados',
         message: err.message,
-      });
+      })
     }
-    if (err.original.code === "ER_DUP_ENTRY") {
+    if (err.original.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({
-        error: "Duplicate entry",
+        error: 'Registo duplicado',
         message: err.message,
-      });
+      })
     }
   }
-  // other errors
-  res.status(err.status || err.statusCode || 500).json({
-    error: err.description || "Internal server error",
+
+  // Outros erros personalizados ou de sistema
+  const status = err.status || err.statusCode || 500
+  const description = err.description || err.message || 'Internal Server Error'
+  const errors = err.errors || null
+
+  return res.status(status).json({
+    error: description,
     message: err.message,
-    details: err.errors || null
-  });
-});
-
-// Start server
-app.listen(port, host, () => {
-  console.log(`Server running on host ${host} and port ${port}`)
-  console.log(`Access: http://localhost:${port}/relatorios`)
+    details: errors,
+  })
 })
+
+// Sincronização da Base de Dados e Inicialização do Servidor
+sequelize
+  .sync({ alter: true }) // Sincroniza tabelas na BD se houver alterações nos Modelos
+  .then(() => {
+    console.log('✔ Database sincronizada com sucesso.')
+    app.listen(port, host, () => {
+      console.log(`✔ Server running on http://${host}:${port}`)
+      console.log(`✔ Access: http://${host}:${port}/relatorios`)
+    })
+  })
+  .catch((error) => {
+    console.error('✖ Erro ao sincronizar a Base de Dados:', error)
+  })
 
 export default app
