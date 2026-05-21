@@ -1,5 +1,7 @@
 // Certifica-te de que os caminhos './definition' e './faker'
 // correspondem aos nomes exatos dos teus ficheiros
+import fs from 'fs'
+import path from 'path'
 import type { LocaleDefinition } from './definitions.ts'
 import { MyFaker, Person } from './faker'
 
@@ -337,3 +339,33 @@ const pt_PT: LocaleDefinition = {
 // 2. Inicializar o nosso Faker personalizado com os dados
 const myFakerInstance = new MyFaker(pt_PT)
 const personFaker = new Person(myFakerInstance)
+
+// 3. Obter caminhos de ficheiro utilizando o CWD (Current Working Directory)
+const baseDir = path.join(process.cwd(), 'backend', 'faker')
+
+// 4. Gerar utilizadores fictícios
+const numUsers = 30
+const generatedUsers = []
+
+for (let i = 0; i < numUsers; i++) {
+  // Gera uma mistura de utilizadores normais e artistas
+  const isArtist = Math.random() < 0.3
+  const user = personFaker.account({
+    role: isArtist ? 'artista' : 'normal'
+  })
+  generatedUsers.push(user)
+}
+
+// 5. Gravar os dados em users.json
+const usersJsonPath = path.join(baseDir, 'users.json')
+
+try {
+  const jsonContent = JSON.stringify(generatedUsers, null, 2)
+  
+  fs.writeFileSync(usersJsonPath, jsonContent, 'utf-8')
+  
+  console.log(`\n\x1b[32m✔ Sucesso! Foram gerados ${numUsers} utilizadores.\x1b[0m`)
+  console.log(`\x1b[34m→ Gravado em: ${usersJsonPath}\x1b[0m`)
+} catch (error) {
+  console.error('\x1b[31m✖ Erro ao gravar ficheiros JSON:\x1b[0m', error)
+}
