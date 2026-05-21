@@ -342,23 +342,37 @@ const personFaker = new Person(myFakerInstance)
 
 // 3. Obter caminhos de ficheiro utilizando o CWD (Current Working Directory)
 const baseDir = path.join(process.cwd(), 'backend', 'faker')
+const usersJsonPath = path.join(baseDir, 'users.json')
+
+// Apagar o ficheiro users.json se existir antes de correr a geração
+if (fs.existsSync(usersJsonPath)) {
+  try {
+    fs.unlinkSync(usersJsonPath)
+    console.log('\x1b[33m✔ Dados antigos de users.json apagados.\x1b[0m')
+  } catch (error) {
+    console.error('\x1b[31m✖ Erro ao apagar users.json:\x1b[0m', error)
+  }
+}
 
 // 4. Gerar utilizadores fictícios
 const numUsers = 30
 const generatedUsers = []
+let artistCounter = 1
 
 for (let i = 0; i < numUsers; i++) {
   // Gera uma mistura de utilizadores normais e artistas
   const isArtist = Math.random() < 0.3
+  const id_conta = i + 1
+  const id_artista = isArtist ? artistCounter++ : null
+
   const user = personFaker.account({
-    role: isArtist ? 'artista' : 'normal'
+    id_conta,
+    id_artista
   })
   generatedUsers.push(user)
 }
 
 // 5. Gravar os dados em users.json
-const usersJsonPath = path.join(baseDir, 'users.json')
-
 try {
   const jsonContent = JSON.stringify(generatedUsers, null, 2)
   

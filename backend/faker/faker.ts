@@ -153,19 +153,31 @@ export class Person extends ModuleBase {
       .join('')
   }
 
+  numeroTelemovel(): string {
+    const prefixes = ['91', '92', '93', '96']
+    const prefix = this.faker.helpers.arrayElement(prefixes)
+    let rest = ''
+    for (let i = 0; i < 7; i++) {
+      rest += Math.floor(Math.random() * 10)
+    }
+    return prefix + rest
+  }
+
   account(
     options: {
       sex?: SexType
-      role?: 'normal' | 'artista'
+      id_conta?: number
+      id_artista?: number | null
     } = {},
   ) {
     const sex = options.sex ?? this.faker.helpers.arrayElement([Sex.Female, Sex.Male])
     const firstName = this.firstName(sex)
     const lastName = this.lastName(sex)
     const fullName = this.fullName({ firstName, lastName, sex })
-    const role = options.role ?? (Math.random() < 0.25 ? 'artista' : 'normal')
+    const id_artista = options.id_artista ?? null
 
     const baseAccount: Record<string, any> = {
+      id_conta: options.id_conta ?? null,
       fullName,
       firstName,
       lastName,
@@ -173,10 +185,11 @@ export class Person extends ModuleBase {
       username: this.username({ firstName, lastName, sex }),
       email: this.email({ firstName, lastName, sex }),
       password: this.password(),
-      role,
+      numero_telemovel: this.numeroTelemovel(),
+      id_artista,
     }
 
-    if (role === 'artista') {
+    if (id_artista !== null) {
       // 8-digit random license number
       let licenseNumber = ''
       for (let i = 0; i < 8; i++) {

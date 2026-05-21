@@ -38,7 +38,7 @@ const Ocorrencia = sequelize.define(
     },
     id_spot: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'Spot',
         key: 'id_spot',
