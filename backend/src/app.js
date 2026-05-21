@@ -1,58 +1,119 @@
 import express from 'express'
 import cors from 'cors'
+import dotenv from 'dotenv'
+dotenv.config()
+import process from 'process'
+
+// Importar ligação do Sequelize para a Base de Dados
 import sequelize from './config/database.js'
-import 'dotenv/config'
-import ContaGlobal from './Models/ContaGlobal.js'
-import Utilizador from './Models/Utilizador.js'
-import Artista from './Models/Artista.js'
-import Spot from './Models/Spot.js'
-import Categorias from './Models/Categorias.js'
-import Reservas from './Models/Reservas.js'
-import Ocorrencia from './Models/Ocorrencia.js'
-import Seguidor from './Models/Seguidor.js'
+
+// Importar as Rotas da API
+import relatorios from './routes/ocorrencia.routes.js'
+import spots from './routes/Spot.routes.js'
+import reservas from './routes/Reservas.routes.js'
 import authRoutes from './routes/auth.routes.js'
+import userRoutes from './routes/user.routes.js'
+
+// Inicializar Associações dos Modelos
+import './Models/db.js'
 
 const app = express()
+const port = process.env.PORT || 3000
+const host = process.env.HOST || 'localhost'
 
-// Middlewares Globais obligatórios para tratamento de pedidos
+// Middlewares Globais
 app.use(cors())
-app.use(express.json()) // Permite ler o Body em formato JSON enviado pelo Postman
+app.use(express.json()) // Permite ler o Body em formato JSON enviado pelos clientes/Postman
 
-// Definição do Prefixo Base das Rotas da API
-app.use('/api', authRoutes) // Disponibiliza /api/users e /api/users/login
+// Registo de Rotas
+app.use('api/relatorios', relatorios)
+app.use('/api/spots', spots)
+app.use('/api/reservas', reservas)
+app.use('/api', authRoutes)
+app.use('/api/users', userRoutes)
 
-// Rota base de teste rápido para verificar no Postman se a API está online
+// Rota base de teste rápido para verificar no browser ou Postman se a API está online
 app.get('/', (req, res) => {
   return res.status(200).json({
     message: 'API do Project Spotlight está a correr com sucesso!',
   })
 })
 
-// Middleware Global de Tratamento de Erros (Formato padrão ESMAD)
-// Captura qualquer erro lançado nos controladores (ex: next(error)) e responde em JSON
-app.use((err, req, res, next) => {
-  const status = err.status || 500
-  const description = err.message || 'Internal Server Error'
-  const errors = err.errors || {}
+// Middleware para endpoints não encontrados (404)
+app.use((req, res, next) => {
+  res.status(404).json({ message: 'Endpoint não encontrado' })
+})
 
-  console.error(`[Error ${status}]: ${description}`, errors)
+// Middleware Global de Tratamento de Erros (Consolidado e Robusto)
+app.use((err, req, res, next) => {
+  console.error(err)
+
+  // Erro do middleware express.json() se o body não for JSON válido
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({
+      error: 'Payload JSON inválido! Verifique se os dados estão no formato correto.',
+      message: err.message,
+    })
+  }
+
+  // Erros de Validação do Sequelize (todos os Modelos)
+  if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+    return res.status(400).json({
+      error: 'Erro de Validação',
+      message: 'Os dados fornecidos não cumprem os requisitos do sistema.',
+      details: err.errors.map((e) => ({
+        field: e.path,
+        message: e.message,
+      })),
+    })
+  }
+
+  // Erros de base de dados do Sequelize/MySQL
+  if (err.name === 'SequelizeDatabaseError' && err.original) {
+    if (err.original.code === 'ER_CHECK_CONSTRAINT_VIOLATED') {
+      return res.status(400).json({
+        error: 'Valor inválido para campo enumerado',
+        message: err.message,
+      })
+    }
+    if (err.original.code === 'ER_BAD_NULL_ERROR') {
+      return res.status(400).json({
+        error: 'Campo obrigatório em falta na base de dados',
+        message: err.message,
+      })
+    }
+    if (err.original.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({
+        error: 'Registo duplicado',
+        message: err.message,
+      })
+    }
+  }
+
+  // Outros erros personalizados ou de sistema
+  const status = err.status || err.statusCode || 500
+  const description = err.description || err.message || 'Internal Server Error'
+  const errors = err.errors || null
 
   return res.status(status).json({
-    description: description,
-    errors: errors,
+    error: description,
+    message: err.message,
+    details: errors,
   })
 })
 
-// Sincronização da Base de Dados com o Sequelize
-const PORT = process.env.PORT || 3000
-
+// Sincronização da Base de Dados e Inicialização do Servidor
 sequelize
-  .sync({ alter: true }) // Atualiza as tabelas na BD se houver alterações nos Modelos
+  .sync({ alter: true }) // Sincroniza tabelas na BD se houver alterações nos Modelos
   .then(() => {
-    console.log('Database sincronizada com sucesso.')
+    console.log('✔ Database sincronizada com sucesso.')
+    app.listen(port, host, () => {
+      console.log(`✔ Server running on http://${host}:${port}`)
+      console.log(`✔ Access: http://${host}:${port}/relatorios`)
+    })
   })
   .catch((error) => {
-    console.error('Erro ao sincronizar a Base de Dados:', error)
+    console.error('✖ Erro ao sincronizar a Base de Dados:', error)
   })
 
 export default app

@@ -10,7 +10,7 @@ const Utilizador = sequelize.define(
     },
     nif: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {

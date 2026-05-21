@@ -17,7 +17,7 @@ const Conta_global = sequelize.define(
       allowNull: false,
     },
     tipo: {
-      type: DataTypes.ENUM('artista', 'utilizador'),
+      type: DataTypes.ENUM('artista', 'utilizador', 'admin'),
       allowNull: false,
     },
     data_registo: {
@@ -30,6 +30,10 @@ const Conta_global = sequelize.define(
     },
     numero_telemovel: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    id_artista: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
   },

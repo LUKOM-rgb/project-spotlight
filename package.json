@@ -11,7 +11,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "faker": "npx tsx backend/faker/index.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
@@ -24,6 +25,7 @@
     "express": "^5.2.1",
     "faker": "^5.5.3",
     "jsonwebtoken": "^9.0.3",
+    "leaflet": "^1.9.4",
     "mysql2": "^3.22.3",
     "numeral": "^2.0.6",
     "pinia": "^3.0.1",

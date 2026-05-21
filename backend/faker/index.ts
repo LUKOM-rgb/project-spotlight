@@ -1,5 +1,7 @@
 // Certifica-te de que os caminhos './definition' e './faker'
 // correspondem aos nomes exatos dos teus ficheiros
+import fs from 'fs'
+import path from 'path'
 import type { LocaleDefinition } from './definitions.ts'
 import { MyFaker, Person } from './faker'
 
@@ -8,10 +10,6 @@ const pt_PT: LocaleDefinition = {
   person: {
     gender: ['Mulher', 'Homem', 'Não-binário', 'Género Fluido'],
     sex: ['female', 'male'],
-    prefix: {
-      female: ['Sra.', 'Dra.', 'Enga.'],
-      male: ['Sr.', 'Dr.', 'Eng.'],
-    },
     first_name: {
       female: [
         'Maria',
@@ -320,12 +318,11 @@ const pt_PT: LocaleDefinition = {
         'Vieira',
       ],
     },
-    suffix: ['Jr.', 'Neto', 'Filho'],
 
     // Os nossos padrões de Mustache com pesos
     name: [
       { value: '{{person.firstName}} {{person.lastName}}', weight: 10 },
-      { value: '{{person.prefix}} {{person.firstName}} {{person.lastName}}', weight: 3 },
+      { value: '{{person.firstName}} {{person.lastName}}', weight: 3 },
       { value: '{{person.firstName}}  {{person.lastName}}', weight: 5 },
     ],
     last_name_pattern: { generic: [{ value: '{{person.lastName}}', weight: 1 }] },
@@ -336,7 +333,6 @@ const pt_PT: LocaleDefinition = {
     job_area: [],
     job_type: [],
     job_title_pattern: [],
-    western_zodiac_sign: [],
   },
 }
 
@@ -344,11 +340,46 @@ const pt_PT: LocaleDefinition = {
 const myFakerInstance = new MyFaker(pt_PT)
 const personFaker = new Person(myFakerInstance)
 
-// 3. Imprimir os resultados na consola!
-console.log('=== A Iniciar ===')
-console.log('Nome 100% Aleatório:', personFaker.fullName())
-console.log('Outro Nome Aleatório:', personFaker.fullName())
-console.log('Nome Feminino:', personFaker.fullName({ sex: 'female' }))
-console.log('Nome Masculino:', personFaker.fullName({ sex: 'male' }))
-console.log('Nome c/ primeiro nome fixo:', personFaker.fullName({ firstName: 'Adamastor' }))
-console.log('Género Aleatório:', personFaker.gender())
+// 3. Obter caminhos de ficheiro utilizando o CWD (Current Working Directory)
+const baseDir = path.join(process.cwd(), 'backend', 'faker')
+const usersJsonPath = path.join(baseDir, 'users.json')
+
+// Apagar o ficheiro users.json se existir antes de correr a geração
+if (fs.existsSync(usersJsonPath)) {
+  try {
+    fs.unlinkSync(usersJsonPath)
+    console.log('\x1b[33m✔ Dados antigos de users.json apagados.\x1b[0m')
+  } catch (error) {
+    console.error('\x1b[31m✖ Erro ao apagar users.json:\x1b[0m', error)
+  }
+}
+
+// 4. Gerar utilizadores fictícios
+const numUsers = 30
+const generatedUsers = []
+let artistCounter = 1
+
+for (let i = 0; i < numUsers; i++) {
+  // Gera uma mistura de utilizadores normais e artistas
+  const isArtist = Math.random() < 0.3
+  const id_conta = i + 1
+  const id_artista = isArtist ? artistCounter++ : null
+
+  const user = personFaker.account({
+    id_conta,
+    id_artista
+  })
+  generatedUsers.push(user)
+}
+
+// 5. Gravar os dados em users.json
+try {
+  const jsonContent = JSON.stringify(generatedUsers, null, 2)
+  
+  fs.writeFileSync(usersJsonPath, jsonContent, 'utf-8')
+  
+  console.log(`\n\x1b[32m✔ Sucesso! Foram gerados ${numUsers} utilizadores.\x1b[0m`)
+  console.log(`\x1b[34m→ Gravado em: ${usersJsonPath}\x1b[0m`)
+} catch (error) {
+  console.error('\x1b[31m✖ Erro ao gravar ficheiros JSON:\x1b[0m', error)
+}

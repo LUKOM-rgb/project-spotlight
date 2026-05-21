@@ -42,7 +42,7 @@ export type PersonDefinition = LocaleEntry<{
 
   prefix: SimplePersonEntryDefinition
   first_name: SimplePersonEntryDefinition
-  middle_name: SimplePersonEntryDefinition
+  role: string[]
   last_name: SimplePersonEntryDefinition
 
   suffix: string[]
@@ -64,6 +64,4 @@ export type PersonDefinition = LocaleEntry<{
   job_type: string[]
 
   job_title_pattern: string[]
-
-  western_zodiac_sign: string[]
 }>
