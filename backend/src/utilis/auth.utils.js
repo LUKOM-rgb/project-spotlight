@@ -20,7 +20,7 @@ export function generateToken(user) {
     {
       sub: user.id_conta, // ID único da conta global
       email: user.email,
-      role: user.tipo_utilizador, // 'utilizador' ou 'artista' ou 'admin'
+      role: user.tipo, // 'utilizador' ou 'artista' ou 'admin'
     },
     JWT_SECRET,
     { expiresIn: '1d' }, // Token válido por 1 dia
