@@ -1,11 +1,26 @@
 import RelatorioOcorrencia from '../Models/Ocorrencia.js'
 import ContaGlobal from '../Models/ContaGlobal.js'
-import Spot from '../Models/Spot.js' // Assumindo que tens este modelo para validar o spot
-import { validationError } from '../utilis/error.utils.js'
+import Spot from '../Models/Spot.js'
+import {
+  validationError,
+  unauthorizedError,
+  forbiddenError,
+  notFoundError,
+} from '../utilis/error.utils.js'
 
 // POST /relatorios - Criar nova ocorrência
 export const createOcorrencia = async (req, res, next) => {
   try {
+    // 401 Unauthorized: verificar se o utilizador está autenticado
+    if (!req.user) {
+      throw unauthorizedError('Autenticação necessária. Token em falta.')
+    }
+
+    // 403 Forbidden: verificar se o utilizador é admin
+    if (req.user.role !== 'admin') {
+      throw forbiddenError('Acesso recusado. Apenas administradores podem criar ocorrências.')
+    }
+
     const {
       data_ocorrencia,
       hora_ocorrencia,
@@ -16,42 +31,25 @@ export const createOcorrencia = async (req, res, next) => {
       id_spot,
     } = req.body
 
-    // 1. Validações básicas de campos obrigatórios
+    // 400 Bad Request: Validações básicas de campos obrigatórios
     const errors = {}
     if (!descricao) errors.descricao = ['O campo descrição é obrigatório.']
     if (!local_ocorrencia) errors.local_ocorrencia = ['O local da ocorrência é obrigatório.']
     if (!id_conta) errors.id_conta = ['O ID da conta é obrigatório.']
+    if (!id_spot) errors.id_spot = ['O ID do spot é obrigatório.']
 
     if (Object.keys(errors).length > 0) {
       throw validationError(errors)
     }
 
-    // Verificar se o id_conta e id_spot realmente existem na Base de Dados se fornecidos
+    // 404 Not Found: Verificar se o id_conta e id_spot realmente existem na Base de Dados
     const contaExiste = await ContaGlobal.findByPk(id_conta)
-    if (!contaExiste) throw validationError({ id_conta: ['A conta especificada não existe.'] })
+    if (!contaExiste) throw notFoundError('Conta', id_conta)
 
-    if (id_spot) {
-      const spotExiste = await Spot.findByPk(id_spot)
-      if (!spotExiste) throw validationError({ id_spot: ['O spot especificado não existe.'] })
-    }
+    const spotExiste = await Spot.findByPk(id_spot)
+    if (!spotExiste) throw notFoundError('Spot', id_spot)
 
     // 3. Criar o relatório na base de dados
-    let final_id_spot = id_spot || null
-
-    if (!final_id_spot) {
-      try {
-        const fallbackSpot = await Spot.findOne()
-        if (fallbackSpot) {
-          final_id_spot = fallbackSpot.id_spot
-          console.log(
-            `[Teste] Usando spot de fallback (id_spot: ${final_id_spot}) para evitar restrição física da BD.`,
-          )
-        }
-      } catch (err) {
-        console.error('Erro ao obter spot de fallback:', err)
-      }
-    }
-
     const novoRelatorio = await RelatorioOcorrencia.create({
       data_ocorrencia: data_ocorrencia || new Date(),
       hora_ocorrencia,
@@ -59,7 +57,7 @@ export const createOcorrencia = async (req, res, next) => {
       descricao_ocorrencia: descricao,
       estado_ocorrencia: estado ? estado.toLowerCase() : 'pendente',
       id_conta,
-      id_spot: final_id_spot,
+      id_spot,
     })
 
     // 4. Responder com 201 Created
@@ -75,6 +73,16 @@ export const createOcorrencia = async (req, res, next) => {
 // GET /relatorios - Obter todas as ocorrências
 export const getAllOcorrencias = async (req, res, next) => {
   try {
+    // 401 Unauthorized: verificar se o utilizador está autenticado
+    if (!req.user) {
+      throw unauthorizedError('Autenticação necessária. Token em falta.')
+    }
+
+    // 403 Forbidden: verificar se o utilizador é admin
+    if (req.user.role !== 'admin') {
+      throw forbiddenError('Acesso recusado. Apenas administradores podem consultar ocorrências.')
+    }
+
     // Podes ler parâmetros da query (ex: /relatorios?estado=Pendente)
     const { estado, id_spot } = req.query
     const whereClause = {}
@@ -98,13 +106,22 @@ export const getAllOcorrencias = async (req, res, next) => {
 // GET /relatorios/:id - Obter uma ocorrência específica
 export const getOcorrenciaById = async (req, res, next) => {
   try {
+    // 401 Unauthorized: verificar se o utilizador está autenticado
+    if (!req.user) {
+      throw unauthorizedError('Autenticação necessária. Token em falta.')
+    }
+
+    // 403 Forbidden: verificar se o utilizador é admin
+    if (req.user.role !== 'admin') {
+      throw forbiddenError('Acesso recusado. Apenas administradores podem consultar ocorrências.')
+    }
+
     const { id } = req.params
 
     const relatorio = await RelatorioOcorrencia.findByPk(id)
 
     if (!relatorio) {
-      // Se tiveres um notFoundError nos teus error.utils, usa-o aqui. Senão:
-      return res.status(404).json({ message: 'Relatório não encontrado.' })
+      throw notFoundError('RelatorioOcorrencia', id)
     }
 
     return res.status(200).json({
@@ -119,17 +136,29 @@ export const getOcorrenciaById = async (req, res, next) => {
 // PATCH /relatorios/:id/estado - Atualizar o estado da ocorrência
 export const updateEstadoOcorrencia = async (req, res, next) => {
   try {
+    // 401 Unauthorized: verificar se o utilizador está autenticado
+    if (!req.user) {
+      throw unauthorizedError('Autenticação necessária. Token em falta.')
+    }
+
+    // 403 Forbidden: verificar se o utilizador é admin
+    if (req.user.role !== 'admin') {
+      throw forbiddenError('Acesso recusado. Apenas administradores podem alterar o estado de ocorrências.')
+    }
+
     const { id } = req.params
     const { estado } = req.body
 
+    // 400 Bad Request: Validações básicas de campos obrigatórios
     if (!estado) {
       throw validationError({ estado: ['O novo estado é obrigatório.'] })
     }
 
     const relatorio = await RelatorioOcorrencia.findByPk(id)
 
+    // 404 Not Found: Verificar se o relatório existe na base de dados
     if (!relatorio) {
-      return res.status(404).json({ message: 'Relatório não encontrado.' })
+      throw notFoundError('RelatorioOcorrencia', id)
     }
 
     // Atualizar e guardar
@@ -137,7 +166,7 @@ export const updateEstadoOcorrencia = async (req, res, next) => {
     await relatorio.save()
 
     return res.status(200).json({
-      message: 'Estado do relatório atualizado com sucesso!',
+      message: 'Estado do relatório updated com sucesso!',
       data: relatorio,
     })
   } catch (error) {
@@ -148,12 +177,23 @@ export const updateEstadoOcorrencia = async (req, res, next) => {
 // DELETE /relatorios/:id - Eliminar uma ocorrência
 export const deleteOcorrencia = async (req, res, next) => {
   try {
+    // 401 Unauthorized: verificar se o utilizador está autenticado
+    if (!req.user) {
+      throw unauthorizedError('Autenticação necessária. Token em falta.')
+    }
+
+    // 403 Forbidden: verificar se o utilizador é admin
+    if (req.user.role !== 'admin') {
+      throw forbiddenError('Acesso recusado. Apenas administradores podem eliminar ocorrências.')
+    }
+
     const { id } = req.params
 
     const relatorio = await RelatorioOcorrencia.findByPk(id)
 
+    // 404 Not Found: Verificar se o relatório existe na base de dados
     if (!relatorio) {
-      return res.status(404).json({ message: 'Relatório não encontrado.' })
+      throw notFoundError('RelatorioOcorrencia', id)
     }
 
     await relatorio.destroy()
