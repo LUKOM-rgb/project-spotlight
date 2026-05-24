@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import process from 'process';
-import { unauthorizedError } from '../utilis/error.utils.js';
+import { unauthorizedError, forbiddenError } from '../utilis/error.utils.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chave_secreta_super_segura_esmad';
 
@@ -34,10 +34,7 @@ export const isAdmin = (req, res, next) => {
   }
 
   if (req.user.role !== 'admin') {
-    return res.status(403).json({
-      error: 'Acesso Proibido',
-      message: 'Apenas administradores têm permissão para realizar esta ação.'
-    });
+    return next(forbiddenError('Acesso Proibido. Apenas administradores têm permissão para realizar esta ação.'));
   }
 
   next();

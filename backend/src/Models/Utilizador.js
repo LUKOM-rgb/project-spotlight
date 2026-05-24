@@ -7,11 +7,7 @@ const Utilizador = sequelize.define(
     id_conta: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-    },
-    nif: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    }
   },
   {
     tableName: 'Utilizador',

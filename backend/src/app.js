@@ -15,6 +15,7 @@ import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
 import artistaRoutes from './routes/artista.routes.js'
 import categoriaRoutes from './routes/categoria.routes.js'
+import followerRoutes from './routes/follower.routes.js'
 
 // Inicializar Associações dos Modelos
 import './Models/db.js'
@@ -33,6 +34,7 @@ app.use('/api/spots', spots)
 app.use('/api/reservas', reservas)
 app.use('/api/artistas', artistaRoutes)
 app.use('/api/categorias', categoriaRoutes)
+app.use('/api/followers', followerRoutes)
 app.use('/api', authRoutes)
 app.use('/api/users', userRoutes)
 

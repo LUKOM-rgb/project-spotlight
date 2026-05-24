@@ -1,7 +1,7 @@
 import Categoria from '../Models/Categorias.js';
 import Artista from '../Models/Artista.js';
 import ContaGlobal from '../Models/ContaGlobal.js';
-import { validationError } from '../utilis/error.utils.js';
+import { validationError, notFoundError, conflictError } from '../utilis/error.utils.js';
 
 // 1. Adicionar Categoria
 export const createCategoria = async (req, res, next) => {
@@ -17,9 +17,7 @@ export const createCategoria = async (req, res, next) => {
       // Verificar se já existe alguma categoria com este ID
       const categoriaExistente = await Categoria.findByPk(categoria_id);
       if (categoriaExistente) {
-        return res.status(400).json({ 
-          message: `Já existe uma categoria com o ID ${categoria_id}. Escolhe outro ID ou não envies o campo para ser gerado automaticamente.` 
-        });
+        throw conflictError(`Já existe uma categoria com o ID ${categoria_id}. Escolhe outro ID ou não envies o campo para ser gerado automaticamente.`);
       }
       payload.categoria_id = categoria_id;
     }
@@ -40,16 +38,26 @@ export const deleteCategoria = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    if (!id) {
+      throw validationError({ id: ['O ID da categoria a apagar é obrigatório.'] });
+    }
+
     const categoria = await Categoria.findByPk(id);
     if (!categoria) {
-      return res.status(404).json({ message: 'Categoria não encontrada.' });
+      throw notFoundError('Categoria', id);
+    }
+
+    // Verificar se existem artistas associados a esta categoria antes de apagar
+    const artistasAssociados = await Artista.count({ where: { categoria_id: id } });
+    if (artistasAssociados > 0) {
+      throw conflictError('Não podes apagar esta categoria porque ainda tem artistas associados.');
     }
 
     await categoria.destroy();
 
     return res.status(200).json({ message: 'Categoria apagada com sucesso!' });
   } catch (error) {
-    // Se houver erro de foreign key, é apanhado pelo global error handler
+    // Se houver erro de foreign key não detetado acima, é apanhado pelo global error handler
     next(error);
   }
 };
@@ -70,10 +78,14 @@ export const getArtistasByCategoria = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    if (!id) {
+      throw validationError({ id: ['O ID da categoria é obrigatório.'] });
+    }
+
     // Verificar se a categoria existe
     const categoria = await Categoria.findByPk(id);
     if (!categoria) {
-      return res.status(404).json({ message: 'Categoria não encontrada.' });
+      throw notFoundError('Categoria', id);
     }
 
     // Buscar artistas associados à categoria (juntando com ContaGlobal para ter nome, email, etc.)

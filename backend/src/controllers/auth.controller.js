@@ -1,12 +1,12 @@
 import ContaGlobal from '../Models/ContaGlobal.js'
 import Utilizador from '../Models/Utilizador.js'
 import { hashPassword, comparePassword, generateToken } from '../utilis/auth.utils.js'
-import { validationError, unauthorizedError } from '../utilis/error.utils.js'
+import { validationError, unauthorizedError, conflictError } from '../utilis/error.utils.js'
 
 // Registar Conta
 export const register = async (req, res, next) => {
   try {
-    const { email, password, nome_utilizador, nif, numero_telemovel } = req.body
+    const { email, password, nome_utilizador, numero_telemovel } = req.body
 
     // campos obrigatórios
     const errors = {}
@@ -22,7 +22,7 @@ export const register = async (req, res, next) => {
     // 2. Verificar se o email ou username já existem
     const existingAccount = await ContaGlobal.findOne({ where: { email } })
     if (existingAccount) {
-      throw validationError({ email: ['Este email já está registado.'] })
+      throw conflictError('Este email já está registado.')
     }
 
     // 3. Cifrar password e criar Conta Global
@@ -38,8 +38,7 @@ export const register = async (req, res, next) => {
 
     // 4. Criar o perfil específico na tabela Utilizador
     const novoUtilizador = await Utilizador.create({
-      id_conta: novaConta.id_conta, // Corrigido de id_user para id_conta
-      nif
+      id_conta: novaConta.id_conta // Corrigido de id_user para id_conta
     })
 
     // 5. Responder com 201 Created (Sucesso no Postman)
@@ -48,8 +47,7 @@ export const register = async (req, res, next) => {
       data: {
         id_conta: novaConta.id_conta,
         nome_utilizador: novaConta.nome_utilizador,
-        email: novaConta.email,
-        nif: novoUtilizador.nif
+        email: novaConta.email
       },
     })
   } catch (error) {

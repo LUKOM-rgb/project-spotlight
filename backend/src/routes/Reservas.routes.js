@@ -5,7 +5,7 @@ import {
   getReservasBySpotId,
   getReservasByArtistaId,
   deleteReservaById
-} from '../Controllers/Reservas.controller.js'
+} from '../controllers/Reservas.controller.js'
 const router = express.Router()
 
 router.get('/', getAllReservas)

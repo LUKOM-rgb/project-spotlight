@@ -42,3 +42,12 @@ export function notFoundError(resource, id) {
     },
   })
 }
+
+// Erro 409 - Conflito (Recurso já existe ou violação de integridade)
+export function conflictError(message = 'Conflict') {
+  return createError({
+    status: 409,
+    description: 'Conflict error',
+    errors: { conflict: [message] },
+  })
+}

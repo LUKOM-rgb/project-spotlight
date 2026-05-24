@@ -2,7 +2,7 @@ import Artista from '../Models/Artista.js';
 import ContaGlobal from '../Models/ContaGlobal.js';
 import Seguidor from '../Models/Seguidor.js';
 import { hashPassword } from '../utilis/auth.utils.js';
-import { validationError } from '../utilis/error.utils.js';
+import { validationError, notFoundError, conflictError } from '../utilis/error.utils.js';
 
 // 1. Criar Artista (Registo de um novo Artista)
 export const createArtist = async (req, res, next) => {
@@ -33,7 +33,7 @@ export const createArtist = async (req, res, next) => {
     // Verificar se o email já existe
     const existingAccount = await ContaGlobal.findOne({ where: { email } });
     if (existingAccount) {
-      throw validationError({ email: ['Este email já está registado.'] });
+      throw conflictError('Este email já está registado.');
     }
 
     // Criar o registo do Artista primeiro
@@ -95,7 +95,7 @@ export const getArtistById = async (req, res, next) => {
     });
 
     if (!conta) {
-      return res.status(404).json({ message: 'Artista não encontrado.' });
+      throw notFoundError('Artista', id);
     }
 
     return res.status(200).json(conta);
@@ -112,12 +112,12 @@ export const updateArtist = async (req, res, next) => {
 
     const conta = await ContaGlobal.findOne({ where: { id_conta: id, tipo: 'artista' } });
     if (!conta || !conta.id_artista) {
-      return res.status(404).json({ message: 'Artista não encontrado.' });
+      throw notFoundError('Conta de Artista', id);
     }
 
     const artista = await Artista.findByPk(conta.id_artista);
     if (!artista) {
-      return res.status(404).json({ message: 'Perfil de artista não encontrado.' });
+      throw notFoundError('Perfil de Artista', conta.id_artista);
     }
 
     // Atualizar ContaGlobal
@@ -145,7 +145,9 @@ export const deleteArtist = async (req, res, next) => {
     const { id } = req.params;
     const conta = await ContaGlobal.findOne({ where: { id_conta: id, tipo: 'artista' } });
     
-    if (!conta) return res.status(404).json({ message: 'Artista não encontrado.' });
+    if (!conta) {
+      throw notFoundError('Artista', id);
+    }
 
     // Destruir Artista primeiro, depois a Conta (ou a BD faz cascade se configurado, mas vamos forçar)
     const idArtista = conta.id_artista;
@@ -155,62 +157,6 @@ export const deleteArtist = async (req, res, next) => {
     }
 
     return res.status(200).json({ message: 'Artista removido com sucesso!' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// 6. Seguir um artista
-export const followArtist = async (req, res, next) => {
-  try {
-    const { artistId } = req.params; // ID do Artista (ContaGlobal do Artista)
-    const { id_conta } = req.body;   // ID da Conta que vai seguir o artista (Idealmente viria do token de Auth)
-
-    if (!id_conta) return res.status(400).json({ message: 'id_conta é obrigatório no corpo do pedido.' });
-
-    const conta = await ContaGlobal.findByPk(id_conta);
-    if (!conta) return res.status(404).json({ message: 'Conta de utilizador não encontrada.' });
-
-    const contaArtista = await ContaGlobal.findOne({ where: { id_conta: artistId, tipo: 'artista' } });
-    if (!contaArtista || !contaArtista.id_artista) return res.status(404).json({ message: 'Artista não encontrado.' });
-
-    const jaSegue = await Seguidor.findOne({
-      where: { id_conta: id_conta, id_artista: contaArtista.id_artista }
-    });
-    if (jaSegue) return res.status(400).json({ message: 'Já segues este artista.' });
-
-    await Seguidor.create({
-      id_conta: id_conta,
-      id_artista: contaArtista.id_artista,
-      data_inicio: new Date()
-    });
-
-    return res.status(201).json({ message: 'Passaste a seguir o artista com sucesso!' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// 7. Deixar de seguir um artista
-export const unfollowArtist = async (req, res, next) => {
-  try {
-    const { artistId } = req.params;
-    const { id_conta } = req.body;
-
-    if (!id_conta) return res.status(400).json({ message: 'id_conta é obrigatório no corpo do pedido.' });
-
-    const contaArtista = await ContaGlobal.findOne({ where: { id_conta: artistId, tipo: 'artista' } });
-    if (!contaArtista || !contaArtista.id_artista) return res.status(404).json({ message: 'Artista não encontrado.' });
-
-    const segue = await Seguidor.findOne({
-      where: { id_conta: id_conta, id_artista: contaArtista.id_artista }
-    });
-
-    if (!segue) return res.status(400).json({ message: 'Não segues este artista.' });
-
-    await segue.destroy();
-
-    return res.status(200).json({ message: 'Deixaste de seguir o artista com sucesso!' });
   } catch (error) {
     next(error);
   }
