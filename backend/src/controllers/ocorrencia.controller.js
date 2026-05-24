@@ -159,7 +159,7 @@ export const deleteOcorrencia = async (req, res, next) => {
     await relatorio.destroy()
 
     return res.status(200).json({
-      message: 'Relatório de ocorrência eliminado com sucesso.',
+      message: `Relatório da ocorrência em ${relatorio.local_ocorrencia} eliminado com sucesso.`,
     })
   } catch (error) {
     next(error)

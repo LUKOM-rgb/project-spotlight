@@ -55,7 +55,7 @@ export const deleteCategoria = async (req, res, next) => {
 
     await categoria.destroy();
 
-    return res.status(200).json({ message: 'Categoria apagada com sucesso!' });
+    return res.status(200).json({ message: `Categoria ${categoria.nome_categoria} apagada com sucesso!` });
   } catch (error) {
     // Se houver erro de foreign key não detetado acima, é apanhado pelo global error handler
     next(error);

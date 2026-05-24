@@ -88,7 +88,7 @@ export const unfollowArtist = async (req, res, next) => {
 
     await segue.destroy();
 
-    return res.status(200).json({ message: 'Deixaste de seguir o artista com sucesso!' });
+    return res.status(200).json({ message: `Deixaste de seguir o artista ${contaArtista.nome_utilizador} com sucesso!` });
   } catch (error) {
     next(error);
   }

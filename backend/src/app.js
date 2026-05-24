@@ -11,7 +11,7 @@ import sequelize from './config/database.js'
 import relatorios from './routes/ocorrencia.routes.js'
 import spots from './routes/Spot.routes.js'
 import reservas from './routes/Reservas.routes.js'
-import authRoutes from './routes/auth.routes.js'
+
 import userRoutes from './routes/user.routes.js'
 import artistaRoutes from './routes/artista.routes.js'
 import categoriaRoutes from './routes/categoria.routes.js'
@@ -35,7 +35,7 @@ app.use('/api/reservas', reservas)
 app.use('/api/artistas', artistaRoutes)
 app.use('/api/categorias', categoriaRoutes)
 app.use('/api/followers', followerRoutes)
-app.use('/api', authRoutes)
+
 app.use('/api/users', userRoutes)
 
 // Rota base de teste rápido para verificar no browser ou Postman se a API está online

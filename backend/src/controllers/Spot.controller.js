@@ -88,7 +88,7 @@ export const deleteSpotById = async (req, res) => {
     await spot.destroy()
 
     return res.status(200).json({
-      message: 'Spot eliminado com sucesso.',
+      message: `Spot em ${spot.localizacao} eliminado com sucesso.`,
     })
   } catch (error) {
     console.error('Error deleting spot:', error)

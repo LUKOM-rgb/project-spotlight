@@ -5,7 +5,7 @@ import ContaGlobal from '../Models/ContaGlobal.js';
 import Categoria from '../Models/Categorias.js';
 import { Op } from 'sequelize';
 import { notFoundError, validationError, conflictError } from '../utilis/error.utils.js';
-
+import { hashPassword } from '../utilis/auth.utils.js';
 // 1. Mostrar todos os utilizadores (Com filtros)
 export const getAllUsers = async (req, res, next) => {
   try {
@@ -46,23 +46,47 @@ export const getUserById = async (req, res, next) => {
   }
 };
 
-// 3. Mudar dados básicos do utilizador
-export const updateUser = async (req, res, next) => {
+// 3. Mudar dados do próprio perfil (PATCH /me)
+export const updateProfile = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { nome_utilizador, numero_telemovel } = req.body;
+    const id = req.user.sub;
+    const { email, password, nome_utilizador, numero_telemovel } = req.body;
 
     const conta = await ContaGlobal.findByPk(id);
     if (!conta) {
       throw notFoundError('Utilizador', id);
     }
 
+    // Verificar se o novo email já está em uso por outra conta
+    if (email && email !== conta.email) {
+      const emailExistente = await ContaGlobal.findOne({ where: { email } });
+      if (emailExistente) {
+        throw conflictError('Este email já está associado a outra conta.');
+      }
+    }
+
+    // Hash da nova password, caso seja fornecida
+    let novaPasswordHashed = conta.password;
+    if (password) {
+      if (password.length < 6) {
+        throw validationError({ password: ['A password deve ter pelo menos 6 caracteres.'] });
+      }
+      novaPasswordHashed = await hashPassword(password);
+    }
+
     await conta.update({
+      email: email || conta.email,
+      password: novaPasswordHashed,
       nome_utilizador: nome_utilizador || conta.nome_utilizador,
       numero_telemovel: numero_telemovel !== undefined ? numero_telemovel : conta.numero_telemovel
     });
 
-    return res.status(200).json({ message: 'Dados atualizados com sucesso!', conta });
+    return res.status(200).json({ message: 'Perfil atualizado com sucesso!', conta: {
+      id_conta: conta.id_conta,
+      email: conta.email,
+      nome_utilizador: conta.nome_utilizador,
+      numero_telemovel: conta.numero_telemovel
+    }});
   } catch (error) {
     next(error);
   }
@@ -79,7 +103,7 @@ export const deleteUser = async (req, res, next) => {
     }
 
     await conta.destroy();
-    return res.status(200).json({ message: 'Conta removida com sucesso!' });
+    return res.status(200).json({ message: `Conta ${conta.email} removida com sucesso!` });
   } catch (error) {
     next(error);
   }

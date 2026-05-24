@@ -119,7 +119,7 @@ export const deleteReservaById = async (req, res) => {
     await reserva.destroy()
 
     return res.status(200).json({
-      message: 'Reserva eliminada com sucesso.',
+      message: `Reserva do dia ${reserva.data_evento} eliminada com sucesso.`,
     })
   } catch (error) {
     console.error('Error deleting reserva:', error)

@@ -156,7 +156,7 @@ export const deleteArtist = async (req, res, next) => {
       await Artista.destroy({ where: { id_artista: idArtista } });
     }
 
-    return res.status(200).json({ message: 'Artista removido com sucesso!' });
+    return res.status(200).json({ message: `Artista ${conta.nome_utilizador} removido com sucesso!` });
   } catch (error) {
     next(error);
   }
