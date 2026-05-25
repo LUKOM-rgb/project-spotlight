@@ -9,7 +9,7 @@ const Ocorrencia = sequelize.define(
       autoIncrement: true,
     },
     data_ocorrencia: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     hora_ocorrencia: {

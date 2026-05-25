@@ -66,28 +66,68 @@ export const getReservasByArtistaId = async (req, res) => {
 export const updateReservaById = async (req, res) => {
   try {
     const { id } = req.params
-    const { data_evento, hora_inicio, hora_final } = req.body
-
+    const { data_evento, hora_inicio, hora_fim } = req.body
     const reserva = await Reservas.findByPk(id)
-
     if (!reserva) {
       return res.status(404).json({ message: 'Reserva não encontrada.' })
     }
-    const dataHoraReserva = new Date(`${reserva.data_evento}T${reserva.hora_inicio}`)
-
-    const vinteQuatroHorasAntes = new Date(dataHoraReserva.getTime() - 24 * 60 * 60 * 1000)
-
+    // 24 horas antes
+    const originalDateTime = new Date(
+      `${reserva.data_evento}T${reserva.hora_inicio}`
+    )
+    const vinteQuatroHorasAntes = new Date(
+      originalDateTime.getTime() - 24 * 60 * 60 * 1000
+    )
     const agora = new Date()
-
     if (agora > vinteQuatroHorasAntes) {
-      return res.status(400).json({ message: 'Não é possível atualizar a reserva com menos de 24 horas de antecedência.' })
+      return res.status(400).json({
+        message:
+          'Não é possível atualizar a reserva com menos de 24 horas de antecedência.',
+      })
     }
-    reserva.data_evento = data_evento || reserva.data_evento
-    reserva.hora_inicio = hora_inicio || reserva.hora_inicio
-    reserva.hora_final = hora_final || reserva.hora_final
+    const novaData = data_evento || reserva.data_evento
+    const novoInicio = hora_inicio || reserva.hora_inicio
+    const novoFim = hora_fim || reserva.hora_fim
 
+    const toMinutes = (time) => {
+      const [h, m] = time.split(':').map(Number)
+      return h * 60 + m
+    }
+    const start = toMinutes(novoInicio)
+    const end = toMinutes(novoFim)
+    if (start >= end) {
+      return res.status(400).json({
+        message: 'hora_inicio tem de ser antes de hora_fim',
+      })
+    }
+    if (end - start > 120 || end - start < 30) {
+      return res.status(400).json({
+        message: 'A reserva não pode exceder 2 horas de duração e deve ter no mínimo 30 minutos de duração.',
+      })
+    }
+    const reservasExistentes = await Reservas.findAll({
+      where: {
+        id_spot: reserva.id_spot,
+        data_evento: novaData,
+      },
+    })
+// Não se pode sobrepor com outras
+    for (const r of reservasExistentes) {
+      if (r.id_reserva === reserva.id_reserva) continue
+      const inicioExistente = toMinutes(r.hora_inicio)
+      const fimExistente = toMinutes(r.hora_fim)
+      const overlap =
+        start < fimExistente && end > inicioExistente
+      if (overlap) {
+        return res.status(400).json({
+          message: 'Já existe uma reserva neste horário.',
+        })
+      }
+    }
+    reserva.data_evento = novaData
+    reserva.hora_inicio = novoInicio
+    reserva.hora_fim = novoFim
     await reserva.save()
-
     return res.status(200).json({
       message: 'Reserva atualizada com sucesso.',
       data: reserva,
@@ -107,22 +147,53 @@ export const deleteReservaById = async (req, res) => {
     if (!reserva) {
       return res.status(404).json({ message: 'Reserva não encontrada.' })
     }
-    const dataHoraReserva = new Date(`${reserva.data_evento}T${reserva.hora_inicio}`)
-
-    const vinteQuatroHorasAntes = new Date(dataHoraReserva.getTime() - 24 * 60 * 60 * 1000)
 
     const agora = new Date()
 
+    // data_evento já é string YYYY-MM-DD
+    const data = reserva.data_evento
+
+    const dataHoraReserva = new Date(`${data}T${reserva.hora_inicio}`)
+
+    const vinteQuatroHorasAntes = new Date(
+      dataHoraReserva.getTime() - 24 * 60 * 60 * 1000
+    )
+
     if (agora > vinteQuatroHorasAntes) {
-      return res.status(400).json({ message: 'Não é possível eliminar a reserva com menos de 24 horas de antecedência.' })
+      return res.status(400).json({
+        message:
+          'Não é possível eliminar a reserva com menos de 24 horas de antecedência.',
+      })
     }
+
     await reserva.destroy()
 
     return res.status(200).json({
-      message: `Reserva do dia ${reserva.data_evento} eliminada com sucesso.`,
+      message: 'Reserva eliminada com sucesso.',
     })
   } catch (error) {
     console.error('Error deleting reserva:', error)
-    return res.status(500).json({ error: 'Failed to delete reserva' })
+    return res.status(500).json({ error: error.message })
+  }
+}
+export const getreservasBySpotIdAndDate = async (req, res) => {
+  try {
+    const { spotId, date } = req.params
+
+    const reservas = await Reservas.findAll({
+      where: {
+        id_spot: spotId,
+        data_evento: date,
+      },
+      order: [['hora_inicio', 'ASC']],
+    })
+
+    return res.status(200).json({
+      message: 'Reservas obtidas com sucesso.',
+      data: reservas,
+    })
+  } catch (error) {
+    console.error('Error fetching reservas by spot ID and date:', error)
+    return res.status(500).json({ error: 'Failed to fetch reservas' })
   }
 }
