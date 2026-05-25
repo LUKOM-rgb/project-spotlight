@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Bar } from 'vue-chartjs'
-import { watch,onMounted,computed} from 'vue'
+import { watch, onMounted, computed } from 'vue'
 
 import {
   Chart as ChartJS,
@@ -21,6 +21,9 @@ ChartJS.register(
   CategoryScale,
   LinearScale
 )
+const props = defineProps({
+  selectedSpotId: Number
+})
 const toHours = (time) => {
   const [h, m] = time.split(':').map(Number)
   return h + m / 60
@@ -31,14 +34,14 @@ const formatHours = (value) => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 const selectedDate = ref('')
-const openTime=ref('')
-const closeTime=ref('')
-
+const openTime = ref('')
+const closeTime = ref('')
+console.log('selected spot id in chart', props.selectedSpotId)
 async function getReservations() {
-  if (!selectedDate.value) return
+  if (!selectedDate.value || !props.selectedSpotId) return
 
   const res = await fetch(
-    `http://localhost:3000/api/reservas/spot/3/date/${selectedDate.value}`
+    `http://localhost:3000/api/reservas/spot/${props.selectedSpotId}/date/${selectedDate.value}`
   )
 
   const result = await res.json()
@@ -59,20 +62,30 @@ async function getReservations() {
     ],
   }
 }
-watch(selectedDate, getReservations)
+watch(
+  [() => props.selectedSpotId, selectedDate],
+  ([id, date]) => {
+    if (!id || !date) return
+    fetchSpotData()
+    getReservations()
+  },
+  { immediate: true }
+)
 const chartData = ref({
-  labels: ['Spot 3'],
+  labels: [''],
   datasets: [],
 })
 onMounted(() => {
-  fetchSpotData()
+  selectedDate.value = new Date().toISOString().split('T')[0]
 })
 async function fetchSpotData() {
-  const res = await fetch('http://localhost:3000/api/spots/3')
+  if (!props.selectedSpotId) return
+  const res = await fetch(
+    `http://localhost:3000/api/spots/${props.selectedSpotId}`
+  )
   const spot = await res.json()
   openTime.value = toHours(spot.data.abertura)
   closeTime.value = toHours(spot.data.fecho)
-  console.log(openTime.value, closeTime.value)
 }
 
 const chartOptions = computed(() => ({
@@ -82,8 +95,8 @@ const chartOptions = computed(() => ({
 
   scales: {
     x: {
-      min: openTime.value-1 ?? 0,
-      max: closeTime.value+1 ?? 24,
+      min: openTime.value - 1 ?? 0,
+      max: closeTime.value + 1 ?? 24,
 
       ticks: {
         stepSize: 1,
@@ -107,12 +120,15 @@ const chartOptions = computed(() => ({
 </script>
 
 <template>
-  <div>
-    <input type="date" v-model="selectedDate" />
+  <div v-if="props.selectedSpotId">
+    <div>
+      <input type="date" v-model="selectedDate" />
+    </div>
+    <div class="chart-wrapper">
+      <Bar :data="chartData" :options="chartOptions" />
+    </div>
   </div>
-  <div class="chart-wrapper">
-    <Bar :data="chartData" :options="chartOptions" />
-  </div>
+
 </template>
 <style scoped>
 .chart-wrapper {

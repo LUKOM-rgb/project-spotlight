@@ -23,10 +23,9 @@ const navItems = [
   {
     icon: mdiAccountCircle,
     label: 'Perfil',
-    action: () => router.push('/src/views/ProfileView.vue'),
+    action: () => router.push('/Profile'),
   },
   { icon: mdiAccountGroup, label: 'Comunidade', action: () => router.push('/tables') },
-  { icon: mdiEmail, label: 'Mensagens', action: () => router.push('/forms') },
   { icon: mdiMusicNote, label: 'Música', action: () => router.push('/') },
   { icon: mdiThemeLightDark, label: 'Modo', action: toggleDarkMode },
 ]
@@ -46,7 +45,7 @@ const logout = () => {
           src="/src/img/Logo.png"
           alt="Logo"
           class="h-8 w-auto cursor-pointer object-contain"
-          @click="router.push('/dashboard')"
+          @click="router.push('/')"
         />
         <div class="flex items-center gap-4">
           <BaseIcon

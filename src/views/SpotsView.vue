@@ -7,7 +7,7 @@ import {
   mdiClock,
 } from '@mdi/js'
 import ReservationChart from '@/components/ReservationChart.vue'
-
+import Navbar from '@/components/NavBar.vue'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
 import BaseButton from '@/components/BaseButton.vue'
@@ -80,15 +80,15 @@ onMounted(async () => {
     const marker = L.marker([lat, lng], {
       icon: defaultIcon,
     }).addTo(map)
-    markers.set(spot.id, marker)
+    markers.set(spot.id_spot, marker)
     marker.on('click', () => {
       selectSpot(spot)
-      selectedSpotId.value = spot.id
-      // reset previous active marker
+
+      selectedSpotId.value = spot.id_spot
       if (activeMarker) {
         activeMarker.setIcon(defaultIcon)
       }
-      // set new active marker
+      
       marker.setIcon(activeIcon)
       activeMarker = marker
     })
@@ -116,6 +116,7 @@ const getSpotStatus = (spot) => {
 
 <template>
   <SectionMain class="min-h-screen bg-[#f5f0e6]">
+    <Navbar />
 
     <!-- FILTERS -->
     <div class="mb-4 flex items-center gap-4">
@@ -174,7 +175,8 @@ const getSpotStatus = (spot) => {
 
             <div class="flex items-center gap-3">
               <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8e0d0]">
-                <BaseIcon v-if="getSpotStatus(selectedSpot) === 'open'" :path="mdiClock" size="16" class="text-green-600" />
+                <BaseIcon v-if="getSpotStatus(selectedSpot) === 'open'" :path="mdiClock" size="16"
+                  class="text-green-600" />
                 <BaseIcon v-else :path="mdiClock" size="16" class="text-red-400" />
               </div>
               <p class="text-sm text-gray-700">
@@ -185,19 +187,15 @@ const getSpotStatus = (spot) => {
 
           </div>
 
-          <div class="p-4 pt-0">
-            <BaseButton label="Reserve" class="w-full rounded-lg bg-[#40798C] text-black hover:bg-[#0B2027]"
-              :disabled="getSpotStatus(selectedSpot) === 'closed'" @click="reserveSpot" />
-          </div>
         </CardBox>
       </transition>
     </div>
     <br>
     <div>
-      <ReservationChart />
+      <ReservationChart :selectedSpotId="selectedSpotId" />
     </div>
 
-  </SectionMain>
+  </SectionMain  />
 
 </template>
 

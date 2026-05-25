@@ -1,23 +1,14 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
-import Style from '@/views/StyleView.vue'
+import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/HomeView.vue'
 
 const routes = [
+
   {
-    meta: {
-      title: 'Select style',
-    },
-    path: '/',
-    name: 'style',
-    component: Style,
-  },
-  {
-    // Document title tag
-    // We combine it with defaultDocumentTitle set in `src/main.js` on router.afterEach hook
+
     meta: {
       title: 'Dashboard',
     },
-    path: '/dashboard',
+    path: '/',
     name: 'dashboard',
     component: Home,
   },
@@ -57,7 +48,7 @@ const routes = [
     meta: {
       title: 'Spots',
     },
-    patch: '/spots',
+    path: '/spots',
     name: 'spots',
     component: () => import('@/views/SpotsView.vue'),
   },
@@ -96,7 +87,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { top: 0 }
