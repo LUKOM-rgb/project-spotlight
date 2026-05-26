@@ -43,7 +43,14 @@ async function getReservations() {
   const res = await fetch(
     `http://localhost:3000/api/reservas/spot/${props.selectedSpotId}/?date=${selectedDate.value}`
   )
-
+  // Nao tem reservas nesse dia, e da erro do json
+  if (res.status === 204) {
+    chartData.value = {
+      labels: [''],
+      datasets: [],
+    }
+    return
+  }
   const result = await res.json()
   const reservations = result.data || []
 

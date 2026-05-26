@@ -38,7 +38,7 @@ export const getReservasBySpotId = async (req, res) => {
         (reserva) => reserva.data_evento === date
       )
       if (reservasFiltradas.length === 0) {
-        return res.status(404).json({ message: 'Nenhuma reserva encontrada para este spot e data.' })
+        return res.status(204).json({ message: 'Nenhuma reserva encontrada para este spot e data.' })
       }
       return res.status(200).json({
         message: 'Reservas obtidas com sucesso.',
