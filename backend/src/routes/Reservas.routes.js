@@ -15,7 +15,6 @@ router.get('/:id', getReservaById)
 router.get('/spot/:spotId', getReservasBySpotId)
 router.get('/artista/:artistaId', getReservasByArtistaId)
 router.delete('/:id', deleteReservaById)
-router.get('/spot/:spotId/date/:date', getreservasBySpotIdAndDate)
 router.patch('/:id', updateReservaById)
 
 export default router

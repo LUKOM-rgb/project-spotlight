@@ -31,8 +31,20 @@ export const getReservaById = async (req, res) => {
 export const getReservasBySpotId = async (req, res) => {
   try {
     const { spotId } = req.params
+    const date = req.query.date
     const reservas = await Reservas.findAll({ where: { id_spot: spotId } })
-
+    if (date) {
+      const reservasFiltradas = reservas.filter(
+        (reserva) => reserva.data_evento === date
+      )
+      if (reservasFiltradas.length === 0) {
+        return res.status(404).json({ message: 'Nenhuma reserva encontrada para este spot e data.' })
+      }
+      return res.status(200).json({
+        message: 'Reservas obtidas com sucesso.',
+        data: reservasFiltradas,
+      })
+    }
     if (reservas.length === 0) {
       return res.status(404).json({ message: 'Nenhuma reserva encontrada para este spot.' })
     }
@@ -174,26 +186,5 @@ export const deleteReservaById = async (req, res) => {
   } catch (error) {
     console.error('Error deleting reserva:', error)
     return res.status(500).json({ error: error.message })
-  }
-}
-export const getreservasBySpotIdAndDate = async (req, res) => {
-  try {
-    const { spotId, date } = req.params
-
-    const reservas = await Reservas.findAll({
-      where: {
-        id_spot: spotId,
-        data_evento: date,
-      },
-      order: [['hora_inicio', 'ASC']],
-    })
-
-    return res.status(200).json({
-      message: 'Reservas obtidas com sucesso.',
-      data: reservas,
-    })
-  } catch (error) {
-    console.error('Error fetching reservas by spot ID and date:', error)
-    return res.status(500).json({ error: 'Failed to fetch reservas' })
   }
 }
