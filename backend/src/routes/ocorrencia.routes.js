@@ -15,7 +15,7 @@ const router = express.Router()
 router.post('/', verifyToken, isAdmin, createOcorrencia)
 router.get('/', verifyToken, isAdmin, getAllOcorrencias)
 router.get('/:id', verifyToken, isAdmin, getOcorrenciaById)
-router.patch('/:id/estado', verifyToken, isAdmin, updateEstadoOcorrencia)
+router.patch('/:id/', verifyToken, isAdmin, updateEstadoOcorrencia)
 router.delete('/:id', verifyToken, isAdmin, deleteOcorrencia)
 
 export default router
