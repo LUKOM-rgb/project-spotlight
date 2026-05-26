@@ -41,7 +41,7 @@ async function getReservations() {
   if (!selectedDate.value || !props.selectedSpotId) return
 
   const res = await fetch(
-    `http://localhost:3000/api/reservas/spot/${props.selectedSpotId}/date/${selectedDate.value}`
+    `http://localhost:3000/api/reservas/spot/${props.selectedSpotId}/?date=${selectedDate.value}`
   )
 
   const result = await res.json()
