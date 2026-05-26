@@ -23,9 +23,6 @@ const Seguidor = sequelize.define(
   },
 )
 Seguidor.associate = (models) => {
-  Seguidor.belongsTo(models.Utilizador, {
-    foreignKey: 'id_conta',
-  })
   Seguidor.belongsTo(models.Artista, {
     foreignKey: 'id_artista',
   })

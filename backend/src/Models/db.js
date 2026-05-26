@@ -3,7 +3,6 @@ import { Sequelize } from 'sequelize'
 
 // models/db.js
 
-import Utilizador from './Utilizador.js'
 import Artista from './Artista.js'
 import Conta_global from './ContaGlobal.js'
 import Categoria from './Categorias.js'
@@ -14,7 +13,6 @@ import Reserva from './Reservas.js'
 const db = {
   sequelize,
   Sequelize,
-  Utilizador,
   Artista,
   Conta_global,
   Categoria,

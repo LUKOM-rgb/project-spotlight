@@ -112,11 +112,11 @@ export const createReserva = async (req, res) => {
     const end = toMinutes(hora_fim)
     // hora de inicio tem que ser antes da hora de fim e a reserva n pode ter mais que 2 horas de duração
     if (start >= end) {
-      return res.status(400).json({
+      return res.status(409).json({
         message: 'hora_inicio tem de ser antes de hora_fim',
       })
     } else if (end - start > 120) {
-      return res.status(400).json({
+      return res.status(409).json({
         message: 'A reserva não pode exceder 2 horas de duração.',
       })
     }

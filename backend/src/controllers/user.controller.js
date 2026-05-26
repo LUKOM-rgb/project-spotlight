@@ -1,4 +1,3 @@
-import Utilizador from '../Models/Utilizador.js';
 import Artista from '../Models/Artista.js';
 import Seguidor from '../Models/Seguidor.js';
 import ContaGlobal from '../Models/ContaGlobal.js';
@@ -97,7 +96,7 @@ export const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
     const conta = await ContaGlobal.findByPk(id);
-    
+
     if (!conta) {
       throw notFoundError('Utilizador', id);
     }
@@ -167,4 +166,4 @@ export const changeUserRole = async (req, res, next) => {
     next(error);
   }
 };
-
+

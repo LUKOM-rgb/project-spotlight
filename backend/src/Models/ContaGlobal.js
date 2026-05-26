@@ -48,9 +48,6 @@ Conta_global.associate = (models) => {
   Conta_global.belongsTo(models.Artista, {
     foreignKey: 'id_artista',
   })
-  Conta_global.belongsTo(models.Utilizador, {
-    foreignKey: 'id_conta',
-  })
   Conta_global.hasMany(models.Ocorrencia, {
     foreignKey: 'id_conta',
   })
