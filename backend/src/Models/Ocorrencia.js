@@ -12,6 +12,10 @@ const Ocorrencia = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    data_envio: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
     hora_ocorrencia: {
       type: DataTypes.TIME,
       allowNull: false,
