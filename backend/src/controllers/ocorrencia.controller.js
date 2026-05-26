@@ -3,24 +3,12 @@ import ContaGlobal from '../Models/ContaGlobal.js'
 import Spot from '../Models/Spot.js'
 import {
   validationError,
-  unauthorizedError,
-  forbiddenError,
   notFoundError,
 } from '../utilis/error.utils.js'
 
 // POST /relatorios - Criar nova ocorrência
 export const createOcorrencia = async (req, res, next) => {
   try {
-    // 401 Unauthorized: verificar se o utilizador está autenticado
-    if (!req.user) {
-      throw unauthorizedError('Autenticação necessária. Token em falta.')
-    }
-
-    // 403 Forbidden: verificar se o utilizador é admin
-    if (req.user.role !== 'admin') {
-      throw forbiddenError('Acesso recusado. Apenas administradores podem criar ocorrências.')
-    }
-
     const {
       data_ocorrencia,
       hora_ocorrencia,
@@ -73,16 +61,6 @@ export const createOcorrencia = async (req, res, next) => {
 // GET /relatorios - Obter todas as ocorrências
 export const getAllOcorrencias = async (req, res, next) => {
   try {
-    // 401 Unauthorized: verificar se o utilizador está autenticado
-    if (!req.user) {
-      throw unauthorizedError('Autenticação necessária. Token em falta.')
-    }
-
-    // 403 Forbidden: verificar se o utilizador é admin
-    if (req.user.role !== 'admin') {
-      throw forbiddenError('Acesso recusado. Apenas administradores podem consultar ocorrências.')
-    }
-
     // Podes ler parâmetros da query (ex: /relatorios?estado=Pendente)
     const { estado, id_spot } = req.query
     const whereClause = {}
@@ -106,16 +84,6 @@ export const getAllOcorrencias = async (req, res, next) => {
 // GET /relatorios/:id - Obter uma ocorrência específica
 export const getOcorrenciaById = async (req, res, next) => {
   try {
-    // 401 Unauthorized: verificar se o utilizador está autenticado
-    if (!req.user) {
-      throw unauthorizedError('Autenticação necessária. Token em falta.')
-    }
-
-    // 403 Forbidden: verificar se o utilizador é admin
-    if (req.user.role !== 'admin') {
-      throw forbiddenError('Acesso recusado. Apenas administradores podem consultar ocorrências.')
-    }
-
     const { id } = req.params
 
     const relatorio = await RelatorioOcorrencia.findByPk(id)
@@ -136,16 +104,6 @@ export const getOcorrenciaById = async (req, res, next) => {
 // PATCH /relatorios/:id/estado - Atualizar o estado da ocorrência
 export const updateEstadoOcorrencia = async (req, res, next) => {
   try {
-    // 401 Unauthorized: verificar se o utilizador está autenticado
-    if (!req.user) {
-      throw unauthorizedError('Autenticação necessária. Token em falta.')
-    }
-
-    // 403 Forbidden: verificar se o utilizador é admin
-    if (req.user.role !== 'admin') {
-      throw forbiddenError('Acesso recusado. Apenas administradores podem alterar o estado de ocorrências.')
-    }
-
     const { id } = req.params
     const { estado } = req.body
 
@@ -177,16 +135,6 @@ export const updateEstadoOcorrencia = async (req, res, next) => {
 // DELETE /relatorios/:id - Eliminar uma ocorrência
 export const deleteOcorrencia = async (req, res, next) => {
   try {
-    // 401 Unauthorized: verificar se o utilizador está autenticado
-    if (!req.user) {
-      throw unauthorizedError('Autenticação necessária. Token em falta.')
-    }
-
-    // 403 Forbidden: verificar se o utilizador é admin
-    if (req.user.role !== 'admin') {
-      throw forbiddenError('Acesso recusado. Apenas administradores podem eliminar ocorrências.')
-    }
-
     const { id } = req.params
 
     const relatorio = await RelatorioOcorrencia.findByPk(id)
