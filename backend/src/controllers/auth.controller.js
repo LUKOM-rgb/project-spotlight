@@ -1,5 +1,4 @@
 import ContaGlobal from '../Models/ContaGlobal.js'
-import Utilizador from '../Models/Utilizador.js'
 import { hashPassword, comparePassword, generateToken } from '../utilis/auth.utils.js'
 import { validationError, unauthorizedError, conflictError } from '../utilis/error.utils.js'
 

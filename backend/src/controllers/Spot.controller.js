@@ -110,14 +110,28 @@ export const createReserva = async (req, res) => {
     }
     const start = toMinutes(hora_inicio)
     const end = toMinutes(hora_fim)
-    // hora de inicio tem que ser antes da hora de fim e a reserva n pode ter mais que 2 horas de duração
-    if (start >= end) {
+    // 24 horas antes
+    const diaAntesHora = new Date(`${data_evento}T${hora_inicio}`)
+    const vinteQuatroHorasAntes = new Date(
+      diaAntesHora.getTime() - 24 * 60 * 60 * 1000
+    )
+    const agora = new Date()
+    if (agora > vinteQuatroHorasAntes) {
       return res.status(400).json({
+        message:
+          'Não é possível criar a reserva com menos de 24 horas de antecedência.',
+      })
+    }
+    // hora de inicio tem que ser antes da hora de fim e a reserva n pode ter mais que 2 horas de duração
+
+    if(start)
+    if (start >= end) {
+      return res.status(409).json({
         message: 'hora_inicio tem de ser antes de hora_fim',
       })
-    } else if (end - start > 120) {
-      return res.status(400).json({
-        message: 'A reserva não pode exceder 2 horas de duração.',
+    } else if (end - start > 120 || end - start < 30) {
+      return res.status(409).json({
+        message: 'A reserva não pode ter menos que 30 minutos ou mais que 2 horas de duração.',
       })
     }
     const reservasExistentes = await Reservas.findAll({
