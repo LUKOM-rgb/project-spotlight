@@ -26,6 +26,22 @@ export const createOcorrencia = async (req, res, next) => {
     if (!id_conta) errors.id_conta = ['O ID da conta é obrigatório.']
     if (!id_spot) errors.id_spot = ['O ID do spot é obrigatório.']
 
+    // Validar se a data de ocorrência não é no futuro (no máximo o dia de hoje)
+    if (data_ocorrencia) {
+      const dataInserida = new Date(data_ocorrencia)
+      if (isNaN(dataInserida.getTime())) {
+        errors.data_ocorrencia = ['A data da ocorrência fornecida é inválida.']
+      } else {
+        const hoje = new Date()
+        const dataInseridaSemHora = new Date(dataInserida.getFullYear(), dataInserida.getMonth(), dataInserida.getDate())
+        const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
+
+        if (dataInseridaSemHora > hojeSemHora) {
+          errors.data_ocorrencia = ['Data de ocorrência inválida.']
+        }
+      }
+    }
+
     if (Object.keys(errors).length > 0) {
       throw validationError(errors)
     }
