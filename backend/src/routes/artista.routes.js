@@ -14,7 +14,7 @@ const router = express.Router();
 router.post('/', createArtist);                                // Criar novo artista
 router.get('/', getAllArtists);                                // Listar todos os artistas
 router.get('/:id', getArtistById);                             // Info de um artista (Público)
-router.put('/:id', updateArtist);                              // Atualizar dados do artista
+router.patch('/:id', updateArtist);                              // Atualizar dados do artista
 router.delete('/:id', verifyToken, isAdmin, deleteArtist);     // Apagar artista (Admin)
 
 export default router;
