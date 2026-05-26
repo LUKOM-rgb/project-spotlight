@@ -1,10 +1,7 @@
 import RelatorioOcorrencia from '../Models/Ocorrencia.js'
 import ContaGlobal from '../Models/ContaGlobal.js'
 import Spot from '../Models/Spot.js'
-import {
-  validationError,
-  notFoundError,
-} from '../utilis/error.utils.js'
+import { validationError, notFoundError } from '../utilis/error.utils.js'
 
 // POST /relatorios - Criar nova ocorrência
 export const createOcorrencia = async (req, res, next) => {
@@ -33,7 +30,11 @@ export const createOcorrencia = async (req, res, next) => {
         errors.data_ocorrencia = ['A data da ocorrência fornecida é inválida.']
       } else {
         const hoje = new Date()
-        const dataInseridaSemHora = new Date(dataInserida.getFullYear(), dataInserida.getMonth(), dataInserida.getDate())
+        const dataInseridaSemHora = new Date(
+          dataInserida.getFullYear(),
+          dataInserida.getMonth(),
+          dataInserida.getDate(),
+        )
         const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
 
         if (dataInseridaSemHora > hojeSemHora) {
@@ -56,6 +57,7 @@ export const createOcorrencia = async (req, res, next) => {
     // 3. Criar o relatório na base de dados
     const novoRelatorio = await RelatorioOcorrencia.create({
       data_ocorrencia: data_ocorrencia || new Date(),
+      data_envio: new Date(),
       hora_ocorrencia,
       local_ocorrencia,
       descricao_ocorrencia: descricao,
