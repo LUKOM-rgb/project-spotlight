@@ -8,7 +8,7 @@ import process from 'process'
 import sequelize from './config/database.js'
 
 // Importar as Rotas da API
-import relatorios from './routes/ocorrencia.routes.js'
+import ocorrencias from './routes/ocorrencia.routes.js'
 import spots from './routes/Spot.routes.js'
 import reservas from './routes/Reservas.routes.js'
 
@@ -29,7 +29,7 @@ app.use(cors())
 app.use(express.json()) // Permite ler o Body em formato JSON enviado pelos clientes/Postman
 
 // Registo de Rotas
-app.use('/api/relatorios', relatorios)
+app.use('/api/ocorrencias', ocorrencias)
 app.use('/api/spots', spots)
 app.use('/api/reservas', reservas)
 app.use('/api/artistas', artistaRoutes)

@@ -7,7 +7,6 @@ import {
   updateEstadoOcorrencia,
   deleteOcorrencia
 } from '../controllers/ocorrencia.controller.js'
-import { verifyToken, isAdmin } from '../middlewares/auth.middleware.js'
 
 const router = express.Router()
 
