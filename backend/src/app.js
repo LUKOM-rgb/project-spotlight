@@ -110,7 +110,7 @@ app.use((err, req, res, next) => {
 
 // Sincronização da Base de Dados e Inicialização do Servidor
 sequelize
-  .sync({ alter: true }) // Sincroniza tabelas na BD se houver alterações nos Modelos
+  .sync({ }) // Sincroniza tabelas na BD se houver alterações nos Modelos
   .then(() => {
     console.log('✔ Database sincronizada com sucesso.')
     app.listen(port, host, () => {
