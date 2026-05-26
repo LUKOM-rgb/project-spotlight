@@ -31,13 +31,13 @@ export const getSpotById = async (req, res) => {
 // - localizacao: string -longitude: decimal -latitude: decimal -abertura:time(00:00:00) -fecho:time(00:00:00)
 export const createSpot = async (req, res) => {
   try {
-    const {localizacao, longitude, latitude, abertura, fecho  } = req.body
-    const newSpot=await Spot.create({
+    const { localizacao, longitude, latitude, abertura, fecho } = req.body
+    const newSpot = await Spot.create({
       localizacao,
       longitude,
       latitude,
       abertura,
-      fecho
+      fecho,
     })
     res.status(201).json({
       message: 'Spot criado com sucesso!',
@@ -51,7 +51,7 @@ export const createSpot = async (req, res) => {
 export const updateSpot = async (req, res) => {
   try {
     const { id } = req.params
-    const {localizacao, longitude, latitude, abertura, fecho  } = req.body
+    const { localizacao, longitude, latitude, abertura, fecho } = req.body
 
     const spot = await Spot.findByPk(id)
 
@@ -99,19 +99,56 @@ export const deleteSpotById = async (req, res) => {
 export const createReserva = async (req, res) => {
   try {
     const { id } = req.params
-    const { data_evento, hora_inicio, hora_final, id_user } = req.body
+    const { data_evento, hora_inicio, hora_fim, id_artista } = req.body
     const spot = await Spot.findByPk(id)
-
     if (!spot) {
       return res.status(404).json({ message: 'Spot não encontrado.' })
     }
+    const toMinutes = (time) => {
+      const [h, m] = time.split(':').map(Number)
+      return h * 60 + m
+    }
+    const start = toMinutes(hora_inicio)
+    const end = toMinutes(hora_fim)
+    // hora de inicio tem que ser antes da hora de fim e a reserva n pode ter mais que 2 horas de duração
+    if (start >= end) {
+      return res.status(400).json({
+        message: 'hora_inicio tem de ser antes de hora_fim',
+      })
+    } else if (end - start > 120) {
+      return res.status(400).json({
+        message: 'A reserva não pode exceder 2 horas de duração.',
+      })
+    }
+    const reservasExistentes = await Reservas.findAll({
+      where: {
+        id_spot: id,
+        data_evento,
+      },
+    })
+    // Verifica se as reservas n se sobrepõem
+    for (const reserva of reservasExistentes) {
+      const reservaStart = toMinutes(reserva.hora_inicio)
+      const reservaEnd = toMinutes(reserva.hora_fim)
+      if (
+        (start >= reservaStart && start < reservaEnd) ||
+        (end > reservaStart && end <= reservaEnd) ||
+        (start <= reservaStart && end >= reservaEnd)
+      ) {
+        return res.status(400).json({
+          message: 'O horário escolhido já está reservado.',
+        })
+      }
+    }
+    const data_emissao = new Date()
 
     const novaReserva = await Reservas.create({
       data_evento,
       hora_inicio,
-      hora_final,
-      id_user,
-      id_spot: id
+      hora_fim,
+      data_emissao,
+      id_spot: id,
+      id_artista,
     })
 
     return res.status(201).json({

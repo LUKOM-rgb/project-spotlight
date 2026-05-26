@@ -63,7 +63,7 @@ const formatFollowers = (num) => {
             label="Pick a spot!"
             color=""
             class="w-fit rounded-lg border-none bg-[#40798C] text-white hover:bg-[#0B2027]"
-            href="SpotsView.vue"
+            href="Spots"
           />
         </div>
       </div>

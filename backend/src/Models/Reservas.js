@@ -25,11 +25,11 @@ const Reserva = sequelize.define(
       },
     },
     data_emissao: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     data_evento: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     hora_inicio: {

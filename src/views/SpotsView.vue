@@ -1,65 +1,58 @@
 <script setup>
-import { ref } from 'vue'
-import { onMounted } from 'vue'
-import { mdiMapMarker, mdiClose, mdiMapMarkerRadius, mdiClock, mdiAccountMultiple } from '@mdi/js'
+import { ref, onMounted, computed } from 'vue'
+import {
+  mdiMapMarker,
+  mdiClose,
+  mdiMapMarkerRadius,
+  mdiClock,
+} from '@mdi/js'
+import ReservationChart from '@/components/ReservationChart.vue'
+import Navbar from '@/components/NavBar.vue'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
+
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-// Dados dos spots no mapa
-const spots = ref([
-  {
-    id: 1,
-    name: 'Rua das Carmelitas 200',
-    description: 'Ponto de performance junto à Livraria Lello',
-    status: 'open',
-    hours: '9am - 8pm',
-    artistsToday: 3,
-    position: { top: '25%', left: '60%' },
-    images: [
-      'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=400&auto=format&fit=crop&q=60',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&auto=format&fit=crop&q=60',
-    ],
-  },
-  {
-    id: 2,
-    name: 'Praça dos Leões',
-    description: 'Espaço amplo para performances de rua',
-    status: 'open',
-    hours: '10am - 10pm',
-    artistsToday: 5,
-    position: { top: '45%', left: '35%' },
-    images: [
-      'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&auto=format&fit=crop&q=60',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&auto=format&fit=crop&q=60',
-    ],
-  },
-  {
-    id: 3,
-    name: 'Jardim da Cordoaria',
-    description: 'Zona verde ideal para música acústica',
-    status: 'closed',
-    hours: '8am - 6pm',
-    artistsToday: 0,
-    position: { top: '70%', left: '55%' },
-    images: [
-      'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=400&auto=format&fit=crop&q=60',
-      'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&auto=format&fit=crop&q=60',
-    ],
-  },
-])
+delete L.Icon.Default.prototype._getIconUrl
 
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl:
+    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl:
+    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+})
 const selectedSpot = ref(null)
 const showSidebar = ref(false)
 const activeFilter = ref('all')
+
+const markers = new Map()
+const selectedSpotId = ref(null)
+
+let activeMarker = null
 
 const filters = [
   { id: 'all', label: 'All' },
   { id: 'street', label: 'Street Music' },
 ]
+
+const defaultIcon = new L.Icon.Default()
+const activeIcon = L.icon({
+  iconUrl:
+    'data:image/svg+xml;charset=UTF-8,' +
+    encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
+        <path fill="#0B2027" d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5" fill="white"/>
+      </svg>
+    `),
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+})
 
 const selectSpot = (spot) => {
   selectedSpot.value = spot
@@ -71,27 +64,64 @@ const closeSidebar = () => {
   selectedSpot.value = null
 }
 
-const reserveSpot = () => {
-  if (selectedSpot.value) {
-    alert(`Reserva iniciada para: ${selectedSpot.value.name}`)
-    // Aqui implementarias a lógica de reserva
-  }
-}
-// Mapa
-onMounted(() => {
-  const map = L.map('map').setView([41.1579, -8.6291], 13)
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-  }).addTo(map)
+onMounted(async () => {
+  const map = L.map('map').setView([41.1579, -8.6291], 13)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', }).addTo(map)
+  const response = await fetch('http://localhost:3000/api/spots')
+  const spotsData = await response.json()
+  spotsData.forEach((spot) => {
+    const lat = Number(spot.latitude)
+    const lng = Number(spot.longitude)
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      console.warn('Invalid coords:', spot)
+      return
+    }
+    const marker = L.marker([lat, lng], {
+      icon: defaultIcon,
+    }).addTo(map)
+    markers.set(spot.id_spot, marker)
+    marker.on('click', () => {
+      selectSpot(spot)
+
+      selectedSpotId.value = spot.id_spot
+      if (activeMarker) {
+        activeMarker.setIcon(defaultIcon)
+      }
+      
+      marker.setIcon(activeIcon)
+      activeMarker = marker
+    })
+  })
 })
+
+const toMinutes = (time) => {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + m
+}
+const getSpotStatus = (spot) => {
+  const now = new Date()
+  const currentMinutes = now.getHours() * 60 + now.getMinutes()
+
+  const openingMinutes = toMinutes(spot.abertura)
+  const closingMinutes = toMinutes(spot.fecho)
+
+  return currentMinutes >= openingMinutes &&
+    currentMinutes <= closingMinutes
+    ? 'open'
+    : 'closed'
+}
+
 </script>
 
 <template>
   <SectionMain class="min-h-screen bg-[#f5f0e6]">
+    <Navbar />
 
+    <!-- FILTERS -->
     <div class="mb-4 flex items-center gap-4">
       <span class="text-sm text-gray-600">⚡ Spots</span>
+
       <div class="flex gap-2">
         <button v-for="filter in filters" :key="filter.id" :class="[
           'rounded-full px-4 py-1 text-sm transition-colors',
@@ -104,7 +134,9 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- MAP + SIDEBAR -->
     <div class="relative flex gap-4">
+
       <CardBox :class="[
         'overflow-hidden rounded-2xl transition-all duration-300',
         showSidebar ? 'flex-1' : 'w-full',
@@ -113,81 +145,61 @@ onMounted(() => {
       </CardBox>
 
       <transition name="slide">
+
         <CardBox v-if="showSidebar && selectedSpot" class="w-80 flex-shrink-0 overflow-hidden rounded-2xl bg-white">
+
           <div class="flex justify-end p-2">
-            <button
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+            <button class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200"
               @click="closeSidebar">
-              <BaseIcon :path="mdiClose" class="text-gray-500" size="18" />
+              <BaseIcon :path="mdiClose" size="18" class="text-gray-500" />
             </button>
           </div>
 
-          <div class="space-y-3 px-4">
-            <div v-for="(image, index) in selectedSpot.images" :key="index" class="h-32 rounded-xl bg-cover bg-center"
-              :style="{ backgroundImage: `url('${image}')` }">
-              <div v-if="index === 0" class="relative h-full">
-                <div class="absolute top-4 right-4">
-                  <div class="flex h-6 w-6 items-center justify-center rounded-full bg-red-500">
-                    <BaseIcon :path="mdiMapMarker" class="text-white" size="14" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div class="space-y-3 p-4">
+
             <div class="flex items-start gap-3">
-              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]">
-                <BaseIcon :path="mdiMapMarkerRadius" class="text-gray-600" size="16" />
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8e0d0]">
+                <BaseIcon :path="mdiMapMarkerRadius" size="16" class="text-gray-600" />
               </div>
+
               <div>
-                <p class="text-sm font-medium text-gray-700">{{ selectedSpot.name }}</p>
-                <p class="text-xs text-gray-500">{{ selectedSpot.description }}</p>
+                <p class="text-sm font-medium text-gray-700">
+                  {{ selectedSpot.localizacao }}
+                </p>
+                <p class="text-xs text-gray-500">
+                  {{ selectedSpot.latitude }}, {{ selectedSpot.longitude }}
+                </p>
               </div>
             </div>
 
+
             <div class="flex items-center gap-3">
-              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]">
-                <div :class="[
-                  'h-3 w-3 rounded-full',
-                  selectedSpot.status === 'open' ? 'bg-green-500' : 'bg-red-500',
-                ]"></div>
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8e0d0]">
+                <BaseIcon v-if="getSpotStatus(selectedSpot) === 'open'" :path="mdiClock" size="16"
+                  class="text-green-600" />
+                <BaseIcon v-else :path="mdiClock" size="16" class="text-red-400" />
               </div>
               <p class="text-sm text-gray-700">
-                {{ selectedSpot.status === 'open' ? 'Open' : 'Closed' }}
+                {{ getSpotStatus(selectedSpot) }}:
+                {{ selectedSpot.abertura }} - {{ selectedSpot.fecho }}
               </p>
             </div>
 
-            <div class="flex items-center gap-3">
-              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]">
-                <BaseIcon :path="mdiClock" class="text-gray-600" size="16" />
-              </div>
-              <p class="text-sm text-gray-700">{{ selectedSpot.hours }}</p>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8e0d0]">
-                <BaseIcon :path="mdiAccountMultiple" class="text-gray-600" size="16" />
-              </div>
-              <p class="text-sm text-gray-700">
-                {{ selectedSpot.artistsToday }} artists will play here
-              </p>
-            </div>
           </div>
 
-          <div class="p-4 pt-0">
-            <BaseButton label="Reserve" color=""
-              class="w-full rounded-lg border-none bg-[#40798C] text-white hover:bg-[#0B2027]"
-              :disabled="selectedSpot.status === 'closed'" @click="reserveSpot" />
-          </div>
         </CardBox>
       </transition>
     </div>
-  </SectionMain>
+    <br>
+    <div>
+      <ReservationChart :selectedSpotId="selectedSpotId" />
+    </div>
+
+  </SectionMain  />
+
 </template>
 
 <style scoped>
-/* Slide transition for sidebar */
 .slide-enter-active,
 .slide-leave-active {
   transition: all 0.3s ease;
@@ -197,19 +209,5 @@ onMounted(() => {
 .slide-leave-to {
   opacity: 0;
   transform: translateX(20px);
-}
-
-/* Pulse animation */
-@keyframes ping {
-
-  75%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.animate-ping {
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 </style>
