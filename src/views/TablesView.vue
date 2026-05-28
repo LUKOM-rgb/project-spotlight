@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import {
   mdiAccount,
   mdiClipboardText,
@@ -28,29 +28,26 @@ const reservations = reactive([
   { id: 9, name: 'Howell Hand', date: 'Mar 3, 2025 @ pending', status: 'pending' },
 ])
 
-const rapporteurItems = reactive([
-  {
-    id: 1,
-    name: 'Refined Soft Chicken',
-    date: '3 days ago',
-    avatar: '/src/img/Logo.png',
-    tags: ['music', 'live'],
-  },
-  {
-    id: 2,
-    name: 'Intelligent Metal Bacon',
-    date: '4 days ago',
-    avatar: '/src/img/Logo.png',
-    tags: ['music'],
-  },
-  {
-    id: 3,
-    name: 'Rustic Wooden Shoes',
-    date: '7 days ago',
-    avatar: '/src/img/Logo.png',
-    tags: ['music', 'live'],
-  },
-])
+const rapporteurItems = ref([])
+
+onMounted(async () => {
+  try {
+    const response = await fetch('http://localhost:3000/api/ocorrencias')
+    const result = await response.json()
+    if (result && result.data && Array.isArray(result.data)) {
+      rapporteurItems.value = result.data.map(ocorr => ({
+        id: ocorr.id_ocorrencia,
+        name: ocorr.descricao_ocorrencia || 'Sem descrição',
+        local: ocorr.local_ocorrencia || 'Desconhecido',
+        date: `${ocorr.data_ocorrencia} @ ${ocorr.hora_ocorrencia}`,
+        avatar: '/src/img/Logo.png',
+        tags: [ocorr.estado_ocorrencia || 'pendente'],
+      }))
+    }
+  } catch (error) {
+    console.error('Erro ao ir buscar as ocorrências:', error)
+  }
+})
 
 const artists = reactive([
   { id: 1, name: 'Howell Hand', genre: 'EDM', category: 'Music spinning', created: '04.11.2024' },
@@ -110,13 +107,13 @@ const goToPage = (page) => {
       <section class="mb-8">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-200">
           <BaseIcon :path="mdiFileDocument" size="20" />
-          Rapporteur
+          Ocorrências
         </h2>
         <div class="space-y-3">
           <div
             v-for="item in rapporteurItems"
             :key="item.id"
-            class="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+            class="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-4 shadow-md transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
           >
             <div class="flex items-center gap-3">
               <div
@@ -125,21 +122,31 @@ const goToPage = (page) => {
                 <img src="/src/img/Logo.png" class="h-6 w-6 object-contain" />
               </div>
               <div>
-                <p class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
                   {{ item.name }}
                 </p>
-                <p class="text-xs text-gray-500">{{ item.date }}</p>
+                <p v-if="item.local" class="text-xs font-semibold text-[#40798C] dark:text-[#7dd3c0] mt-0.5">
+                  Local: {{ item.local }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ item.date }}</p>
               </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
               <span
                 v-for="tag in item.tags"
                 :key="tag"
-                class="rounded bg-[#7dd3c0] px-2 py-1 text-xs font-bold text-teal-900 uppercase"
+                :class="[
+                  'rounded px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider shadow-sm',
+                  tag === 'resolvida'
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
+                    : tag === 'em progresso'
+                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400'
+                    : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400'
+                ]"
               >
                 {{ tag }}
               </span>
-              <button class="rounded bg-gray-100 p-1 text-slate-700 hover:bg-gray-200">
+              <button class="rounded-full bg-gray-100 p-1.5 text-slate-600 transition-colors hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">
                 <BaseIcon :path="mdiEye" size="16" />
               </button>
             </div>
