@@ -9,13 +9,13 @@ import sequelize from './config/database.js'
 
 // Importar as Rotas da API
 import ocorrencias from './routes/ocorrencia.routes.js'
-import spots from './routes/Spot.routes.js'
-import reservas from './routes/Reservas.routes.js'
+import spots from './routes/spot.routes.js'
+import reservas from './routes/reservas.routes.js'
 
-import userRoutes from './routes/user.routes.js'
+import utilizadorRoutes from './routes/utilizador.routes.js'
 import artistaRoutes from './routes/artista.routes.js'
 import categoriaRoutes from './routes/categoria.routes.js'
-import followerRoutes from './routes/follower.routes.js'
+import seguidorRoutes from './routes/seguidor.routes.js'
 
 // Inicializar Associações dos Modelos
 import './Models/db.js'
@@ -34,9 +34,9 @@ app.use('/api/spots', spots)
 app.use('/api/reservas', reservas)
 app.use('/api/artistas', artistaRoutes)
 app.use('/api/categorias', categoriaRoutes)
-app.use('/api/followers', followerRoutes)
+app.use('/api/seguidores', seguidorRoutes)
 
-app.use('/api/users', userRoutes)
+app.use('/api/utilizadores', utilizadorRoutes)
 
 // Rota base de teste rápido para verificar no browser ou Postman se a API está online
 app.get('/', (req, res) => {

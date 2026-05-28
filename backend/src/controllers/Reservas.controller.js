@@ -1,4 +1,4 @@
-import Reservas from '../Models/Reservas.js'
+import Reservas from '../Models/reservas.js'
 
 // Get all reservas
 export const getAllReservas = async (req, res) => {

@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../config/database.js'
-const Conta_global = sequelize.define(
-  'Conta_global',
+const Utilizador = sequelize.define(
+  'Utilizador',
   {
-    id_conta: {
+    id_utilizador: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -38,18 +38,18 @@ const Conta_global = sequelize.define(
     },
   },
   {
-    tableName: 'Conta_global',
+    tableName: 'Utilizador',
     freezeTableName: true,
     timestamps: false,
   },
 )
 
-Conta_global.associate = (models) => {
-  Conta_global.belongsTo(models.Artista, {
+Utilizador.associate = (models) => {
+  Utilizador.belongsTo(models.Artista, {
     foreignKey: 'id_artista',
   })
-  Conta_global.hasMany(models.Ocorrencia, {
-    foreignKey: 'id_conta',
+  Utilizador.hasMany(models.Ocorrencia, {
+    foreignKey: 'id_utilizador',
   })
 }
-export default Conta_global
+export default Utilizador

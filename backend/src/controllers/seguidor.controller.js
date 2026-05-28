@@ -1,48 +1,48 @@
-import ContaGlobal from '../Models/ContaGlobal.js';
-import Artista from '../Models/Artista.js';
-import Seguidor from '../Models/Seguidor.js';
+import Utilizador from '../Models/utilizador.js';
+import Artista from '../Models/artista.js';
+import Seguidor from '../Models/seguidor.js';
 import { validationError, notFoundError, conflictError } from '../utilis/error.utils.js';
 
 // 1. Seguir um artista
-export const followArtist = async (req, res, next) => {
+export const seguirArtista = async (req, res, next) => {
   try {
-    // id_conta = conta de quem segue (Utilizador/Artista)
+    // id_utilizador = conta de quem segue (Utilizador/Artista)
     // id_artista = conta do Artista que vai ser seguido
-    const { id_conta, id_artista } = req.body;
+    const { id_utilizador, id_artista } = req.body;
 
-    if (!id_conta || !id_artista) {
+    if (!id_utilizador || !id_artista) {
       throw validationError({ 
-        id_conta: !id_conta ? ['O campo id_conta é obrigatório.'] : undefined,
+        id_utilizador: !id_utilizador ? ['O campo id_utilizador é obrigatório.'] : undefined,
         id_artista: !id_artista ? ['O campo id_artista é obrigatório.'] : undefined,
       });
     }
 
-    if (String(id_conta) === String(id_artista)) {
+    if (String(id_utilizador) === String(id_artista)) {
       throw conflictError('Um utilizador não pode seguir-se a si próprio.');
     }
 
     // Verificar se a conta seguidora existe
-    const conta = await ContaGlobal.findByPk(id_conta);
+    const conta = await Utilizador.findByPk(id_utilizador);
     if (!conta) {
-      throw notFoundError('Conta de Utilizador (Seguidor)', id_conta);
+      throw notFoundError('Conta de Utilizador (Seguidor)', id_utilizador);
     }
 
     // Verificar se o artista alvo existe e obter o seu verdadeiro id_artista
-    const contaArtista = await ContaGlobal.findOne({ where: { id_conta: id_artista, tipo: 'artista' } });
+    const contaArtista = await Utilizador.findOne({ where: { id_utilizador: id_artista, tipo: 'artista' } });
     if (!contaArtista || !contaArtista.id_artista) {
       throw notFoundError('Conta de Artista (Alvo)', id_artista);
     }
 
     // Verificar se já segue
     const jaSegue = await Seguidor.findOne({
-      where: { id_conta: id_conta, id_artista: contaArtista.id_artista }
+      where: { id_utilizador: id_utilizador, id_artista: contaArtista.id_artista }
     });
     if (jaSegue) {
       throw conflictError('Já segues este artista.');
     }
 
     await Seguidor.create({
-      id_conta: id_conta,
+      id_utilizador: id_utilizador,
       id_artista: contaArtista.id_artista,
       data_inicio: new Date()
     });
@@ -54,32 +54,32 @@ export const followArtist = async (req, res, next) => {
 };
 
 // 2. Deixar de seguir um artista
-export const unfollowArtist = async (req, res, next) => {
+export const deixarSeguirArtista = async (req, res, next) => {
   try {
-    const { id_conta, id_artista } = req.body;
+    const { id_utilizador, id_artista } = req.body;
 
-    if (!id_conta || !id_artista) {
+    if (!id_utilizador || !id_artista) {
       throw validationError({ 
-        id_conta: !id_conta ? ['O campo id_conta é obrigatório.'] : undefined,
+        id_utilizador: !id_utilizador ? ['O campo id_utilizador é obrigatório.'] : undefined,
         id_artista: !id_artista ? ['O campo id_artista é obrigatório.'] : undefined,
       });
     }
 
     // Verificar se a conta seguidora existe
-    const conta = await ContaGlobal.findByPk(id_conta);
+    const conta = await Utilizador.findByPk(id_utilizador);
     if (!conta) {
-      throw notFoundError('Conta de Utilizador (Seguidor)', id_conta);
+      throw notFoundError('Conta de Utilizador (Seguidor)', id_utilizador);
     }
 
     // Verificar se o artista existe e obter o seu verdadeiro id_artista
-    const contaArtista = await ContaGlobal.findOne({ where: { id_conta: id_artista, tipo: 'artista' } });
+    const contaArtista = await Utilizador.findOne({ where: { id_utilizador: id_artista, tipo: 'artista' } });
     if (!contaArtista || !contaArtista.id_artista) {
       throw notFoundError('Conta de Artista (Alvo)', id_artista);
     }
 
     // Verificar a relação de seguidor
     const segue = await Seguidor.findOne({
-      where: { id_conta: id_conta, id_artista: contaArtista.id_artista }
+      where: { id_utilizador: id_utilizador, id_artista: contaArtista.id_artista }
     });
 
     if (!segue) {
@@ -95,34 +95,34 @@ export const unfollowArtist = async (req, res, next) => {
 };
 
 // 3. Ver seguidores / quem o utilizador segue
-export const getFollowers = async (req, res, next) => {
+export const getSeguidores = async (req, res, next) => {
   try {
-    const { id_conta, id_artista } = req.query;
+    const { id_utilizador, id_artista } = req.query;
 
-    if (!id_conta && !id_artista) {
+    if (!id_utilizador && !id_artista) {
       throw validationError({ 
-        query: ['É obrigatório enviar ?id_conta= ou ?id_artista= na query da pesquisa.'] 
+        query: ['É obrigatório enviar ?id_utilizador= ou ?id_artista= na query da pesquisa.'] 
       });
     }
 
-    if (id_conta && id_artista) {
+    if (id_utilizador && id_artista) {
       throw validationError({ 
-        query: ['Por favor, envia apenas um parâmetro: ou ?id_conta= ou ?id_artista=, não ambos.'] 
+        query: ['Por favor, envia apenas um parâmetro: ou ?id_utilizador= ou ?id_artista=, não ambos.'] 
       });
     }
 
     // Se indicarmos o ID do Utilizador, mostramos todos os artistas que ele segue
-    if (id_conta) {
+    if (id_utilizador) {
       // Garantir que a conta existe
-      const conta = await ContaGlobal.findByPk(id_conta);
-      if (!conta) throw notFoundError('Conta de Utilizador', id_conta);
+      const conta = await Utilizador.findByPk(id_utilizador);
+      if (!conta) throw notFoundError('Conta de Utilizador', id_utilizador);
 
       // Obter as relações
-      const seguindo = await Seguidor.findAll({ where: { id_conta } });
+      const seguindo = await Seguidor.findAll({ where: { id_utilizador } });
       const idsArtistas = seguindo.map(s => s.id_artista);
 
       // Obter os dados completos das contas dos artistas seguidos
-      const artistasSeguidos = await ContaGlobal.findAll({
+      const artistasSeguidos = await Utilizador.findAll({
         where: { tipo: 'artista', id_artista: idsArtistas },
         attributes: { exclude: ['password'] },
         include: [{ model: Artista }]
@@ -136,16 +136,16 @@ export const getFollowers = async (req, res, next) => {
 
     // Se indicarmos o ID do Artista, mostramos todos os seus seguidores
     if (id_artista) {
-      // Obter o verdadeiro id_artista da tabela de artistas através da ContaGlobal
-      const contaArtista = await ContaGlobal.findOne({ where: { id_conta: id_artista, tipo: 'artista' } });
+      // Obter o verdadeiro id_artista da tabela de artistas através da Utilizador
+      const contaArtista = await Utilizador.findOne({ where: { id_utilizador: id_artista, tipo: 'artista' } });
       if (!contaArtista || !contaArtista.id_artista) throw notFoundError('Conta de Artista', id_artista);
 
       const seguidoresRelacoes = await Seguidor.findAll({ where: { id_artista: contaArtista.id_artista } });
-      const idsContasSeguidoras = seguidoresRelacoes.map(s => s.id_conta);
+      const idsContasSeguidoras = seguidoresRelacoes.map(s => s.id_utilizador);
 
       // Obter as contas de quem segue o artista
-      const seguidores = await ContaGlobal.findAll({
-        where: { id_conta: idsContasSeguidoras },
+      const seguidores = await Utilizador.findAll({
+        where: { id_utilizador: idsContasSeguidoras },
         attributes: { exclude: ['password'] }
       });
 
