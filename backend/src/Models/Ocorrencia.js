@@ -32,12 +32,12 @@ const Ocorrencia = sequelize.define(
       type: DataTypes.ENUM('pendente', 'resolvida', 'em progresso'),
       allowNull: false,
     },
-    id_conta: {
+    id_utilizador: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Conta_global',
-        key: 'id_conta',
+        model: 'Utilizador',
+        key: 'id_utilizador',
       },
     },
     id_spot: {
@@ -56,8 +56,8 @@ const Ocorrencia = sequelize.define(
   },
 )
 Ocorrencia.associate = (models) => {
-  Ocorrencia.belongsTo(models.Conta_global, {
-    foreignKey: 'id_conta',
+  Ocorrencia.belongsTo(models.Utilizador, {
+    foreignKey: 'id_utilizador',
   })
   Ocorrencia.belongsTo(models.Spot, {
     foreignKey: 'id_spot',

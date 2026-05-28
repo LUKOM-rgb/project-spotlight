@@ -3,18 +3,18 @@ import { Sequelize } from 'sequelize'
 
 // models/db.js
 
-import Artista from './Artista.js'
-import Conta_global from './ContaGlobal.js'
-import Categoria from './Categorias.js'
-import Seguidor from './Seguidor.js'
-import Ocorrencia from './Ocorrencia.js'
-import Spot from './Spot.js'
-import Reserva from './Reservas.js'
+import Artista from './artista.js'
+import Utilizador from './utilizador.js'
+import Categoria from './categorias.js'
+import Seguidor from './seguidor.js'
+import Ocorrencia from './ocorrencia.js'
+import Spot from './spot.js'
+import Reserva from './reservas.js'
 const db = {
   sequelize,
   Sequelize,
   Artista,
-  Conta_global,
+  Utilizador,
   Categoria,
   Seguidor,
   Ocorrencia,

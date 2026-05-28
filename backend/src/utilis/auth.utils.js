@@ -18,7 +18,7 @@ export async function comparePassword(password, hashedPassword) {
 export function generateToken(user) {
   return jwt.sign(
     {
-      sub: user.id_conta, // ID único da conta global
+      sub: user.id_utilizador, // ID único da conta global
       email: user.email,
       role: user.tipo, // 'utilizador' ou 'artista' ou 'admin'
     },

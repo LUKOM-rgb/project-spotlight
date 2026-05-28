@@ -1,6 +1,6 @@
-import Artista from '../Models/Artista.js';
-import ContaGlobal from '../Models/ContaGlobal.js';
-import Seguidor from '../Models/Seguidor.js';
+import Artista from '../Models/artista.js';
+import Utilizador from '../Models/utilizador.js';
+import Seguidor from '../Models/seguidor.js';
 import { hashPassword } from '../utilis/auth.utils.js';
 import { validationError, notFoundError, conflictError } from '../utilis/error.utils.js';
 
@@ -31,7 +31,7 @@ export const createArtist = async (req, res, next) => {
     }
 
     // Verificar se o email já existe
-    const existingAccount = await ContaGlobal.findOne({ where: { email } });
+    const existingAccount = await Utilizador.findOne({ where: { email } });
     if (existingAccount) {
       throw conflictError('Este email já está registado.');
     }
@@ -43,9 +43,9 @@ export const createArtist = async (req, res, next) => {
       categoria_id
     });
 
-    // Cifrar a password e criar a ContaGlobal ligada ao Artista
+    // Cifrar a password e criar a Utilizador ligada ao Artista
     const hashedPassword = await hashPassword(password);
-    const novaConta = await ContaGlobal.create({
+    const novaConta = await Utilizador.create({
       email,
       password: hashedPassword,
       tipo: 'artista',
@@ -58,7 +58,7 @@ export const createArtist = async (req, res, next) => {
     return res.status(201).json({
       message: 'Artista criado com sucesso!',
       data: {
-        id_conta: novaConta.id_conta,
+        id_utilizador: novaConta.id_utilizador,
         nome_utilizador: novaConta.nome_utilizador,
         email: novaConta.email,
         id_artista: novoArtista.id_artista
@@ -72,7 +72,7 @@ export const createArtist = async (req, res, next) => {
 // 2. Mostrar todos os Artistas
 export const getAllArtists = async (req, res, next) => {
   try {
-    const contas = await ContaGlobal.findAll({
+    const contas = await Utilizador.findAll({
       where: { tipo: 'artista' },
       attributes: { exclude: ['password'] },
       include: [{ model: Artista }]
@@ -88,8 +88,8 @@ export const getAllArtists = async (req, res, next) => {
 export const getArtistById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const conta = await ContaGlobal.findOne({
-      where: { id_conta: id, tipo: 'artista' },
+    const conta = await Utilizador.findOne({
+      where: { id_utilizador: id, tipo: 'artista' },
       attributes: { exclude: ['password'] },
       include: [{ model: Artista }]
     });
@@ -110,7 +110,7 @@ export const updateArtist = async (req, res, next) => {
     const { id } = req.params;
     const { nome_utilizador, numero_telemovel, numero_licenca, validade_licenca, categoria_id } = req.body;
 
-    const conta = await ContaGlobal.findOne({ where: { id_conta: id, tipo: 'artista' } });
+    const conta = await Utilizador.findOne({ where: { id_utilizador: id, tipo: 'artista' } });
     if (!conta || !conta.id_artista) {
       throw notFoundError('Conta de Artista', id);
     }
@@ -120,7 +120,7 @@ export const updateArtist = async (req, res, next) => {
       throw notFoundError('Perfil de Artista', conta.id_artista);
     }
 
-    // Atualizar ContaGlobal
+    // Atualizar Utilizador
     await conta.update({
       nome_utilizador: nome_utilizador || conta.nome_utilizador,
       numero_telemovel: numero_telemovel !== undefined ? numero_telemovel : conta.numero_telemovel
@@ -143,7 +143,7 @@ export const updateArtist = async (req, res, next) => {
 export const deleteArtist = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const conta = await ContaGlobal.findOne({ where: { id_conta: id, tipo: 'artista' } });
+    const conta = await Utilizador.findOne({ where: { id_utilizador: id, tipo: 'artista' } });
     
     if (!conta) {
       throw notFoundError('Artista', id);

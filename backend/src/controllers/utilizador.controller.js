@@ -1,12 +1,12 @@
-import Artista from '../Models/Artista.js';
-import Seguidor from '../Models/Seguidor.js';
-import ContaGlobal from '../Models/ContaGlobal.js';
-import Categoria from '../Models/Categorias.js';
+import Artista from '../Models/artista.js';
+import Seguidor from '../Models/seguidor.js';
+import Utilizador from '../Models/utilizador.js';
+import Categoria from '../Models/categorias.js';
 import { Op } from 'sequelize';
 import { notFoundError, validationError, conflictError } from '../utilis/error.utils.js';
 import { hashPassword } from '../utilis/auth.utils.js';
 // 1. Mostrar todos os utilizadores (Com filtros)
-export const getAllUsers = async (req, res, next) => {
+export const getAllUtilizadores = async (req, res, next) => {
   try {
     const { nome, username, tipo } = req.query;
     let condicoes = {};
@@ -15,7 +15,7 @@ export const getAllUsers = async (req, res, next) => {
     if (username) condicoes.nome_utilizador = { [Op.like]: `%${username}%` };
     if (tipo) condicoes.tipo = tipo;
 
-    const users = await ContaGlobal.findAll({
+    const users = await Utilizador.findAll({
       where: condicoes,
       attributes: { exclude: ['password'] }
     });
@@ -27,10 +27,10 @@ export const getAllUsers = async (req, res, next) => {
 };
 
 // 2. Mostrar info de utilizador específico
-export const getUserById = async (req, res, next) => {
+export const getUtilizadorById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const conta = await ContaGlobal.findByPk(id, {
+    const conta = await Utilizador.findByPk(id, {
       attributes: { exclude: ['password'] },
       include: [{ model: Artista }]
     });
@@ -48,17 +48,17 @@ export const getUserById = async (req, res, next) => {
 // 3. Mudar dados do próprio perfil (PATCH /me)
 export const updateProfile = async (req, res, next) => {
   try {
-    const id = req.user.sub;
+    const id = req.utilizador.sub;
     const { email, password, nome_utilizador, numero_telemovel } = req.body;
 
-    const conta = await ContaGlobal.findByPk(id);
+    const conta = await Utilizador.findByPk(id);
     if (!conta) {
       throw notFoundError('Utilizador', id);
     }
 
     // Verificar se o novo email já está em uso por outra conta
     if (email && email !== conta.email) {
-      const emailExistente = await ContaGlobal.findOne({ where: { email } });
+      const emailExistente = await Utilizador.findOne({ where: { email } });
       if (emailExistente) {
         throw conflictError('Este email já está associado a outra conta.');
       }
@@ -81,7 +81,7 @@ export const updateProfile = async (req, res, next) => {
     });
 
     return res.status(200).json({ message: 'Perfil atualizado com sucesso!', conta: {
-      id_conta: conta.id_conta,
+      id_utilizador: conta.id_utilizador,
       email: conta.email,
       nome_utilizador: conta.nome_utilizador,
       numero_telemovel: conta.numero_telemovel
@@ -92,10 +92,10 @@ export const updateProfile = async (req, res, next) => {
 };
 
 // 4. Apagar utilizador
-export const deleteUser = async (req, res, next) => {
+export const deleteUtilizador = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const conta = await ContaGlobal.findByPk(id);
+    const conta = await Utilizador.findByPk(id);
 
     if (!conta) {
       throw notFoundError('Utilizador', id);
@@ -109,7 +109,7 @@ export const deleteUser = async (req, res, next) => {
 };
 
 // 5. Mudar cargo (Role) da Conta (REST API)
-export const changeUserRole = async (req, res, next) => {
+export const changeUtilizadorRole = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { tipo, numero_licenca, validade_licenca, categoria_id } = req.body;
@@ -118,7 +118,7 @@ export const changeUserRole = async (req, res, next) => {
       throw validationError({ tipo: ['O campo tipo é obrigatório e deve ser "artista" ou "utilizador".'] });
     }
 
-    const conta = await ContaGlobal.findByPk(id);
+    const conta = await Utilizador.findByPk(id);
     if (!conta) {
       throw notFoundError('Utilizador', id);
     }

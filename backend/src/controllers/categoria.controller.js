@@ -1,6 +1,6 @@
-import Categoria from '../Models/Categorias.js';
-import Artista from '../Models/Artista.js';
-import ContaGlobal from '../Models/ContaGlobal.js';
+import Categoria from '../Models/categorias.js';
+import Artista from '../Models/artista.js';
+import Utilizador from '../Models/utilizador.js';
 import { validationError, notFoundError, conflictError } from '../utilis/error.utils.js';
 
 // 1. Adicionar Categoria
@@ -88,8 +88,8 @@ export const getArtistasByCategoria = async (req, res, next) => {
       throw notFoundError('Categoria', id);
     }
 
-    // Buscar artistas associados à categoria (juntando com ContaGlobal para ter nome, email, etc.)
-    const contas = await ContaGlobal.findAll({
+    // Buscar artistas associados à categoria (juntando com Utilizador para ter nome, email, etc.)
+    const contas = await Utilizador.findAll({
       where: { tipo: 'artista' },
       attributes: { exclude: ['password'] },
       include: [

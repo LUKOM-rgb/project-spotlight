@@ -1,4 +1,4 @@
-import ContaGlobal from '../Models/ContaGlobal.js'
+import Utilizador from '../Models/utilizador.js'
 import { hashPassword, comparePassword, generateToken } from '../utilis/auth.utils.js'
 import { validationError, unauthorizedError, conflictError } from '../utilis/error.utils.js'
 
@@ -19,14 +19,14 @@ export const register = async (req, res, next) => {
     }
 
     // 2. Verificar se o email ou username já existem
-    const existingAccount = await ContaGlobal.findOne({ where: { email } })
+    const existingAccount = await Utilizador.findOne({ where: { email } })
     if (existingAccount) {
       throw conflictError('Este email já está registado.')
     }
 
     // 3. Cifrar password e criar Conta Global
     const hashedPassword = await hashPassword(password)
-    const novaConta = await ContaGlobal.create({
+    const novaConta = await Utilizador.create({
       email,
       password: hashedPassword,
       tipo: 'utilizador', // Corrigido de tipo_utilizador para tipo
@@ -37,14 +37,14 @@ export const register = async (req, res, next) => {
 
     // 4. Criar o perfil específico na tabela Utilizador
     const novoUtilizador = await Utilizador.create({
-      id_conta: novaConta.id_conta // Corrigido de id_user para id_conta
+      id_utilizador: novaConta.id_utilizador // Corrigido de id_user para id_utilizador
     })
 
     // 5. Responder com 201 Created (Sucesso no Postman)
     return res.status(201).json({
       message: 'Utilizador registado com sucesso!',
       data: {
-        id_conta: novaConta.id_conta,
+        id_utilizador: novaConta.id_utilizador,
         nome_utilizador: novaConta.nome_utilizador,
         email: novaConta.email
       },
@@ -64,7 +64,7 @@ export const login = async (req, res, next) => {
     }
 
     // 1. Procurar a conta pelo email
-    const conta = await ContaGlobal.findOne({ where: { email } })
+    const conta = await Utilizador.findOne({ where: { email } })
     if (!conta) {
       throw unauthorizedError('Credenciais de acesso inválidas.')
     }

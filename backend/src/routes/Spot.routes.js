@@ -6,7 +6,7 @@ import {
   createSpot,
   deleteSpotById,
   createReserva
-} from '../controllers/Spot.controller.js';
+} from '../controllers/spot.controller.js';
 
   const router = express.Router();
 router.get('/', getAllSpots)

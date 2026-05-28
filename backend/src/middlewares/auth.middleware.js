@@ -16,7 +16,7 @@ export const verifyToken = (req, res, next) => {
     const token = authHeader.split(' ')[1];
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // Guarda as informações do token (ex: role, email, id) no req.user
+    req.utilizador = decoded; // Guarda as informações do token (ex: role, email, id) no req.utilizador
 
     next();
   } catch (error) {
@@ -29,11 +29,11 @@ export const verifyToken = (req, res, next) => {
 
 // Middleware para verificar se o utilizador tem a role de 'admin'
 export const isAdmin = (req, res, next) => {
-  if (!req.user) {
+  if (!req.utilizador) {
     return next(unauthorizedError('Utilizador não autenticado.'));
   }
 
-  if (req.user.role !== 'admin') {
+  if (req.utilizador.role !== 'admin') {
     return next(forbiddenError('Acesso Proibido. Apenas administradores têm permissão para realizar esta ação.'));
   }
 

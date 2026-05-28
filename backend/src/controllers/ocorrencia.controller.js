@@ -1,6 +1,6 @@
-import RelatorioOcorrencia from '../Models/Ocorrencia.js'
-import ContaGlobal from '../Models/ContaGlobal.js'
-import Spot from '../Models/Spot.js'
+import RelatorioOcorrencia from '../Models/ocorrencia.js'
+import Utilizador from '../Models/utilizador.js'
+import Spot from '../Models/spot.js'
 import { validationError, notFoundError } from '../utilis/error.utils.js'
 
 // POST /ocorrencias - Criar nova ocorrência
@@ -12,7 +12,7 @@ export const createOcorrencia = async (req, res, next) => {
       local_ocorrencia,
       descricao_ocorrencia,
       estado,
-      id_conta,
+      id_utilizador,
       id_spot,
     } = req.body
 
@@ -20,7 +20,7 @@ export const createOcorrencia = async (req, res, next) => {
     const errors = {}
     if (!descricao_ocorrencia) errors.descricao_ocorrencia = ['O campo descrição é obrigatório.']
     if (!local_ocorrencia) errors.local_ocorrencia = ['O local da ocorrência é obrigatório.']
-    if (!id_conta) errors.id_conta = ['O ID da conta é obrigatório.']
+    if (!id_utilizador) errors.id_utilizador = ['O ID da conta é obrigatório.']
     if (!id_spot) errors.id_spot = ['O ID do spot é obrigatório.']
 
     // Validar se a data de ocorrência não é no futuro (no máximo o dia de hoje)
@@ -47,9 +47,9 @@ export const createOcorrencia = async (req, res, next) => {
       throw validationError(errors)
     }
 
-    // 404 Not Found: Verificar se o id_conta e id_spot realmente existem na Base de Dados
-    const contaExiste = await ContaGlobal.findByPk(id_conta)
-    if (!contaExiste) throw notFoundError('Conta', id_conta)
+    // 404 Not Found: Verificar se o id_utilizador e id_spot realmente existem na Base de Dados
+    const contaExiste = await Utilizador.findByPk(id_utilizador)
+    if (!contaExiste) throw notFoundError('Conta', id_utilizador)
 
     const spotExiste = await Spot.findByPk(id_spot)
     if (!spotExiste) throw notFoundError('Spot', id_spot)
@@ -62,7 +62,7 @@ export const createOcorrencia = async (req, res, next) => {
       local_ocorrencia,
       descricao_ocorrencia: descricao_ocorrencia,
       estado_ocorrencia: estado ? estado.toLowerCase() : 'pendente',
-      id_conta,
+      id_utilizador,
       id_spot,
     })
 
