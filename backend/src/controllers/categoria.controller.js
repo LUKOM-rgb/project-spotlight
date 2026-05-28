@@ -1,7 +1,7 @@
 import Categoria from '../Models/categorias.js';
 import Artista from '../Models/artista.js';
 import Utilizador from '../Models/utilizador.js';
-import { validationError, notFoundError, conflictError } from '../utilis/error.utils.js';
+import { validationError, notFoundError, conflictError } from '../utils/error.utils.js';
 
 // 1. Adicionar Categoria
 export const createCategoria = async (req, res, next) => {

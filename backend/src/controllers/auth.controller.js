@@ -1,6 +1,6 @@
 import Utilizador from '../Models/utilizador.js'
-import { hashPassword, comparePassword, generateToken } from '../utilis/auth.utils.js'
-import { validationError, unauthorizedError, conflictError } from '../utilis/error.utils.js'
+import { hashPassword, comparePassword, generateToken } from '../utils/auth.utils.js'
+import { validationError, unauthorizedError, conflictError } from '../utils/error.utils.js'
 
 // Registar Conta
 export const register = async (req, res, next) => {

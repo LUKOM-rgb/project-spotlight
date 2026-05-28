@@ -1,8 +1,8 @@
 import Artista from '../Models/artista.js';
 import Utilizador from '../Models/utilizador.js';
 import Seguidor from '../Models/seguidor.js';
-import { hashPassword } from '../utilis/auth.utils.js';
-import { validationError, notFoundError, conflictError } from '../utilis/error.utils.js';
+import { hashPassword } from '../utils/auth.utils.js';
+import { validationError, notFoundError, conflictError } from '../utils/error.utils.js';
 
 // 1. Criar Artista (Registo de um novo Artista)
 export const createArtist = async (req, res, next) => {

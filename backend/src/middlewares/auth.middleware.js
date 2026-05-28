@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import process from 'process';
-import { unauthorizedError, forbiddenError } from '../utilis/error.utils.js';
+import { unauthorizedError, forbiddenError } from '../utils/error.utils.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chave_secreta_super_segura_esmad';
 

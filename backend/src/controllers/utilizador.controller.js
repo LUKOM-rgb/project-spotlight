@@ -3,8 +3,8 @@ import Seguidor from '../Models/seguidor.js';
 import Utilizador from '../Models/utilizador.js';
 import Categoria from '../Models/categorias.js';
 import { Op } from 'sequelize';
-import { notFoundError, validationError, conflictError } from '../utilis/error.utils.js';
-import { hashPassword } from '../utilis/auth.utils.js';
+import { notFoundError, validationError, conflictError } from '../utils/error.utils.js';
+import { hashPassword } from '../utils/auth.utils.js';
 // 1. Mostrar todos os utilizadores (Com filtros)
 export const getAllUtilizadores = async (req, res, next) => {
   try {

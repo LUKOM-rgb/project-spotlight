@@ -1,7 +1,7 @@
 import Utilizador from '../Models/utilizador.js';
 import Artista from '../Models/artista.js';
 import Seguidor from '../Models/seguidor.js';
-import { validationError, notFoundError, conflictError } from '../utilis/error.utils.js';
+import { validationError, notFoundError, conflictError } from '../utils/error.utils.js';
 
 // 1. Seguir um artista
 export const seguirArtista = async (req, res, next) => {
