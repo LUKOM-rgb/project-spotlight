@@ -3,7 +3,7 @@ import ContaGlobal from '../Models/ContaGlobal.js'
 import Spot from '../Models/Spot.js'
 import { validationError, notFoundError } from '../utilis/error.utils.js'
 
-// POST /relatorios - Criar nova ocorrência
+// POST /ocorrencias - Criar nova ocorrência
 export const createOcorrencia = async (req, res, next) => {
   try {
     const {
@@ -54,8 +54,8 @@ export const createOcorrencia = async (req, res, next) => {
     const spotExiste = await Spot.findByPk(id_spot)
     if (!spotExiste) throw notFoundError('Spot', id_spot)
 
-    // 3. Criar o relatório na base de dados
-    const novoRelatorio = await RelatorioOcorrencia.create({
+    // 3. Criar a ocorrência na base de dados
+    const novaOcorrencia = await RelatorioOcorrencia.create({
       data_ocorrencia: data_ocorrencia || new Date(),
       data_envio: new Date(),
       hora_ocorrencia,
@@ -68,58 +68,58 @@ export const createOcorrencia = async (req, res, next) => {
 
     // 4. Responder com 201 Created
     return res.status(201).json({
-      message: 'Relatório de ocorrência registado com sucesso!',
-      data: novoRelatorio,
+      message: 'Ocorrência registada com sucesso!',
+      data: novaOcorrencia,
     })
   } catch (error) {
     next(error) // Encaminha para o middleware global de erros
   }
 }
 
-// GET /relatorios - Obter todas as ocorrências
+// GET /ocorrencias - Obter todas as ocorrências
 export const getAllOcorrencias = async (req, res, next) => {
   try {
-    // Podes ler parâmetros da query (ex: /relatorios?estado=Pendente)
+    // Podes ler parâmetros da query (ex: /ocorrencias?estado=Pendente)
     const { estado, id_spot } = req.query
     const whereClause = {}
 
     if (estado) whereClause.estado_ocorrencia = estado.toLowerCase()
     if (id_spot) whereClause.id_spot = id_spot
 
-    const relatorios = await RelatorioOcorrencia.findAll({
+    const ocorrencias = await RelatorioOcorrencia.findAll({
       where: whereClause,
     })
 
     return res.status(200).json({
-      message: 'Relatórios obtidos com sucesso.',
-      data: relatorios,
+      message: 'Ocorrências obtidas com sucesso.',
+      data: ocorrencias,
     })
   } catch (error) {
     next(error)
   }
 }
 
-// GET /relatorios/:id - Obter uma ocorrência específica
+// GET /ocorrencias/:id - Obter uma ocorrência específica
 export const getOcorrenciaById = async (req, res, next) => {
   try {
     const { id } = req.params
 
-    const relatorio = await RelatorioOcorrencia.findByPk(id)
+    const ocorrencia = await RelatorioOcorrencia.findByPk(id)
 
-    if (!relatorio) {
-      throw notFoundError('RelatorioOcorrencia', id)
+    if (!ocorrencia) {
+      throw notFoundError('Ocorrencia', id)
     }
 
     return res.status(200).json({
-      message: 'Relatório obtido com sucesso.',
-      data: relatorio,
+      message: 'Ocorrência obtida com sucesso.',
+      data: ocorrencia,
     })
   } catch (error) {
     next(error)
   }
 }
 
-// PATCH /relatorios/:id/estado - Atualizar o estado da ocorrência
+// PATCH /ocorrencias/:id/estado - Atualizar o estado da ocorrência
 export const updateEstadoOcorrencia = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -130,42 +130,42 @@ export const updateEstadoOcorrencia = async (req, res, next) => {
       throw validationError({ estado_ocorrencia: ['O novo estado é obrigatório.'] })
     }
 
-    const relatorio = await RelatorioOcorrencia.findByPk(id)
+    const ocorrencia = await RelatorioOcorrencia.findByPk(id)
 
-    // 404 Not Found: Verificar se o relatório existe na base de dados
-    if (!relatorio) {
-      throw notFoundError('RelatorioOcorrencia', id)
+    // 404 Not Found: Verificar se a ocorrência existe na base de dados
+    if (!ocorrencia) {
+      throw notFoundError('Ocorrencia', id)
     }
 
     // Atualizar e guardar
-    relatorio.estado_ocorrencia = estado_ocorrencia.toLowerCase()
-    await relatorio.save()
+    ocorrencia.estado_ocorrencia = estado_ocorrencia.toLowerCase()
+    await ocorrencia.save()
 
     return res.status(200).json({
-      message: 'Estado do relatório updated com sucesso!',
-      data: relatorio,
+      message: 'Estado da ocorrência atualizado com sucesso!',
+      data: ocorrencia,
     })
   } catch (error) {
     next(error)
   }
 }
 
-// DELETE /relatorios/:id - Eliminar uma ocorrência
+// DELETE /ocorrencias/:id - Eliminar uma ocorrência
 export const deleteOcorrencia = async (req, res, next) => {
   try {
     const { id } = req.params
 
-    const relatorio = await RelatorioOcorrencia.findByPk(id)
+    const ocorrencia = await RelatorioOcorrencia.findByPk(id)
 
-    // 404 Not Found: Verificar se o relatório existe na base de dados
-    if (!relatorio) {
-      throw notFoundError('RelatorioOcorrencia', id)
+    // 404 Not Found: Verificar se a ocorrência existe na base de dados
+    if (!ocorrencia) {
+      throw notFoundError('Ocorrencia', id)
     }
 
-    await relatorio.destroy()
+    await ocorrencia.destroy()
 
     return res.status(200).json({
-      message: `Relatório da ocorrência em ${relatorio.local_ocorrencia} eliminado com sucesso.`,
+      message: `Ocorrência em ${ocorrencia.local_ocorrencia} eliminada com sucesso.`,
     })
   } catch (error) {
     next(error)
