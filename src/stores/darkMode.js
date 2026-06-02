@@ -8,14 +8,9 @@ export const useDarkModeStore = defineStore('darkMode', () => {
   const isInProgress = ref(false)
 
   function init() {
-    if (
-      typeof localStorage !== 'undefined' &&
-      typeof window !== 'undefined' &&
-      ((!localStorage[darkModeKey] && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
-        localStorage[darkModeKey] === '1')
-    ) {
-      set(true)
-    }
+    // Forçar sempre modo claro e esquecer se o utilizador tinha escolhido modo escuro antes
+    localStorage.removeItem(darkModeKey)
+    set(false)
   }
 
   function reset() {

@@ -1,6 +1,6 @@
 <script setup>
 import { mdiForwardburger, mdiBackburger, mdiMenu } from '@mdi/js'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { menuAsideMain, menuAsideBottom } from '@/menuAside.js'
 import menuNavBar from '@/menuNavBar.js'
@@ -14,7 +14,14 @@ import AsideMenu from '@/components/AsideMenu.vue'
 import FooterBar from '@/components/FooterBar.vue'
 import PremiumVersionBadge from '@/components/PremiumVersionBadge.vue'
 
-const layoutAsidePadding = 'xl:pl-60'
+const props = defineProps({
+  hideAside: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const layoutAsidePadding = computed(() => props.hideAside ? '' : 'xl:pl-60')
 
 const darkModeStore = useDarkModeStore()
 const authStore = useAuthStore()
@@ -47,7 +54,7 @@ const menuClick = (event, item) => {
     }"
   >
     <div
-      :class="[layoutAsidePadding, { 'ml-60 lg:ml-0': isAsideMobileExpanded }]"
+      :class="[layoutAsidePadding, { 'ml-60 lg:ml-0': isAsideMobileExpanded && !hideAside }]"
       class="min-h-screen w-screen bg-gray-50 pt-14 transition-(--transition-position) lg:w-auto dark:bg-slate-800 dark:text-slate-100"
     >
       <NavBar
@@ -56,12 +63,13 @@ const menuClick = (event, item) => {
         @menu-click="menuClick"
       >
         <NavBarItemPlain
+          v-if="!hideAside"
           display="flex lg:hidden"
           @click.prevent="isAsideMobileExpanded = !isAsideMobileExpanded"
         >
           <BaseIcon :path="isAsideMobileExpanded ? mdiBackburger : mdiForwardburger" size="24" />
         </NavBarItemPlain>
-        <NavBarItemPlain display="hidden lg:flex xl:hidden" @click.prevent="isAsideLgActive = true">
+        <NavBarItemPlain v-if="!hideAside" display="hidden lg:flex xl:hidden" @click.prevent="isAsideLgActive = true">
           <BaseIcon :path="mdiMenu" size="24" />
         </NavBarItemPlain>
         <NavBarItemPlain use-margin>
@@ -69,6 +77,7 @@ const menuClick = (event, item) => {
         </NavBarItemPlain>
       </NavBar>
       <AsideMenu
+        v-if="!hideAside"
         :is-aside-mobile-expanded="isAsideMobileExpanded"
         :is-aside-lg-active="isAsideLgActive"
         :menu="menuAsideMain"

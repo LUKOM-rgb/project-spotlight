@@ -35,11 +35,6 @@ export const register = async (req, res, next) => {
       numero_telemovel
     })
 
-    // 4. Criar o perfil específico na tabela Utilizador
-    const novoUtilizador = await Utilizador.create({
-      id_utilizador: novaConta.id_utilizador // Corrigido de id_user para id_utilizador
-    })
-
     // 5. Responder com 201 Created (Sucesso no Postman)
     return res.status(201).json({
       message: 'Utilizador registado com sucesso!',
