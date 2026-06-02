@@ -7,21 +7,18 @@ import { validationError, notFoundError, conflictError } from '../utils/error.ut
 // 1. Criar Artista (Registo de um novo Artista)
 export const createArtist = async (req, res, next) => {
   try {
-    const { 
-      email, 
-      password, 
-      nome_utilizador, 
-      numero_telemovel, 
-      numero_licenca, 
-      validade_licenca, 
-      categoria_id 
+    const id_utilizador= req.utilizador.sub;
+    if (!id_utilizador) {
+      throw conflictError('Já estás autenticado. Para criar um novo artista, por favor, desloga primeiro.');
+    }
+    const {
+      numero_licenca,
+      validade_licenca,
+      categoria_id
     } = req.body;
 
     // Validação básica
     const errors = {};
-    if (!email) errors.email = ['O campo email é obrigatório.'];
-    if (!password || password.length < 6) errors.password = ['A password deve ter pelo menos 6 caracteres.'];
-    if (!nome_utilizador) errors.nome_utilizador = ['O campo nome_utilizador é obrigatório.'];
     if (!numero_licenca) errors.numero_licenca = ['O campo numero_licenca é obrigatório.'];
     if (!validade_licenca) errors.validade_licenca = ['O campo validade_licenca é obrigatório.'];
     if (!categoria_id) errors.categoria_id = ['O campo categoria_id é obrigatório.'];
@@ -30,30 +27,20 @@ export const createArtist = async (req, res, next) => {
       throw validationError(errors);
     }
 
-    // Verificar se o email já existe
-    const existingAccount = await Utilizador.findOne({ where: { email } });
-    if (existingAccount) {
-      throw conflictError('Este email já está registado.');
-    }
-
     // Criar o registo do Artista primeiro
     const novoArtista = await Artista.create({
       numero_licenca,
       validade_licenca,
       categoria_id
     });
-
-    // Cifrar a password e criar a Utilizador ligada ao Artista
-    const hashedPassword = await hashPassword(password);
-    const novaConta = await Utilizador.create({
-      email,
-      password: hashedPassword,
-      tipo: 'artista',
-      data_registo: new Date(),
-      nome_utilizador,
-      numero_telemovel,
-      id_artista: novoArtista.id_artista
-    });
+// Depois alterar o id_artista do Utilizador existente para o id do Artista criado e alterar o role para Artista
+    const novaConta = await Utilizador.findOne({ where: { id_utilizador } });
+    if (!novaConta) {
+      throw notFoundError('Conta de Utilizador', id_utilizador);
+    }
+    novaConta.id_artista = novoArtista.id_artista;
+    novaConta.role = 'artista';
+    await novaConta.save();
 
     return res.status(201).json({
       message: 'Artista criado com sucesso!',
@@ -144,7 +131,7 @@ export const deleteArtist = async (req, res, next) => {
   try {
     const { id } = req.params;
     const conta = await Utilizador.findOne({ where: { id_utilizador: id, tipo: 'artista' } });
-    
+
     if (!conta) {
       throw notFoundError('Artista', id);
     }

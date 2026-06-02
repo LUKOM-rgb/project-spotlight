@@ -1,5 +1,6 @@
 import Reservas from '../Models/reservas.js'
 import Spot from '../Models/spot.js'
+import Artista from '../Models/artista.js'
 // Get all reservas
 export const getAllReservas = async (req, res) => {
   try {
@@ -33,6 +34,10 @@ export const getReservasBySpotId = async (req, res) => {
     const { spotId } = req.params
     const date = req.query.date
     const reservas = await Reservas.findAll({ where: { id_spot: spotId } })
+
+    if (!(await Spot.findByPk(spotId))) {
+      return res.status(404).json({ message: 'Spot não encontrado.' })
+    }
     if (date) {
       const reservasFiltradas = reservas.filter(
         (reserva) => reserva.data_evento === date
@@ -46,7 +51,7 @@ export const getReservasBySpotId = async (req, res) => {
       })
     }
     if (reservas.length === 0) {
-      return res.status(404).json({ message: 'Nenhuma reserva encontrada para este spot.' })
+      return res.status(204).json({ message: 'Nenhuma reserva encontrada para este spot.' })
     }
 
     return res.status(200).json({
@@ -62,9 +67,11 @@ export const getReservasByArtistaId = async (req, res) => {
   try {
     const { artistaId } = req.params
     const reservas = await Reservas.findAll({ where: { id_artista: artistaId } })
-
+    if (!(await Artista.findByPk(artistaId))) {
+      return res.status(404).json({ message: 'Artista não encontrado.' })
+    }
     if (reservas.length === 0) {
-      return res.status(404).json({ message: 'Nenhuma reserva encontrada para este artista.' })
+      return res.status(204).json({ message: 'Nenhuma reserva encontrada para este artista.' })
     }
     return res.status(200).json({
       message: 'Reservas obtidas com sucesso.',
@@ -211,7 +218,7 @@ export const createReserva = async (req, res) => {
     )
     const agora = new Date()
     if (agora > vinteQuatroHorasAntes) {
-      return res.status(400).json({
+      return res.status(409).json({
         message:
           'Não é possível criar a reserva com menos de 24 horas de antecedência.',
       })
