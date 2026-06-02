@@ -68,7 +68,13 @@ const closeSidebar = () => {
 onMounted(async () => {
   const map = L.map('map').setView([41.1579, -8.6291], 13)
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', }).addTo(map)
-  const response = await fetch('http://localhost:3000/api/spots')
+  const token = localStorage.getItem('token')
+
+  const response = await fetch('http://localhost:3000/api/spots', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
   const spotsData = await response.json()
   spotsData.forEach((spot) => {
     const lat = Number(spot.latitude)
@@ -88,7 +94,7 @@ onMounted(async () => {
       if (activeMarker) {
         activeMarker.setIcon(defaultIcon)
       }
-      
+
       marker.setIcon(activeIcon)
       activeMarker = marker
     })
@@ -195,7 +201,7 @@ const getSpotStatus = (spot) => {
       <ReservationChart :selectedSpotId="selectedSpotId" />
     </div>
 
-  </SectionMain  />
+  </SectionMain />
 
 </template>
 

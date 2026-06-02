@@ -51,7 +51,7 @@ const form = reactive({
 async function submitReservation() {
   try {
     const res = await fetch(
-      `http://localhost:3000/api/spots/${props.selectedSpotId}/reservas`,
+      `http://localhost:3000/api/reservas/${props.selectedSpotId}/reservas`,
       {
         method: 'POST',
         headers: {
