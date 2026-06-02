@@ -32,6 +32,7 @@ const rapporteurItems = ref([])
 
 onMounted(async () => {
   try {
+<<<<<<< Updated upstream
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
@@ -41,6 +42,14 @@ onMounted(async () => {
         authorization: `Bearer ${localStorage.getItem('token')}`,
       }
     ))
+=======
+    const response = await fetch('http://localhost:3000/api/ocorrencias', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    }
+  )
+>>>>>>> Stashed changes
     const result = await response.json()
     if (result && result.data && Array.isArray(result.data)) {
       rapporteurItems.value = result.data.map(ocorr => ({

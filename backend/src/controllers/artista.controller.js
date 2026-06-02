@@ -8,9 +8,7 @@ import { validationError, notFoundError, conflictError } from '../utils/error.ut
 export const createArtist = async (req, res, next) => {
   try {
     const id_utilizador= req.utilizador.sub;
-    if (!id_utilizador) {
-      throw conflictError('Já estás autenticado. Para criar um novo artista, por favor, desloga primeiro.');
-    }
+
     const {
       numero_licenca,
       validade_licenca,
@@ -74,12 +72,12 @@ export const getAllArtists = async (req, res, next) => {
 // 3. Mostrar info de um Artista específico
 export const getArtistById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const conta = await Utilizador.findOne({where: { id_artista: id, tipo: 'artista' },attributes: { exclude: ['password', 'id_artista'] },
+    const { id_artista } = req.params;
+    const conta = await Utilizador.findOne({where: { id_artista: id_artista, tipo: 'artista' },attributes: { exclude: ['password', 'id_artista'] },
       include: [{ model: Artista}],});
 
     if (!conta) {
-      throw notFoundError('Artista', id);
+      throw notFoundError('Artista', id_artista);
     }
 
     return res.status(200).json(conta);
@@ -91,24 +89,14 @@ export const getArtistById = async (req, res, next) => {
 // 4. Mudar dados do Artista
 export const updateArtist = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { nome_utilizador, numero_telemovel, numero_licenca, validade_licenca, categoria_id } = req.body;
+    const { id_artista } = req.utilizador.id_artista ? req.utilizador : req.params; // Se for artista, pega do token, senão adicionar id
+    const { numero_licenca, validade_licenca, categoria_id } = req.body;
 
-    const conta = await Utilizador.findOne({ where: { id_utilizador: id, tipo: 'artista' } });
-    if (!conta || !conta.id_artista) {
-      throw notFoundError('Conta de Artista', id);
-    }
 
-    const artista = await Artista.findByPk(conta.id_artista);
+    const artista = await Artista.findByPk(id_artista);
     if (!artista) {
-      throw notFoundError('Perfil de Artista', conta.id_artista);
+      throw notFoundError('Perfil de Artista', id_artista);
     }
-
-    // Atualizar Utilizador
-    await conta.update({
-      nome_utilizador: nome_utilizador || conta.nome_utilizador,
-      numero_telemovel: numero_telemovel !== undefined ? numero_telemovel : conta.numero_telemovel
-    });
 
     // Atualizar Artista
     await artista.update({
@@ -117,7 +105,7 @@ export const updateArtist = async (req, res, next) => {
       categoria_id: categoria_id || artista.categoria_id
     });
 
-    return res.status(200).json({ message: 'Dados de artista atualizados com sucesso!', conta });
+    return res.status(200).json({ message: 'Dados de artista atualizados com sucesso!', data: artista });
   } catch (error) {
     next(error);
   }
@@ -126,18 +114,18 @@ export const updateArtist = async (req, res, next) => {
 // 5. Apagar Artista, no admin o parametro é o id de artista CUIDADO
 export const deleteArtist = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const conta = await Utilizador.findOne({ where: { id_artista: id, tipo: 'artista' } });
+    const { id_artista } = req.params;
+    const conta = await Utilizador.findOne({ where: { id_artista: id_artista} });
 
     if (!conta) {
-      throw notFoundError('Artista', id);
+      throw notFoundError('Artista', id_artista);
     }
     conta.tipo = 'utilizador'; // Reverter tipo para 'utilizador' antes de apagar o artista
     conta.id_artista = null; // Desassociar o artista da conta
     await conta.save();
 
     // Destruir Artista primeiro, depois a Conta (ou a BD faz cascade se configurado, mas vamos forçar)
-      await Artista.destroy({ where: { id_artista: id } });
+      await Artista.destroy({ where: { id_artista: id_artista } });
 
     return res.status(200).json({ message: `Artista ${conta.nome_utilizador} removido com sucesso!` });
   } catch (error) {

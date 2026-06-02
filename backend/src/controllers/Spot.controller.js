@@ -1,37 +1,44 @@
 import Spot from '../Models/spot.js'
-import Reservas from '../Models/reservas.js'
+import { validationError, notFoundError } from '../utils/error.utils.js'
 // Get all spots
-export const getAllSpots = async (req, res) => {
+export const getAllSpots = async (req, res, next) => {
   try {
     const spots = await Spot.findAll()
-    res.json(spots)
+    return res.status(200).json(spots)
   } catch (error) {
-    console.error('Error fetching spots:', error)
-    res.status(500).json({ error: 'Failed to fetch spots' })
+    next(error)
   }
 }
-export const getSpotById = async (req, res) => {
+export const getSpotById = async (req, res, next) => {
   try {
     const { id } = req.params
     const spot = await Spot.findByPk(id)
-
     if (!spot) {
-      return res.status(404).json({ message: 'Spot não encontrado.' })
+      throw notFoundError('Spot', id)
     }
-
     return res.status(200).json({
       message: 'Spot obtido com sucesso.',
       data: spot,
     })
   } catch (error) {
-    console.error('Error fetching spot:', error)
-    return res.status(500).json({ error: 'Failed to fetch spot' })
+    next(error)
   }
 }
 // - localizacao: string -longitude: decimal -latitude: decimal -abertura:time(00:00:00) -fecho:time(00:00:00)
-export const createSpot = async (req, res) => {
+export const createSpot = async (req, res, next) => {
   try {
     const { localizacao, longitude, latitude, abertura, fecho } = req.body
+
+    const errors = {}
+
+    if (!localizacao) errors.localizacao = ['Obrigatório']
+    if (!longitude) errors.longitude = ['Obrigatório']
+    if (!latitude) errors.latitude = ['Obrigatório']
+    if (!abertura) errors.abertura = ['Obrigatório']
+    if (!fecho) errors.fecho = ['Obrigatório']
+    if (Object.keys(errors).length > 0) {
+      throw validationError(errors)
+    }
     const newSpot = await Spot.create({
       localizacao,
       longitude,
@@ -39,61 +46,49 @@ export const createSpot = async (req, res) => {
       abertura,
       fecho,
     })
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Spot criado com sucesso!',
       data: newSpot,
     })
   } catch (error) {
-    console.error('Error creating spot:', error)
-    res.status(500).json({ error: 'Failed to create spot' })
+    next(error)
   }
 }
-export const updateSpot = async (req, res) => {
+export const updateSpot = async (req, res, next) => {
   try {
     const { id } = req.params
     const { localizacao, longitude, latitude, abertura, fecho } = req.body
-
     const spot = await Spot.findByPk(id)
-
     if (!spot) {
-      return res.status(404).json({ message: 'Spot não encontrado.' })
+      throw notFoundError('Spot', id)
     }
-
-    spot.localizacao = localizacao || spot.localizacao
-    spot.longitude = longitude || spot.longitude
-    spot.latitude = latitude || spot.latitude
-    spot.abertura = abertura || spot.abertura
-    spot.fecho = fecho || spot.fecho
-
-    await spot.save()
-
+    await spot.update({
+      localizacao: localizacao ?? spot.localizacao,
+      longitude: longitude ?? spot.longitude,
+      latitude: latitude ?? spot.latitude,
+      abertura: abertura ?? spot.abertura,
+      fecho: fecho ?? spot.fecho,
+    })
     return res.status(200).json({
       message: 'Spot atualizado com sucesso.',
       data: spot,
     })
   } catch (error) {
-    console.error('Error updating spot:', error)
-    return res.status(500).json({ error: 'Failed to update spot' })
+    next(error)
   }
 }
-export const deleteSpotById = async (req, res) => {
+export const deleteSpotById = async (req, res, next) => {
   try {
     const { id } = req.params
     const spot = await Spot.findByPk(id)
-
     if (!spot) {
-      return res.status(404).json({ message: 'Spot não encontrado.' })
+      throw notFoundError('Spot', id)
     }
-
     await spot.destroy()
-
     return res.status(200).json({
       message: `Spot em ${spot.localizacao} eliminado com sucesso.`,
     })
   } catch (error) {
-    console.error('Error deleting spot:', error)
-    return res.status(500).json({ error: 'Failed to delete spot' })
+    next(error)
   }
 }
-
-
