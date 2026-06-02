@@ -33,13 +33,13 @@ export const createArtist = async (req, res, next) => {
       validade_licenca,
       categoria_id
     });
-// Depois alterar o id_artista do Utilizador existente para o id do Artista criado e alterar o role para Artista
+
     const novaConta = await Utilizador.findOne({ where: { id_utilizador } });
     if (!novaConta) {
       throw notFoundError('Conta de Utilizador', id_utilizador);
     }
     novaConta.id_artista = novoArtista.id_artista;
-    novaConta.role = 'artista';
+    novaConta.tipo = 'artista';
     await novaConta.save();
 
     return res.status(201).json({
@@ -75,11 +75,8 @@ export const getAllArtists = async (req, res, next) => {
 export const getArtistById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const conta = await Utilizador.findOne({
-      where: { id_utilizador: id, tipo: 'artista' },
-      attributes: { exclude: ['password'] },
-      include: [{ model: Artista }]
-    });
+    const conta = await Utilizador.findOne({where: { id_artista: id, tipo: 'artista' },attributes: { exclude: ['password', 'id_artista'] },
+      include: [{ model: Artista}],});
 
     if (!conta) {
       throw notFoundError('Artista', id);
@@ -126,22 +123,21 @@ export const updateArtist = async (req, res, next) => {
   }
 };
 
-// 5. Apagar Artista
+// 5. Apagar Artista, no admin o parametro é o id de artista CUIDADO
 export const deleteArtist = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const conta = await Utilizador.findOne({ where: { id_utilizador: id, tipo: 'artista' } });
+    const conta = await Utilizador.findOne({ where: { id_artista: id, tipo: 'artista' } });
 
     if (!conta) {
       throw notFoundError('Artista', id);
     }
+    conta.tipo = 'utilizador'; // Reverter tipo para 'utilizador' antes de apagar o artista
+    conta.id_artista = null; // Desassociar o artista da conta
+    await conta.save();
 
     // Destruir Artista primeiro, depois a Conta (ou a BD faz cascade se configurado, mas vamos forçar)
-    const idArtista = conta.id_artista;
-    await conta.destroy();
-    if (idArtista) {
-      await Artista.destroy({ where: { id_artista: idArtista } });
-    }
+      await Artista.destroy({ where: { id_artista: id } });
 
     return res.status(200).json({ message: `Artista ${conta.nome_utilizador} removido com sucesso!` });
   } catch (error) {
