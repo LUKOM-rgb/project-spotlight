@@ -34,7 +34,7 @@ const submitLogin = async () => {
 <template>
   <div class="flex min-h-screen items-center justify-center bg-amber-50 p-4">
     <CardBox
-      class="w-full max-w-md rounded-lg bg-slate-800 shadow-xl"
+      class="w-full max-w-md rounded-lg shadow-xl"
       is-form
       @submit.prevent="submitLogin"
     >
@@ -47,23 +47,23 @@ const submitLogin = async () => {
       </div>
 
       <!-- Campo E-mail -->
-      <FormField label="Email:" label-class="text-gray-400 text-sm">
+      <FormField label="Email:" label-class="text-gray-600 text-sm">
         <FormControl
           v-model="loginForm.email"
           type="email"
           name="email"
-          class="rounded border-slate-600 bg-slate-700 text-teal-400"
+          class="rounded"
           required
         />
       </FormField>
 
       <!-- Campo Password -->
-      <FormField label="Password:" label-class="text-gray-400 text-sm">
+      <FormField label="Password:" label-class="text-gray-600 text-sm">
         <FormControl
           v-model="loginForm.password"
           type="password"
           name="password"
-          class="rounded border-slate-600 bg-slate-700 text-teal-400"
+          class="rounded"
           required
         />
       </FormField>
@@ -85,14 +85,3 @@ const submitLogin = async () => {
     </CardBox>
   </div>
 </template>
-
-<style scoped>
-/* Estilos adicionais se necessário */
-input[type='text'],
-input[type='email'],
-input[type='password'] {
-  background-color: rgb(55, 65, 81);
-  border-color: rgb(30, 41, 59);
-  color: #2dd4bf; /* text-teal-400 */
-}
-</style>

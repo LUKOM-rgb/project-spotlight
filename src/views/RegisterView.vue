@@ -12,6 +12,7 @@ const router = useRouter()
 const registerForm = reactive({
   nome_utilizador: '',
   email: '',
+  numero_telemovel: '',
   password: '',
 })
 
@@ -40,7 +41,7 @@ const submitRegister = async () => {
 <template>
   <div class="flex min-h-screen items-center justify-center bg-amber-50 p-4">
     <CardBox
-      class="w-full max-w-md rounded-lg bg-slate-800 shadow-xl"
+      class="w-full max-w-md rounded-lg shadow-xl"
       is-form
       @submit.prevent="submitRegister"
     >
@@ -60,7 +61,7 @@ const submitRegister = async () => {
         <FormControl
           v-model="registerForm.nome_utilizador"
           name="nome_utilizador"
-          class="rounded border-slate-600 bg-slate-700 text-teal-400"
+          class="rounded"
           required
         />
       </FormField>
@@ -71,18 +72,28 @@ const submitRegister = async () => {
           v-model="registerForm.email"
           type="email"
           name="email"
-          class="rounded border-slate-600 bg-slate-700 text-teal-400"
+          class="rounded"
+          required
+        />
+
+      <!-- Campo Telemóvel -->
+      <FormField label="Telemóvel:" label-class="text-gray-600 text-sm">
+        <FormControl
+          v-model="registerForm.numero_telemovel"
+          type="tel"
+          name="numero_telemovel"
+          class="rounded"
           required
         />
       </FormField>
 
       <!-- Campo Password -->
-      <FormField label="Password:" label-class="text-gray-400 text-sm">
+      <FormField label="Password:" label-class="text-gray-600 text-sm">
         <FormControl
           v-model="registerForm.password"
           type="password"
           name="password"
-          class="rounded border-slate-600 bg-slate-700 text-teal-400"
+          class="rounded"
           required
         />
       </FormField>
@@ -104,14 +115,3 @@ const submitRegister = async () => {
     </CardBox>
   </div>
 </template>
-
-<style scoped>
-/* Estilos adicionais se necessário */
-input[type='text'],
-input[type='email'],
-input[type='password'] {
-  background-color: rgb(55, 65, 81);
-  border-color: rgb(30, 41, 59);
-  color: #2dd4bf; /* text-teal-400 */
-}
-</style>

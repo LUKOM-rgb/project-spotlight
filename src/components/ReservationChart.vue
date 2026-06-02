@@ -51,14 +51,16 @@ const form = reactive({
 async function submitReservation() {
   try {
     const res = await fetch(
-      `http://localhost:3000/api/reservas/${props.selectedSpotId}/reservas`,
+      `http://localhost:3000/api/reservas/${props.selectedSpotId}/`,
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+
         },
         body: JSON.stringify({
-          data: form.date,
+          data_evento: form.date,
           hora_inicio: form.startTime,
           hora_fim: form.endTime
         })
@@ -81,7 +83,12 @@ async function getReservations() {
   if (!form.date || !props.selectedSpotId) return
 
   const res = await fetch(
-    `http://localhost:3000/api/reservas/spot/${props.selectedSpotId}/?date=${form.date}`
+    `http://localhost:3000/api/reservas/spot/${props.selectedSpotId}/?date=${form.date}`,(
+      {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
   )
 
   // No reservations for this day
@@ -137,8 +144,14 @@ async function fetchSpotData() {
   if (!props.selectedSpotId) return
 
   const res = await fetch(
-    `http://localhost:3000/api/spots/${props.selectedSpotId}`
-  )
+    `http://localhost:3000/api/spots/${props.selectedSpotId}`,(
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    ))
+
 
   const spot = await res.json()
 
