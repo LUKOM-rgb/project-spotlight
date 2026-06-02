@@ -6,6 +6,7 @@ import {
   mdiEmail,
   mdiMusicNote,
   mdiAccountGroup,
+  mdiAccountMusic,
   mdiLogout,
   mdiAccountCircle,
   mdiThemeLightDark,
@@ -26,8 +27,8 @@ const navItems = [
     label: 'Perfil',
     action: () => router.push('/Profile'),
   },
-  { icon: mdiAccountGroup, label: 'Comunidade', action: () => router.push('/tables') },
-  { icon: mdiMusicNote, label: 'Música', action: () => router.push('/') },
+  { icon: mdiAccountMusic, label: 'Artistas', action: () => router.push('/tables') },
+  { icon: mdiMusicNote, label: 'Música', action: () => router.push('/Spots') },
   { icon: mdiThemeLightDark, label: 'Modo', action: toggleDarkMode },
 ]
 

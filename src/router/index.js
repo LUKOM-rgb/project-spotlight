@@ -15,7 +15,7 @@ const routes = [
   },
   {
     meta: {
-      title: 'Tables',
+      title: 'Artistas',
       requiresAuth: true
     },
     path: '/tables',
@@ -57,15 +57,7 @@ const routes = [
     name: 'reservas',
     component: () => import('@/views/ReservasView.vue'),
   },
-  {
-    meta: {
-      title: 'Responsive layout',
-      requiresAuth: true
-    },
-    path: '/responsive',
-    name: 'responsive',
-    component: () => import('@/views/ResponsiveView.vue'),
-  },
+
   {
     meta: {
       title: 'Login',
@@ -91,15 +83,7 @@ const routes = [
     path: '/error',
     name: 'error',
     component: () => import('@/views/ErrorView.vue'),
-  },
-  {
-    meta: {
-      title: 'Error',
-    },
-    path: '/error',
-    name: 'error',
-    component: () => import('@/views/PerfiladminView.vue'),
-  },
+  }
 ]
 
 const router = createRouter({

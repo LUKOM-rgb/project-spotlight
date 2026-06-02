@@ -2,12 +2,13 @@
 import { reactive, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/api/axios'
-import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
+import Navbar from '@/components/NavBar.vue'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
 import FormField from '@/components/FormField.vue'
 import FormControl from '@/components/FormControl.vue'
 import BaseButton from '@/components/BaseButton.vue'
+import AdminPanel from '@/components/AdminPanel.vue'
 
 const authStore = useAuthStore()
 
@@ -84,14 +85,15 @@ const submitArtist = async () => {
 </script>
 
 <template>
-  <LayoutAuthenticated hide-aside>
-    <SectionMain class="min-h-screen">
-      
+  <SectionMain class="min-h-screen bg-[#f5f0e6] transition-colors dark:bg-slate-900">
+    <Navbar />
+    
+    <div class="p-4">
       <!-- Cabeçalho -->
       <div class="mb-8 flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <h1 class="text-3xl font-light tracking-widest text-teal-400">O MEU PERFIL</h1>
-          <div v-if="authStore.user?.tipo === 'artista'" class="flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1 text-sm font-semibold text-teal-400">
+          <h1 class="text-3xl font-light tracking-widest text-teal-400 dark:text-teal-300">O MEU PERFIL</h1>
+          <div v-if="authStore.user?.tipo === 'artista'" class="flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1 text-sm font-semibold text-teal-400 dark:text-teal-300">
             <span>🌟 Artista Reconhecido</span>
           </div>
         </div>
@@ -107,14 +109,14 @@ const submitArtist = async () => {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         <!-- Coluna 1: Dados Pessoais -->
-        <CardBox class="shadow-xl" is-form @submit.prevent="submitProfile">
-          <h2 class="mb-6 text-xl font-semibold text-gray-900">Dados Pessoais</h2>
+        <CardBox class="shadow-xl dark:bg-slate-800" is-form @submit.prevent="submitProfile">
+          <h2 class="mb-6 text-xl font-semibold text-gray-900 dark:text-white">Dados Pessoais</h2>
           
-          <div v-if="profileMessage" class="mb-4 rounded bg-teal-500/10 p-3 text-teal-400 text-sm border border-teal-500/20 text-center">
+          <div v-if="profileMessage" class="mb-4 rounded bg-teal-500/10 p-3 text-teal-400 text-sm border border-teal-500/20 text-center dark:text-teal-300">
             {{ profileMessage }}
           </div>
 
-          <FormField label="Nome de Utilizador:" label-class="text-gray-600">
+          <FormField label="Nome de Utilizador:" label-class="text-gray-600 dark:text-gray-300">
             <FormControl
               v-model="profileForm.nome_utilizador"
               name="nome"
@@ -123,7 +125,7 @@ const submitArtist = async () => {
             />
           </FormField>
 
-          <FormField label="E-mail:" label-class="text-gray-600">
+          <FormField label="E-mail:" label-class="text-gray-600 dark:text-gray-300">
             <FormControl
               v-model="profileForm.email"
               type="email"
@@ -133,7 +135,7 @@ const submitArtist = async () => {
             />
           </FormField>
 
-          <FormField label="Telemóvel:" label-class="text-gray-600">
+          <FormField label="Telemóvel:" label-class="text-gray-600 dark:text-gray-300">
             <FormControl
               v-model="profileForm.numero_telemovel"
               type="tel"
@@ -204,8 +206,10 @@ const submitArtist = async () => {
             />
           </div>
         </CardBox>
-
       </div>
-    </SectionMain>
-  </LayoutAuthenticated>
+
+      <!-- Admin Panel condicional -->
+      <AdminPanel v-if="authStore.user?.tipo === 'admin'" />
+    </div>
+  </SectionMain>
 </template>
