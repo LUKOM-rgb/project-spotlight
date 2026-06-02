@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { useDarkModeStore } from '@/stores/darkMode.js'
+import { useAuthStore } from '@/stores/auth.js'
 import {
   mdiEmail,
   mdiMusicNote,
@@ -31,7 +32,13 @@ const navItems = [
 ]
 
 const logout = () => {
+  const authStore = useAuthStore()
+
+  authStore.token = null
+  authStore.user = null
+
   localStorage.removeItem('token')
+
   router.push('/login')
 }
 </script>

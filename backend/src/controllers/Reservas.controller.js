@@ -1,5 +1,5 @@
 import Reservas from '../Models/reservas.js'
-
+import Spot from '../Models/spot.js'
 // Get all reservas
 export const getAllReservas = async (req, res) => {
   try {

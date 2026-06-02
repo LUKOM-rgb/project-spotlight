@@ -16,5 +16,5 @@ router.get('/spot/:spotId', getReservasBySpotId,verifyToken)
 router.get('/artista/:artistaId', getReservasByArtistaId,verifyToken)
 router.delete('/:id', verifyToken, isArtista, deleteReservaById)
 router.patch('/:id', verifyToken, isArtista, updateReservaById)
-router.post('/:id/reservas', verifyToken,isArtista, createReserva)
+router.post('/:id/', verifyToken,isArtista, createReserva)
 export default router
