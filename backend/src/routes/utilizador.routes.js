@@ -2,6 +2,7 @@ import express from 'express';
 import { 
   getAllUtilizadores, 
   getUtilizadorById, 
+  getMyProfile,
   updateProfile, 
   deleteUtilizador,
   changeUtilizadorRole
@@ -12,18 +13,17 @@ import { register, login } from '../controllers/auth.controller.js';
 const router = express.Router();
 
 // Rotas de Autenticação e Registo
-router.post('/', register);                                           // Registar utilizador (POST /users)
-router.post('/login', login);                                         // Login utilizador (POST /users/login)
+router.post('/', register);                                          
+router.post('/login', login);                                       
 
 // Rotas de Gestão de Utilizadores e Perfis
-router.get('/', getAllUtilizadores);                                         // Mostrar todos (com filtros na query)
-router.get('/:id', verifyToken, isAdmin, getUtilizadorById);                // Mostrar info de um específico (Admin)
-router.patch('/me', verifyToken, updateProfile);                      // Mudar dados do próprio perfil
-router.delete('/:id', verifyToken, isAdmin, deleteUtilizador);              // Apagar utilizador (Admin)
+router.get('/', getAllUtilizadores);                                         
+router.get('/me', verifyToken, getMyProfile);
+router.get('/:id', verifyToken, isAdmin, getUtilizadorById);                
+router.patch('/me', verifyToken, updateProfile);                      
+router.delete('/:id', verifyToken, isAdmin, deleteUtilizador);              
 
 // Rotas de transição de Role (REST API)
-router.patch('/:id/role', changeUtilizadorRole);                            // Mudar role (tipo) da conta
-
-// (Rotas de artistas foram removidas e movidas para /api/artistas)
+router.patch('/:id/role', changeUtilizadorRole);                          
 
 export default router;
