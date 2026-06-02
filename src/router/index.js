@@ -42,14 +42,6 @@ const routes = [
   },
   {
     meta: {
-      title: 'Ui',
-    },
-    path: '/ui',
-    name: 'ui',
-    component: () => import('@/views/UiView.vue'),
-  },
-  {
-    meta: {
       title: 'Spots',
       requiresAuth: true
     },
