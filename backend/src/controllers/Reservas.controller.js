@@ -85,8 +85,16 @@ export const getReservasByArtistaId = async (req, res, next) => {
 export const updateReservaById = async (req, res, next) => {
   try {
     const { id } = req.params
+    const id_artista = req.utilizador.id_artista
+
     const { data_evento, hora_inicio, hora_fim } = req.body
-    const reserva = await Reservas.findByPk(id)
+    // Verificar se a reserva existe e se pertence ao artista
+    const reserva = await Reservas.findOne({
+      where: {
+        id_reserva: id,
+        id_artista,
+      },
+    })
     if (!reserva) {
       throw notFoundError('Reserva', id)
     }
@@ -148,7 +156,14 @@ export const updateReservaById = async (req, res, next) => {
 export const deleteReservaById = async (req, res, next) => {
   try {
     const { id } = req.params
-    const reserva = await Reservas.findByPk(id)
+    const id_artista = req.utilizador.id_artista
+    // Verificar se a reserva existe e se pertence ao artista
+    const reserva = await Reservas.findOne({
+      where: {
+        id_reserva: id,
+        id_artista,
+      },
+    })
     if (!reserva) {
       throw notFoundError('Reserva', id)
     }
