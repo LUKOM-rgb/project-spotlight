@@ -7,33 +7,22 @@ import { validationError, notFoundError, conflictError } from '../utils/error.ut
 // 1. Criar Artista (Registo de um novo Artista)
 export const createArtist = async (req, res, next) => {
   try {
-    const { 
-      email, 
-      password, 
-      nome_utilizador, 
-      numero_telemovel, 
-      numero_licenca, 
-      validade_licenca, 
-      categoria_id 
+    const id_utilizador= req.utilizador.sub;
+
+    const {
+      numero_licenca,
+      validade_licenca,
+      categoria_id
     } = req.body;
 
     // Validação básica
     const errors = {};
-    if (!email) errors.email = ['O campo email é obrigatório.'];
-    if (!password || password.length < 6) errors.password = ['A password deve ter pelo menos 6 caracteres.'];
-    if (!nome_utilizador) errors.nome_utilizador = ['O campo nome_utilizador é obrigatório.'];
     if (!numero_licenca) errors.numero_licenca = ['O campo numero_licenca é obrigatório.'];
     if (!validade_licenca) errors.validade_licenca = ['O campo validade_licenca é obrigatório.'];
     if (!categoria_id) errors.categoria_id = ['O campo categoria_id é obrigatório.'];
 
     if (Object.keys(errors).length > 0) {
       throw validationError(errors);
-    }
-
-    // Verificar se o email já existe
-    const existingAccount = await Utilizador.findOne({ where: { email } });
-    if (existingAccount) {
-      throw conflictError('Este email já está registado.');
     }
 
     // Criar o registo do Artista primeiro
@@ -43,17 +32,13 @@ export const createArtist = async (req, res, next) => {
       categoria_id
     });
 
-    // Cifrar a password e criar a Utilizador ligada ao Artista
-    const hashedPassword = await hashPassword(password);
-    const novaConta = await Utilizador.create({
-      email,
-      password: hashedPassword,
-      tipo: 'artista',
-      data_registo: new Date(),
-      nome_utilizador,
-      numero_telemovel,
-      id_artista: novoArtista.id_artista
-    });
+    const novaConta = await Utilizador.findOne({ where: { id_utilizador } });
+    if (!novaConta) {
+      throw notFoundError('Conta de Utilizador', id_utilizador);
+    }
+    novaConta.id_artista = novoArtista.id_artista;
+    novaConta.tipo = 'artista';
+    await novaConta.save();
 
     return res.status(201).json({
       message: 'Artista criado com sucesso!',
@@ -87,15 +72,12 @@ export const getAllArtists = async (req, res, next) => {
 // 3. Mostrar info de um Artista específico
 export const getArtistById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const conta = await Utilizador.findOne({
-      where: { id_utilizador: id, tipo: 'artista' },
-      attributes: { exclude: ['password'] },
-      include: [{ model: Artista }]
-    });
+    const { id_artista } = req.params;
+    const conta = await Utilizador.findOne({where: { id_artista: id_artista, tipo: 'artista' },attributes: { exclude: ['password', 'id_artista'] },
+      include: [{ model: Artista}],});
 
     if (!conta) {
-      throw notFoundError('Artista', id);
+      throw notFoundError('Artista', id_artista);
     }
 
     return res.status(200).json(conta);
@@ -107,24 +89,14 @@ export const getArtistById = async (req, res, next) => {
 // 4. Mudar dados do Artista
 export const updateArtist = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { nome_utilizador, numero_telemovel, numero_licenca, validade_licenca, categoria_id } = req.body;
+    const { id_artista } = req.utilizador.id_artista ? req.utilizador : req.params; // Se for artista, pega do token, senão adicionar id
+    const { numero_licenca, validade_licenca, categoria_id } = req.body;
 
-    const conta = await Utilizador.findOne({ where: { id_utilizador: id, tipo: 'artista' } });
-    if (!conta || !conta.id_artista) {
-      throw notFoundError('Conta de Artista', id);
-    }
 
-    const artista = await Artista.findByPk(conta.id_artista);
+    const artista = await Artista.findByPk(id_artista);
     if (!artista) {
-      throw notFoundError('Perfil de Artista', conta.id_artista);
+      throw notFoundError('Perfil de Artista', id_artista);
     }
-
-    // Atualizar Utilizador
-    await conta.update({
-      nome_utilizador: nome_utilizador || conta.nome_utilizador,
-      numero_telemovel: numero_telemovel !== undefined ? numero_telemovel : conta.numero_telemovel
-    });
 
     // Atualizar Artista
     await artista.update({
@@ -133,28 +105,27 @@ export const updateArtist = async (req, res, next) => {
       categoria_id: categoria_id || artista.categoria_id
     });
 
-    return res.status(200).json({ message: 'Dados de artista atualizados com sucesso!', conta });
+    return res.status(200).json({ message: 'Dados de artista atualizados com sucesso!', data: artista });
   } catch (error) {
     next(error);
   }
 };
 
-// 5. Apagar Artista
+// 5. Apagar Artista, no admin o parametro é o id de artista CUIDADO
 export const deleteArtist = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const conta = await Utilizador.findOne({ where: { id_utilizador: id, tipo: 'artista' } });
-    
+    const { id_artista } = req.params;
+    const conta = await Utilizador.findOne({ where: { id_artista: id_artista} });
+
     if (!conta) {
-      throw notFoundError('Artista', id);
+      throw notFoundError('Artista', id_artista);
     }
+    conta.tipo = 'utilizador'; // Reverter tipo para 'utilizador' antes de apagar o artista
+    conta.id_artista = null; // Desassociar o artista da conta
+    await conta.save();
 
     // Destruir Artista primeiro, depois a Conta (ou a BD faz cascade se configurado, mas vamos forçar)
-    const idArtista = conta.id_artista;
-    await conta.destroy();
-    if (idArtista) {
-      await Artista.destroy({ where: { id_artista: idArtista } });
-    }
+      await Artista.destroy({ where: { id_artista: id_artista } });
 
     return res.status(200).json({ message: `Artista ${conta.nome_utilizador} removido com sucesso!` });
   } catch (error) {

@@ -49,3 +49,13 @@ export const isArtista = (req, res, next) => {
   }
   next();
 };
+
+export const isUtilizador = (req, res, next) => {
+  if (!req.utilizador) {
+    return next(unauthorizedError('Utilizador não autenticado.'));
+  }
+  if (req.utilizador.role !== 'utilizador') {
+    return next(forbiddenError('Acesso Proibido. Apenas utilizadores têm permissão para realizar esta ação.'));
+  }
+  next();
+};

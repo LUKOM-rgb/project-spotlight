@@ -32,14 +32,24 @@ const rapporteurItems = ref([])
 
 onMounted(async () => {
   try {
-    const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
-    const headers = {}
+<<<<<<< Updated upstream
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
+    const response = await fetch('http://localhost:3000/api/ocorrencias', (
+      headers = {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${localStorage.getItem('token')}`,
+      }
+    ))
+=======
     const response = await fetch('http://localhost:3000/api/ocorrencias', {
-      headers,
-    })
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    }
+  )
+>>>>>>> Stashed changes
     const result = await response.json()
     if (result && result.data && Array.isArray(result.data)) {
       rapporteurItems.value = result.data.map(ocorr => ({
@@ -133,44 +143,34 @@ const goToOcorrenciasPage = (page) => {
           Reservations
         </h2>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-          <div
-            v-for="reservation in paginatedReservations"
-            :key="reservation.id"
-            class="cursor-pointer rounded-lg bg-[#40798C] p-3 text-white shadow-sm transition-all hover:bg-[#0B2027]"
-          >
+          <div v-for="reservation in paginatedReservations" :key="reservation.id"
+            class="cursor-pointer rounded-lg bg-[#40798C] p-3 text-white shadow-sm transition-all hover:bg-[#0B2027]">
             <p class="text-sm font-medium">{{ reservation.name }}</p>
             <p class="text-xs opacity-75">{{ reservation.date }}</p>
           </div>
         </div>
 
         <!-- Pagination for Reservations -->
-        <div v-if="reservations.length > 9" class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 shadow-md dark:border-slate-700 dark:bg-slate-900/50 mt-4">
+        <div v-if="reservations.length > 9"
+          class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 shadow-md dark:border-slate-700 dark:bg-slate-900/50 mt-4">
           <div class="flex gap-1">
             <button
               class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="reservationsPage === 1"
-              @click="goToReservationsPage(reservationsPage - 1)"
-            >
+              :disabled="reservationsPage === 1" @click="goToReservationsPage(reservationsPage - 1)">
               <BaseIcon :path="mdiChevronLeft" size="16" />
             </button>
-            <button
-              v-for="page in reservationsTotalPages"
-              :key="page"
-              :class="[
-                'rounded px-2.5 py-1 text-xs font-bold transition-colors',
-                reservationsPage === page
-                  ? 'bg-[#40798C] text-white'
-                  : 'border border-[#40798C] bg-white text-[#40798C]',
-              ]"
-              @click="goToReservationsPage(page)"
-            >
+            <button v-for="page in reservationsTotalPages" :key="page" :class="[
+              'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+              reservationsPage === page
+                ? 'bg-[#40798C] text-white'
+                : 'border border-[#40798C] bg-white text-[#40798C]',
+            ]" @click="goToReservationsPage(page)">
               {{ page }}
             </button>
             <button
               class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="reservationsPage === reservationsTotalPages"
-              @click="goToReservationsPage(reservationsPage + 1)"
-            >
+              @click="goToReservationsPage(reservationsPage + 1)">
               <BaseIcon :path="mdiChevronRight" size="16" />
             </button>
           </div>
@@ -183,15 +183,11 @@ const goToOcorrenciasPage = (page) => {
           Ocorrências
         </h2>
         <div class="space-y-3">
-          <div
-            v-for="item in paginatedOcorrencias"
-            :key="item.id"
-            class="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-4 shadow-md transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
-          >
+          <div v-for="item in paginatedOcorrencias" :key="item.id"
+            class="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-4 shadow-md transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800">
             <div class="flex items-center gap-3">
               <div
-                class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#40798C] bg-[#e8e0d0]"
-              >
+                class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#40798C] bg-[#e8e0d0]">
                 <img src="/src/img/Logo.png" class="h-6 w-6 object-contain" />
               </div>
               <div>
@@ -205,54 +201,43 @@ const goToOcorrenciasPage = (page) => {
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <span
-                v-for="tag in item.tags"
-                :key="tag"
-                :class="[
-                  'rounded px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider shadow-sm',
-                  tag === 'resolvida'
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
-                    : tag === 'em progresso'
+              <span v-for="tag in item.tags" :key="tag" :class="[
+                'rounded px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider shadow-sm',
+                tag === 'resolvida'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
+                  : tag === 'em progresso'
                     ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400'
                     : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400'
-                ]"
-              >
+              ]">
                 {{ tag }}
               </span>
-              <button class="rounded-full bg-gray-100 p-1.5 text-slate-600 transition-colors hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">
+              <button
+                class="rounded-full bg-gray-100 p-1.5 text-slate-600 transition-colors hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">
                 <BaseIcon :path="mdiEye" size="16" />
               </button>
             </div>
           </div>
 
           <!-- Pagination for Ocorrências -->
-          <div v-if="rapporteurItems.length > 5" class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 shadow-md dark:border-slate-700 dark:bg-slate-900/50 mt-4">
+          <div v-if="rapporteurItems.length > 5"
+            class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 shadow-md dark:border-slate-700 dark:bg-slate-900/50 mt-4">
             <div class="flex gap-1">
               <button
                 class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="ocorrenciasPage === 1"
-                @click="goToOcorrenciasPage(ocorrenciasPage - 1)"
-              >
+                :disabled="ocorrenciasPage === 1" @click="goToOcorrenciasPage(ocorrenciasPage - 1)">
                 <BaseIcon :path="mdiChevronLeft" size="16" />
               </button>
-              <button
-                v-for="page in ocorrenciasTotalPages"
-                :key="page"
-                :class="[
-                  'rounded px-2.5 py-1 text-xs font-bold transition-colors',
-                  ocorrenciasPage === page
-                    ? 'bg-[#40798C] text-white'
-                    : 'border border-[#40798C] bg-white text-[#40798C]',
-                ]"
-                @click="goToOcorrenciasPage(page)"
-              >
+              <button v-for="page in ocorrenciasTotalPages" :key="page" :class="[
+                'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+                ocorrenciasPage === page
+                  ? 'bg-[#40798C] text-white'
+                  : 'border border-[#40798C] bg-white text-[#40798C]',
+              ]" @click="goToOcorrenciasPage(page)">
                 {{ page }}
               </button>
               <button
                 class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="ocorrenciasPage === ocorrenciasTotalPages"
-                @click="goToOcorrenciasPage(ocorrenciasPage + 1)"
-              >
+                :disabled="ocorrenciasPage === ocorrenciasTotalPages" @click="goToOcorrenciasPage(ocorrenciasPage + 1)">
                 <BaseIcon :path="mdiChevronRight" size="16" />
               </button>
             </div>
@@ -266,9 +251,7 @@ const goToOcorrenciasPage = (page) => {
           Artists
         </h2>
         <CardBox class="overflow-hidden border-none bg-white shadow-lg dark:bg-slate-800">
-          <div
-            class="grid grid-cols-12 gap-2 bg-[#40798C] p-3 text-xs font-bold text-white uppercase"
-          >
+          <div class="grid grid-cols-12 gap-2 bg-[#40798C] p-3 text-xs font-bold text-white uppercase">
             <div class="col-span-3">Name</div>
             <div class="col-span-2">Genre</div>
             <div class="col-span-3">Category</div>
@@ -276,18 +259,15 @@ const goToOcorrenciasPage = (page) => {
             <div class="col-span-2 text-right">Actions</div>
           </div>
           <div class="divide-y divide-gray-100 dark:divide-slate-700">
-            <div
-              v-for="artist in artists"
-              :key="artist.id"
-              class="grid grid-cols-12 items-center gap-2 p-3 text-sm hover:bg-gray-50 dark:hover:bg-slate-700/50"
-            >
+            <div v-for="artist in artists" :key="artist.id"
+              class="grid grid-cols-12 items-center gap-2 p-3 text-sm hover:bg-gray-50 dark:hover:bg-slate-700/50">
               <div class="col-span-3 flex items-center gap-2">
                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
                   <BaseIcon :path="mdiAccount" size="14" class="text-gray-500" />
                 </div>
                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">{{
                   artist.name
-                }}</span>
+                  }}</span>
               </div>
               <div class="col-span-2 text-xs text-gray-500">{{ artist.genre }}</div>
               <div class="col-span-3 text-xs text-gray-500">{{ artist.category }}</div>
@@ -304,29 +284,20 @@ const goToOcorrenciasPage = (page) => {
           </div>
           <div class="flex items-center justify-between bg-gray-50 p-3 dark:bg-slate-900/50">
             <div class="flex gap-1">
-              <button
-                class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027]"
-                @click="goToPage(currentPage - 1)"
-              >
+              <button class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027]"
+                @click="goToPage(currentPage - 1)">
                 <BaseIcon :path="mdiChevronLeft" size="16" />
               </button>
-              <button
-                v-for="page in totalPages"
-                :key="page"
-                :class="[
-                  'rounded px-2.5 py-1 text-xs font-bold transition-colors',
-                  currentPage === page
-                    ? 'bg-[#40798C] text-white'
-                    : 'border border-[#40798C] bg-white text-[#40798C]',
-                ]"
-                @click="goToPage(page)"
-              >
+              <button v-for="page in totalPages" :key="page" :class="[
+                'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+                currentPage === page
+                  ? 'bg-[#40798C] text-white'
+                  : 'border border-[#40798C] bg-white text-[#40798C]',
+              ]" @click="goToPage(page)">
                 {{ page }}
               </button>
-              <button
-                class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027]"
-                @click="goToPage(currentPage + 1)"
-              >
+              <button class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027]"
+                @click="goToPage(currentPage + 1)">
                 <BaseIcon :path="mdiChevronRight" size="16" />
               </button>
             </div>
