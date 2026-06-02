@@ -10,8 +10,8 @@ import {
 import { verifyToken, isAdmin } from '../middlewares/auth.middleware.js';
 const router = express.Router()
 
-// Apenas administradores podem ver, alterar, adicionar e eliminar relatórios de ocorrências
-router.post('/', verifyToken, isAdmin, createOcorrencia)
+// Criar ocorrências está disponível para qualquer utilizador (autenticado ou visitante)
+router.post('/', createOcorrencia)
 router.get('/', verifyToken, isAdmin, getAllOcorrencias)
 router.get('/:id', verifyToken, isAdmin, getOcorrenciaById)
 router.patch('/:id/', verifyToken, isAdmin, updateEstadoOcorrencia)

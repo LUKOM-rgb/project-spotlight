@@ -187,7 +187,7 @@ const submit = async () => {
           <BaseIcon :path="mdiBallotOutline" size="20" />
           Preencha os dados da Ocorrência
         </h2>
-        <CardBox form @submit.prevent="submit" class="border-none bg-white shadow-lg dark:bg-slate-800 rounded-lg">
+        <CardBox is-form @submit.prevent="submit" class="border-none bg-white shadow-lg dark:bg-slate-800 rounded-lg">
           
           <!-- Secção informativa do utilizador ativo -->
           <div

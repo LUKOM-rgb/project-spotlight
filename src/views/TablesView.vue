@@ -32,7 +32,14 @@ const rapporteurItems = ref([])
 
 onMounted(async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/ocorrencias')
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+    const headers = {}
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    const response = await fetch('http://localhost:3000/api/ocorrencias', {
+      headers,
+    })
     const result = await response.json()
     if (result && result.data && Array.isArray(result.data)) {
       rapporteurItems.value = result.data.map(ocorr => ({
