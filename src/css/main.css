@@ -3,7 +3,7 @@
 
 @source inline('style-{basic,white}');
 
-@custom-variant dark (&:where(.dark, .dark *));
+@variant dark (.dark &);
 
 @theme {
   --transition-position: right, left, top, bottom, margin, padding;

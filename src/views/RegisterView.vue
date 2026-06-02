@@ -41,7 +41,7 @@ const submitRegister = async () => {
 <template>
   <div class="flex min-h-screen items-center justify-center bg-amber-50 p-4">
     <CardBox
-      class="w-full max-w-md rounded-lg shadow-xl"
+      class="w-full max-w-md rounded-lg shadow-xl bg-white"
       is-form
       @submit.prevent="submitRegister"
     >
@@ -57,43 +57,44 @@ const submitRegister = async () => {
       </div>
 
       <!-- Campo Nome -->
-      <FormField label="Nome de Utilizador:" label-class="text-gray-400 text-sm">
+      <FormField label="Nome de Utilizador:" label-class="text-teal-400 text-sm font-semibold">
         <FormControl
           v-model="registerForm.nome_utilizador"
           name="nome_utilizador"
-          class="rounded"
+          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>
 
       <!-- Campo E-mail -->
-      <FormField label="Email:" label-class="text-gray-400 text-sm">
+      <FormField label="Email:" label-class="text-teal-400 text-sm font-semibold">
         <FormControl
           v-model="registerForm.email"
           type="email"
           name="email"
-          class="rounded"
+          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
+      </FormField>
 
       <!-- Campo Telemóvel -->
-      <FormField label="Telemóvel:" label-class="text-gray-600 text-sm">
+      <FormField label="Telemóvel:" label-class="text-teal-400 text-sm font-semibold">
         <FormControl
           v-model="registerForm.numero_telemovel"
           type="tel"
           name="numero_telemovel"
-          class="rounded"
+          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>
 
       <!-- Campo Password -->
-      <FormField label="Password:" label-class="text-gray-600 text-sm">
+      <FormField label="Password:" label-class="text-teal-400 text-sm font-semibold">
         <FormControl
           v-model="registerForm.password"
           type="password"
           name="password"
-          class="rounded"
+          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>
