@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/HomeView.vue'
+import { useAuthStore } from '@/stores/auth.js'
 
 const routes = [
 
   {
-
     meta: {
       title: 'Dashboard',
+      requiresAuth: true
     },
     path: '/',
     name: 'dashboard',
@@ -15,6 +16,7 @@ const routes = [
   {
     meta: {
       title: 'Tables',
+      requiresAuth: true
     },
     path: '/tables',
     name: 'tables',
@@ -23,6 +25,7 @@ const routes = [
   {
     meta: {
       title: 'Forms',
+      requiresAuth: true
     },
     path: '/forms',
     name: 'forms',
@@ -31,6 +34,7 @@ const routes = [
   {
     meta: {
       title: 'Profile',
+      requiresAuth: true
     },
     path: '/profile',
     name: 'profile',
@@ -39,6 +43,7 @@ const routes = [
   {
     meta: {
       title: 'Spots',
+      requiresAuth: true
     },
     path: '/spots',
     name: 'spots',
@@ -55,6 +60,7 @@ const routes = [
   {
     meta: {
       title: 'Responsive layout',
+      requiresAuth: true
     },
     path: '/responsive',
     name: 'responsive',
@@ -63,10 +69,20 @@ const routes = [
   {
     meta: {
       title: 'Login',
+      guestOnly: true
     },
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
+  },
+  {
+    meta: {
+      title: 'Register',
+      guestOnly: true
+    },
+    path: '/register',
+    name: 'register',
+    component: () => import('@/views/RegisterView.vue'),
   },
   {
     meta: {
@@ -92,6 +108,29 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { top: 0 }
   },
+})
+
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // Se o utilizador tem token mas ainda não tem os dados carregados na store
+  if (authStore.token && !authStore.user) {
+    await authStore.fetchUser()
+  }
+
+  const isAuthenticated = !!authStore.token
+
+  // Rotas que exigem estar autenticado (placeholder para o futuro, para já protege a dashboard)
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/login')
+  } 
+  // Rotas exclusivas para não autenticados (ex: Login, Registar)
+  else if (to.meta.guestOnly && isAuthenticated) {
+    next('/')
+  } 
+  else {
+    next()
+  }
 })
 
 export default router

@@ -45,6 +45,25 @@ export const getUtilizadorById = async (req, res, next) => {
   }
 };
 
+// 2.5. Mostrar info do próprio utilizador (GET /me)
+export const getMyProfile = async (req, res, next) => {
+  try {
+    const id = req.utilizador.sub;
+    const conta = await Utilizador.findByPk(id, {
+      attributes: { exclude: ['password'] },
+      include: [{ model: Artista }]
+    });
+
+    if (!conta) {
+      throw notFoundError('Utilizador', id);
+    }
+
+    return res.status(200).json(conta);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // 3. Mudar dados do próprio perfil (PATCH /me)
 export const updateProfile = async (req, res, next) => {
   try {

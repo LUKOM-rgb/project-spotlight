@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { menuAsideMain, menuAsideBottom } from '@/menuAside.js'
 import menuNavBar from '@/menuNavBar.js'
 import { useDarkModeStore } from '@/stores/darkMode.js'
+import { useAuthStore } from '@/stores/auth.js'
 import BaseIcon from '@/components/BaseIcon.vue'
 import FormControl from '@/components/FormControl.vue'
 import NavBar from '@/components/NavBar.vue'
@@ -16,6 +17,7 @@ import PremiumVersionBadge from '@/components/PremiumVersionBadge.vue'
 const layoutAsidePadding = 'xl:pl-60'
 
 const darkModeStore = useDarkModeStore()
+const authStore = useAuthStore()
 
 const router = useRouter()
 
@@ -33,7 +35,7 @@ const menuClick = (event, item) => {
   }
 
   if (item.isLogout) {
-    alert('Logout clicked')
+    authStore.logout()
   }
 }
 </script>

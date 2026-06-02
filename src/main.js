@@ -11,7 +11,10 @@ import './css/main.css'
 const pinia = createPinia()
 
 // Create Vue app
-createApp(App).use(router).use(pinia).mount('#app')
+const app = createApp(App)
+app.use(pinia)
+app.use(router)
+app.mount('#app')
 
 // Init main store
 const mainStore = useMainStore(pinia)
@@ -21,11 +24,11 @@ mainStore.fetchSampleClients()
 mainStore.fetchSampleHistory()
 
 // Dark mode
-// Uncomment, if you'd like to restore persisted darkMode setting, or use `prefers-color-scheme: dark`.
-// import { useDarkModeStore } from '@/stores/darkMode'
+// Dark mode
+import { useDarkModeStore } from '@/stores/darkMode.js'
 
-// const darkModeStore = useDarkModeStore(pinia)
-// darkModeStore.init()
+const darkModeStore = useDarkModeStore(pinia)
+darkModeStore.set(true)
 
 // Default title tag
 const defaultDocumentTitle = 'Admin One Vue 3 Tailwind'
