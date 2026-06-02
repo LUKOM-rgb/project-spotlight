@@ -1,170 +1,262 @@
 <script setup>
-import { reactive, ref } from 'vue'
-import { mdiBallotOutline, mdiAccount, mdiMail, mdiGithub } from '@mdi/js'
+import { reactive, ref, onMounted, computed } from 'vue'
+import { mdiBallotOutline, mdiAccount, mdiCalendar, mdiClock, mdiMapMarker } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
-import FormCheckRadioGroup from '@/components/FormCheckRadioGroup.vue'
-import FormFilePicker from '@/components/FormFilePicker.vue'
 import FormField from '@/components/FormField.vue'
 import FormControl from '@/components/FormControl.vue'
 import BaseDivider from '@/components/BaseDivider.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseButtons from '@/components/BaseButtons.vue'
-import SectionTitle from '@/components/SectionTitle.vue'
-import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
-import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
-import NotificationBarInCard from '@/components/NotificationBarInCard.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
+import Navbar from '@/components/NavBar.vue'
 
-const selectOptions = [
-  { id: 1, label: 'Business development' },
-  { id: 2, label: 'Marketing' },
-  { id: 3, label: 'Sales' },
-]
+const spotsList = ref([])
+const successMessage = ref('')
+const errorMessage = ref('')
+const loggedInUser = ref(null)
 
 const form = reactive({
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '',
-  department: selectOptions[0],
-  subject: '',
-  question: '',
+  selectedSpot: null,
+  data_ocorrencia: '',
+  hora_ocorrencia: '',
+  descricao_ocorrencia: '',
 })
 
-const customElementsForm = reactive({
-  checkbox: ['lorem'],
-  radio: 'one',
-  switch: ['one'],
-  file: null,
-})
-
-const submit = () => {
-  //
+// Função para descodificar o token JWT
+const decodeToken = (token) => {
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    return JSON.parse(jsonPayload)
+  } catch (error) {
+    console.error('Erro ao descodificar o token:', error)
+    return null
+  }
 }
 
-const formStatusWithHeader = ref(true)
+// Mapeamento dos spots (ID único) obtidos da BD para o formato do FormControl
+const spotsOptions = computed(() =>
+  spotsList.value.map((s) => ({
+    id: s.id_spot,
+    label: String(s.id_spot),
+  }))
+)
 
-const formStatusCurrent = ref(0)
+// Carregar spots e verificar token do utilizador ao montar o componente
+onMounted(async () => {
+  const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+  if (token) {
+    const decoded = decodeToken(token)
+    if (decoded && decoded.sub) {
+      loggedInUser.value = {
+        id: decoded.sub,
+        email: decoded.email,
+        role: decoded.role,
+      }
+    }
+  }
 
-const formStatusOptions = ['info', 'success', 'danger', 'warning']
+  try {
+    const spotsRes = await fetch('http://localhost:3000/api/spots')
+    if (spotsRes.ok) {
+      spotsList.value = await spotsRes.json()
+    }
+  } catch (err) {
+    console.error('Erro ao carregar spots:', err)
+  }
+})
 
-const formStatusSubmit = () => {
-  formStatusCurrent.value = formStatusOptions[formStatusCurrent.value + 1]
-    ? formStatusCurrent.value + 1
-    : 0
+const submit = async () => {
+  successMessage.value = ''
+  errorMessage.value = ''
+
+  const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+  let userId = null
+
+  if (token) {
+    const decoded = decodeToken(token)
+    if (decoded && decoded.sub) {
+      userId = decoded.sub
+    }
+  }
+
+  // Utilizar utilizador da sessão ativa (ou fallback para ID 1 de teste se não houver sessão ativa)
+  const finalUserId = userId || 1
+
+  if (!form.selectedSpot) {
+    errorMessage.value = 'Por favor, selecione o local da ocorrência (Spot).'
+    return
+  }
+  if (!form.data_ocorrencia) {
+    errorMessage.value = 'A data da ocorrência é obrigatória.'
+    return
+  }
+  if (!form.hora_ocorrencia) {
+    errorMessage.value = 'A hora da ocorrência é obrigatória.'
+    return
+  }
+
+  // Adicionar segundos à hora caso seja necessário (:00)
+  let hora = form.hora_ocorrencia
+  if (hora && hora.length === 5) {
+    hora += ':00'
+  }
+
+  const selectedSpotData = spotsList.value.find((s) => s.id_spot === Number(form.selectedSpot.id))
+  const localOcorrencia = selectedSpotData ? selectedSpotData.localizacao : `Spot ID: ${form.selectedSpot.id}`
+
+  const payload = {
+    data_ocorrencia: form.data_ocorrencia,
+    hora_ocorrencia: hora,
+    local_ocorrencia: localOcorrencia, // Nome do local obtido da BD com base no ID
+    descricao_ocorrencia: form.descricao_ocorrencia || 'Sem descrição',
+    estado: 'pendente', // O estado inicial é sempre 'pendente' (definido apenas por administradores no painel)
+    id_utilizador: Number(finalUserId),
+    id_spot: Number(form.selectedSpot.id), // ID do Spot da BD
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  try {
+    const response = await fetch('http://localhost:3000/api/ocorrencias', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+
+    const result = await response.json()
+
+    if (response.ok) {
+      successMessage.value = 'Ocorrência registada com sucesso!'
+      // Resetar formulário
+      form.selectedSpot = null
+      form.data_ocorrencia = ''
+      form.hora_ocorrencia = ''
+      form.descricao_ocorrencia = ''
+    } else {
+      errorMessage.value = result.message || 'Erro ao registar a ocorrência.'
+    }
+  } catch (error) {
+    console.error('Erro ao submeter ocorrência:', error)
+    errorMessage.value = 'Erro de rede: Não foi possível ligar ao servidor.'
+  }
 }
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiBallotOutline" title="Forms example" main>
-        <BaseButton
-          href="https://github.com/justboil/admin-one-vue-tailwind"
-          target="_blank"
-          :icon="mdiGithub"
-          label="Star on GitHub"
-          color="contrast"
-          rounded-full
-          small
-        />
-      </SectionTitleLineWithButton>
-      <CardBox form @submit.prevent="submit">
-        <FormField label="Grouped with icons">
-          <FormControl v-model="form.name" :icon="mdiAccount" />
-          <FormControl v-model="form.email" type="email" :icon="mdiMail" />
-        </FormField>
+  <SectionMain class="min-h-screen bg-[#f5f0e6] transition-colors dark:bg-slate-900">
+    <Navbar />
 
-        <FormField label="With help line" help="Do not enter the leading zero">
-          <FormControl v-model="form.phone" type="tel" placeholder="Your phone number" />
-        </FormField>
+    <div class="p-4 max-w-3xl mx-auto">
+      <h1 class="mb-8 text-center text-2xl font-bold text-[#40798C]">REGISTO DE OCORRÊNCIA</h1>
 
-        <FormField label="Dropdown">
-          <FormControl v-model="form.department" :options="selectOptions" />
-        </FormField>
-
-        <BaseDivider />
-
-        <FormField label="Question" help="Your question. Max 255 characters">
-          <FormControl type="textarea" placeholder="Explain how we can help you" />
-        </FormField>
-
-        <template #footer>
-          <BaseButtons>
-            <BaseButton type="submit" color="info" label="Submit" />
-            <BaseButton type="reset" color="info" outline label="Reset" />
-          </BaseButtons>
-        </template>
-      </CardBox>
-    </SectionMain>
-
-    <SectionTitle>Custom elements</SectionTitle>
-
-    <SectionMain>
-      <CardBox>
-        <FormField label="Checkbox">
-          <FormCheckRadioGroup
-            v-model="customElementsForm.checkbox"
-            name="sample-checkbox"
-            :options="{ lorem: 'Lorem', ipsum: 'Ipsum', dolore: 'Dolore' }"
-          />
-        </FormField>
-
-        <BaseDivider />
-
-        <FormField label="Radio">
-          <FormCheckRadioGroup
-            v-model="customElementsForm.radio"
-            name="sample-radio"
-            type="radio"
-            :options="{ one: 'One', two: 'Two' }"
-          />
-        </FormField>
-
-        <BaseDivider />
-
-        <FormField label="Switch">
-          <FormCheckRadioGroup
-            v-model="customElementsForm.switch"
-            name="sample-switch"
-            type="switch"
-            :options="{ one: 'One', two: 'Two' }"
-          />
-        </FormField>
-
-        <BaseDivider />
-
-        <FormFilePicker v-model="customElementsForm.file" label="Upload" />
-      </CardBox>
-
-      <SectionTitle>Form with status example</SectionTitle>
-
-      <CardBox
-        class="shadow-2xl md:mx-auto md:w-7/12 lg:w-5/12 xl:w-4/12"
-        is-form
-        is-hoverable
-        @submit.prevent="formStatusSubmit"
+      <!-- Mensagens de Feedback -->
+      <div
+        v-if="successMessage"
+        class="mb-6 p-4 rounded-lg bg-emerald-100 text-emerald-800 font-medium text-sm shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400"
       >
-        <NotificationBarInCard
-          :color="formStatusOptions[formStatusCurrent]"
-          :is-placed-with-header="formStatusWithHeader"
-        >
-          <span
-            ><b class="capitalize">{{ formStatusOptions[formStatusCurrent] }}</b> state</span
-          >
-        </NotificationBarInCard>
-        <FormField label="Fields">
-          <FormControl
-            v-model="form.name"
-            :icon-left="mdiAccount"
-            help="Your full name"
-            placeholder="Name"
-          />
-        </FormField>
+        {{ successMessage }}
+      </div>
+      <div
+        v-if="errorMessage"
+        class="mb-6 p-4 rounded-lg bg-rose-100 text-rose-800 font-medium text-sm shadow-sm dark:bg-rose-950/40 dark:text-rose-400"
+      >
+        {{ errorMessage }}
+      </div>
 
-        <template #footer>
-          <BaseButton label="Trigger" type="submit" color="info" />
-        </template>
-      </CardBox>
-    </SectionMain>
-  </LayoutAuthenticated>
+      <section class="mb-8">
+        <h2 class="mb-4 flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-200">
+          <BaseIcon :path="mdiBallotOutline" size="20" />
+          Preencha os dados da Ocorrência
+        </h2>
+        <CardBox form @submit.prevent="submit" class="border-none bg-white shadow-lg dark:bg-slate-800 rounded-lg">
+          
+          <!-- Secção informativa do utilizador ativo -->
+          <div
+            v-if="loggedInUser"
+            class="mb-6 p-4 rounded-lg bg-gray-50 text-slate-700 text-sm border border-gray-200 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600 flex items-center gap-2"
+          >
+            <BaseIcon :path="mdiAccount" size="18" class="text-[#40798C]" />
+            <span>Sessão ativa como: <strong>{{ loggedInUser.email }}</strong> (ID: {{ loggedInUser.id }})</span>
+          </div>
+          <div
+            v-else
+            class="mb-6 p-4 rounded-lg bg-amber-50 text-amber-800 text-sm border border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50 flex items-center gap-2"
+          >
+            <BaseIcon :path="mdiAccount" size="18" class="text-amber-600" />
+            <span>Nenhum utilizador autenticado detetado. A submeter como utilizador de testes (ID: 1).</span>
+          </div>
+
+          <!-- Dropdown dinâmica para escolha do Spot da base de dados por ID -->
+          <FormField label="ID do Spot">
+            <FormControl
+              v-model="form.selectedSpot"
+              :options="spotsOptions"
+              placeholder="Selecione o ID do spot"
+              :icon="mdiMapMarker"
+            />
+          </FormField>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Data da Ocorrência">
+              <FormControl
+                v-model="form.data_ocorrencia"
+                type="date"
+                :icon="mdiCalendar"
+              />
+            </FormField>
+
+            <FormField label="Hora da Ocorrência">
+              <FormControl
+                v-model="form.hora_ocorrencia"
+                type="time"
+                :icon="mdiClock"
+              />
+            </FormField>
+          </div>
+
+
+          <BaseDivider />
+
+          <FormField label="Descrição da Ocorrência" help="Descreva detalhadamente o sucedido. Máx. 255 caracteres.">
+            <FormControl
+              v-model="form.descricao_ocorrencia"
+              type="textarea"
+              placeholder="Ex: O artista excedeu os limites de ruído estabelecidos após o fecho..."
+            />
+          </FormField>
+
+          <template #footer>
+            <BaseButtons>
+              <BaseButton
+                type="submit"
+                color=""
+                class="rounded-lg border-none bg-[#40798C] text-white hover:bg-[#0B2027] transition-all px-4 py-2 font-semibold"
+                label="Registar Ocorrência"
+              />
+              <BaseButton
+                type="reset"
+                color=""
+                class="rounded-lg border border-[#40798C] text-[#40798C] hover:bg-[#40798C] hover:text-white transition-all px-4 py-2 font-semibold bg-white"
+                outline
+                label="Limpar"
+              />
+            </BaseButtons>
+          </template>
+        </CardBox>
+      </section>
+    </div>
+  </SectionMain>
 </template>

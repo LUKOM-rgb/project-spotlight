@@ -43,7 +43,6 @@ const routes = [
   {
     meta: {
       title: 'Ui',
-      requiresAuth: true
     },
     path: '/ui',
     name: 'ui',
@@ -57,6 +56,14 @@ const routes = [
     path: '/spots',
     name: 'spots',
     component: () => import('@/views/SpotsView.vue'),
+  },
+  {
+  meta: {
+      title: 'My Reservations',
+    },
+    path: '/reservas',
+    name: 'reservas',
+    component: () => import('@/views/ReservasView.vue'),
   },
   {
     meta: {

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import {
   mdiAccount,
   mdiClipboardText,
@@ -28,29 +28,26 @@ const reservations = reactive([
   { id: 9, name: 'Howell Hand', date: 'Mar 3, 2025 @ pending', status: 'pending' },
 ])
 
-const rapporteurItems = reactive([
-  {
-    id: 1,
-    name: 'Refined Soft Chicken',
-    date: '3 days ago',
-    avatar: '/src/img/Logo.png',
-    tags: ['music', 'live'],
-  },
-  {
-    id: 2,
-    name: 'Intelligent Metal Bacon',
-    date: '4 days ago',
-    avatar: '/src/img/Logo.png',
-    tags: ['music'],
-  },
-  {
-    id: 3,
-    name: 'Rustic Wooden Shoes',
-    date: '7 days ago',
-    avatar: '/src/img/Logo.png',
-    tags: ['music', 'live'],
-  },
-])
+const rapporteurItems = ref([])
+
+onMounted(async () => {
+  try {
+    const response = await fetch('http://localhost:3000/api/ocorrencias')
+    const result = await response.json()
+    if (result && result.data && Array.isArray(result.data)) {
+      rapporteurItems.value = result.data.map(ocorr => ({
+        id: ocorr.id_ocorrencia,
+        name: ocorr.descricao_ocorrencia || 'Sem descrição',
+        local: ocorr.local_ocorrencia || 'Desconhecido',
+        date: `${ocorr.data_ocorrencia} @ ${ocorr.hora_ocorrencia}`,
+        avatar: '/src/img/Logo.png',
+        tags: [ocorr.estado_ocorrencia || 'pendente'],
+      }))
+    }
+  } catch (error) {
+    console.error('Erro ao ir buscar as ocorrências:', error)
+  }
+})
 
 const artists = reactive([
   { id: 1, name: 'Howell Hand', genre: 'EDM', category: 'Music spinning', created: '04.11.2024' },
@@ -75,11 +72,44 @@ const artists = reactive([
 const currentPage = ref(1)
 const totalPages = ref(4)
 
-const setActiveTab = (tabId) => {
-  activeTab.value = tabId
-}
 const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) currentPage.value = page
+}
+
+// Pagination for Reservations
+const reservationsPage = ref(1)
+const reservationsPerPage = 9
+const paginatedReservations = computed(() =>
+  reservations.slice(
+    (reservationsPage.value - 1) * reservationsPerPage,
+    reservationsPage.value * reservationsPerPage
+  )
+)
+const reservationsTotalPages = computed(() =>
+  Math.ceil(reservations.length / reservationsPerPage)
+)
+const goToReservationsPage = (page) => {
+  if (page >= 1 && page <= reservationsTotalPages.value) {
+    reservationsPage.value = page
+  }
+}
+
+// Pagination for Ocorrências
+const ocorrenciasPage = ref(1)
+const ocorrenciasPerPage = 5
+const paginatedOcorrencias = computed(() =>
+  rapporteurItems.value.slice(
+    (ocorrenciasPage.value - 1) * ocorrenciasPerPage,
+    ocorrenciasPage.value * ocorrenciasPerPage
+  )
+)
+const ocorrenciasTotalPages = computed(() =>
+  Math.ceil(rapporteurItems.value.length / ocorrenciasPerPage)
+)
+const goToOcorrenciasPage = (page) => {
+  if (page >= 1 && page <= ocorrenciasTotalPages.value) {
+    ocorrenciasPage.value = page
+  }
 }
 </script>
 
@@ -97,7 +127,7 @@ const goToPage = (page) => {
         </h2>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           <div
-            v-for="reservation in reservations"
+            v-for="reservation in paginatedReservations"
             :key="reservation.id"
             class="cursor-pointer rounded-lg bg-[#40798C] p-3 text-white shadow-sm transition-all hover:bg-[#0B2027]"
           >
@@ -105,18 +135,51 @@ const goToPage = (page) => {
             <p class="text-xs opacity-75">{{ reservation.date }}</p>
           </div>
         </div>
+
+        <!-- Pagination for Reservations -->
+        <div v-if="reservations.length > 9" class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 shadow-md dark:border-slate-700 dark:bg-slate-900/50 mt-4">
+          <div class="flex gap-1">
+            <button
+              class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="reservationsPage === 1"
+              @click="goToReservationsPage(reservationsPage - 1)"
+            >
+              <BaseIcon :path="mdiChevronLeft" size="16" />
+            </button>
+            <button
+              v-for="page in reservationsTotalPages"
+              :key="page"
+              :class="[
+                'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+                reservationsPage === page
+                  ? 'bg-[#40798C] text-white'
+                  : 'border border-[#40798C] bg-white text-[#40798C]',
+              ]"
+              @click="goToReservationsPage(page)"
+            >
+              {{ page }}
+            </button>
+            <button
+              class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="reservationsPage === reservationsTotalPages"
+              @click="goToReservationsPage(reservationsPage + 1)"
+            >
+              <BaseIcon :path="mdiChevronRight" size="16" />
+            </button>
+          </div>
+        </div>
       </section>
 
       <section class="mb-8">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-200">
           <BaseIcon :path="mdiFileDocument" size="20" />
-          Rapporteur
+          Ocorrências
         </h2>
         <div class="space-y-3">
           <div
-            v-for="item in rapporteurItems"
+            v-for="item in paginatedOcorrencias"
             :key="item.id"
-            class="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+            class="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-4 shadow-md transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
           >
             <div class="flex items-center gap-3">
               <div
@@ -125,22 +188,65 @@ const goToPage = (page) => {
                 <img src="/src/img/Logo.png" class="h-6 w-6 object-contain" />
               </div>
               <div>
-                <p class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
                   {{ item.name }}
                 </p>
-                <p class="text-xs text-gray-500">{{ item.date }}</p>
+                <p v-if="item.local" class="text-xs font-semibold text-[#40798C] dark:text-[#7dd3c0] mt-0.5">
+                  Local: {{ item.local }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ item.date }}</p>
               </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
               <span
                 v-for="tag in item.tags"
                 :key="tag"
-                class="rounded bg-[#7dd3c0] px-2 py-1 text-xs font-bold text-teal-900 uppercase"
+                :class="[
+                  'rounded px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider shadow-sm',
+                  tag === 'resolvida'
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
+                    : tag === 'em progresso'
+                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400'
+                    : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400'
+                ]"
               >
                 {{ tag }}
               </span>
-              <button class="rounded bg-gray-100 p-1 text-slate-700 hover:bg-gray-200">
+              <button class="rounded-full bg-gray-100 p-1.5 text-slate-600 transition-colors hover:bg-gray-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">
                 <BaseIcon :path="mdiEye" size="16" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Pagination for Ocorrências -->
+          <div v-if="rapporteurItems.length > 5" class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 shadow-md dark:border-slate-700 dark:bg-slate-900/50 mt-4">
+            <div class="flex gap-1">
+              <button
+                class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="ocorrenciasPage === 1"
+                @click="goToOcorrenciasPage(ocorrenciasPage - 1)"
+              >
+                <BaseIcon :path="mdiChevronLeft" size="16" />
+              </button>
+              <button
+                v-for="page in ocorrenciasTotalPages"
+                :key="page"
+                :class="[
+                  'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+                  ocorrenciasPage === page
+                    ? 'bg-[#40798C] text-white'
+                    : 'border border-[#40798C] bg-white text-[#40798C]',
+                ]"
+                @click="goToOcorrenciasPage(page)"
+              >
+                {{ page }}
+              </button>
+              <button
+                class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="ocorrenciasPage === ocorrenciasTotalPages"
+                @click="goToOcorrenciasPage(ocorrenciasPage + 1)"
+              >
+                <BaseIcon :path="mdiChevronRight" size="16" />
               </button>
             </div>
           </div>
@@ -164,7 +270,7 @@ const goToPage = (page) => {
           </div>
           <div class="divide-y divide-gray-100 dark:divide-slate-700">
             <div
-              v-for="(artist, index) in artists"
+              v-for="artist in artists"
               :key="artist.id"
               class="grid grid-cols-12 items-center gap-2 p-3 text-sm hover:bg-gray-50 dark:hover:bg-slate-700/50"
             >

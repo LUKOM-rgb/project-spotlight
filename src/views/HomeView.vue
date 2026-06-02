@@ -103,5 +103,23 @@ const formatFollowers = (num) => {
         </CardBox>
       </div>
     </div>
+
+    <!-- Call to Action Section (Link to FormsView) -->
+    <div class="mt-12 rounded-2xl bg-gradient-to-r from-[#40798C] to-[#5b9a8b] p-8 text-white shadow-lg md:flex md:items-center md:justify-between">
+      <div class="mb-6 md:mb-0 md:mr-8">
+        <h2 class="text-2xl font-bold mb-2">Need to contact us or submit a request?</h2>
+        <p class="text-sm opacity-90 leading-relaxed max-w-xl">
+          Whether you want to suggest a new performance space, report an issue, or apply for an urban permit, our forms are ready to help you get in touch with the administration team.
+        </p>
+      </div>
+      <div>
+        <BaseButton
+          label="Go to Forms"
+          color=""
+          class="w-full md:w-auto rounded-lg border-none bg-white text-[#40798C] font-semibold px-6 py-3 shadow-md hover:bg-[#e8e0d0] hover:text-[#0B2027] transition-all"
+          to="/forms"
+        />
+      </div>
+    </div>
   </SectionMain>
 </template>
