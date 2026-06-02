@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import {
   mdiAccount,
   mdiClipboardText,
@@ -72,11 +72,44 @@ const artists = reactive([
 const currentPage = ref(1)
 const totalPages = ref(4)
 
-const setActiveTab = (tabId) => {
-  activeTab.value = tabId
-}
 const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) currentPage.value = page
+}
+
+// Pagination for Reservations
+const reservationsPage = ref(1)
+const reservationsPerPage = 9
+const paginatedReservations = computed(() =>
+  reservations.slice(
+    (reservationsPage.value - 1) * reservationsPerPage,
+    reservationsPage.value * reservationsPerPage
+  )
+)
+const reservationsTotalPages = computed(() =>
+  Math.ceil(reservations.length / reservationsPerPage)
+)
+const goToReservationsPage = (page) => {
+  if (page >= 1 && page <= reservationsTotalPages.value) {
+    reservationsPage.value = page
+  }
+}
+
+// Pagination for Ocorrências
+const ocorrenciasPage = ref(1)
+const ocorrenciasPerPage = 5
+const paginatedOcorrencias = computed(() =>
+  rapporteurItems.value.slice(
+    (ocorrenciasPage.value - 1) * ocorrenciasPerPage,
+    ocorrenciasPage.value * ocorrenciasPerPage
+  )
+)
+const ocorrenciasTotalPages = computed(() =>
+  Math.ceil(rapporteurItems.value.length / ocorrenciasPerPage)
+)
+const goToOcorrenciasPage = (page) => {
+  if (page >= 1 && page <= ocorrenciasTotalPages.value) {
+    ocorrenciasPage.value = page
+  }
 }
 </script>
 
@@ -94,12 +127,45 @@ const goToPage = (page) => {
         </h2>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           <div
-            v-for="reservation in reservations"
+            v-for="reservation in paginatedReservations"
             :key="reservation.id"
             class="cursor-pointer rounded-lg bg-[#40798C] p-3 text-white shadow-sm transition-all hover:bg-[#0B2027]"
           >
             <p class="text-sm font-medium">{{ reservation.name }}</p>
             <p class="text-xs opacity-75">{{ reservation.date }}</p>
+          </div>
+        </div>
+
+        <!-- Pagination for Reservations -->
+        <div v-if="reservations.length > 9" class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 shadow-md dark:border-slate-700 dark:bg-slate-900/50 mt-4">
+          <div class="flex gap-1">
+            <button
+              class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="reservationsPage === 1"
+              @click="goToReservationsPage(reservationsPage - 1)"
+            >
+              <BaseIcon :path="mdiChevronLeft" size="16" />
+            </button>
+            <button
+              v-for="page in reservationsTotalPages"
+              :key="page"
+              :class="[
+                'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+                reservationsPage === page
+                  ? 'bg-[#40798C] text-white'
+                  : 'border border-[#40798C] bg-white text-[#40798C]',
+              ]"
+              @click="goToReservationsPage(page)"
+            >
+              {{ page }}
+            </button>
+            <button
+              class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="reservationsPage === reservationsTotalPages"
+              @click="goToReservationsPage(reservationsPage + 1)"
+            >
+              <BaseIcon :path="mdiChevronRight" size="16" />
+            </button>
           </div>
         </div>
       </section>
@@ -111,7 +177,7 @@ const goToPage = (page) => {
         </h2>
         <div class="space-y-3">
           <div
-            v-for="item in rapporteurItems"
+            v-for="item in paginatedOcorrencias"
             :key="item.id"
             class="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-4 shadow-md transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
           >
@@ -151,6 +217,39 @@ const goToPage = (page) => {
               </button>
             </div>
           </div>
+
+          <!-- Pagination for Ocorrências -->
+          <div v-if="rapporteurItems.length > 5" class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 shadow-md dark:border-slate-700 dark:bg-slate-900/50 mt-4">
+            <div class="flex gap-1">
+              <button
+                class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="ocorrenciasPage === 1"
+                @click="goToOcorrenciasPage(ocorrenciasPage - 1)"
+              >
+                <BaseIcon :path="mdiChevronLeft" size="16" />
+              </button>
+              <button
+                v-for="page in ocorrenciasTotalPages"
+                :key="page"
+                :class="[
+                  'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+                  ocorrenciasPage === page
+                    ? 'bg-[#40798C] text-white'
+                    : 'border border-[#40798C] bg-white text-[#40798C]',
+                ]"
+                @click="goToOcorrenciasPage(page)"
+              >
+                {{ page }}
+              </button>
+              <button
+                class="rounded bg-[#40798C] p-1.5 text-white hover:bg-[#0B2027] disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="ocorrenciasPage === ocorrenciasTotalPages"
+                @click="goToOcorrenciasPage(ocorrenciasPage + 1)"
+              >
+                <BaseIcon :path="mdiChevronRight" size="16" />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -171,7 +270,7 @@ const goToPage = (page) => {
           </div>
           <div class="divide-y divide-gray-100 dark:divide-slate-700">
             <div
-              v-for="(artist, index) in artists"
+              v-for="artist in artists"
               :key="artist.id"
               class="grid grid-cols-12 items-center gap-2 p-3 text-sm hover:bg-gray-50 dark:hover:bg-slate-700/50"
             >
