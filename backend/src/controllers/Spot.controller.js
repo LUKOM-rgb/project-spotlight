@@ -95,11 +95,14 @@ export const deleteSpotById = async (req, res) => {
     return res.status(500).json({ error: 'Failed to delete spot' })
   }
 }
+// Reserva
 
 export const createReserva = async (req, res) => {
   try {
+    console.log("req.utilizador:", req.utilizador) // Verificar o conteúdo de req.utilizador
     const { id } = req.params
-    const { data_evento, hora_inicio, hora_fim, id_artista } = req.body
+    const id_artista = req.utilizador.id_artista
+    const { data_evento, hora_inicio, hora_fim } = req.body
     const spot = await Spot.findByPk(id)
     if (!spot) {
       return res.status(404).json({ message: 'Spot não encontrado.' })
@@ -124,10 +127,9 @@ export const createReserva = async (req, res) => {
     }
     // hora de inicio tem que ser antes da hora de fim e a reserva n pode ter mais que 2 horas de duração
 
-    if(start)
     if (start >= end) {
       return res.status(409).json({
-        message: 'hora_inicio tem de ser antes de hora_fim',
+        message: 'hora de inicio tem de ser antes de hora_fim',
       })
     } else if (end - start > 120 || end - start < 30) {
       return res.status(409).json({
