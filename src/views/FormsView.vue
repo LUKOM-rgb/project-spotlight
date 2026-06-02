@@ -64,7 +64,13 @@ onMounted(async () => {
   }
 
   try {
-    const spotsRes = await fetch('http://localhost:3000/api/spots')
+    const headers = {}
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    const spotsRes = await fetch('http://localhost:3000/api/spots', {
+      headers,
+    })
     if (spotsRes.ok) {
       spotsList.value = await spotsRes.json()
     }
