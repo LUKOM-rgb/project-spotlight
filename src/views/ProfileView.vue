@@ -84,52 +84,61 @@ const submitArtist = async () => {
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain class="min-h-screen bg-slate-900 text-slate-100">
+  <LayoutAuthenticated hide-aside>
+    <SectionMain class="min-h-screen">
       
       <!-- Cabeçalho -->
       <div class="mb-8 flex items-center justify-between">
-        <h1 class="text-3xl font-light tracking-widest text-teal-400">O MEU PERFIL</h1>
-        <div v-if="authStore.user?.tipo === 'artista'" class="flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1 text-sm font-semibold text-teal-400">
-          <span>🌟 Artista Reconhecido</span>
+        <div class="flex items-center gap-4">
+          <h1 class="text-3xl font-light tracking-widest text-teal-400">O MEU PERFIL</h1>
+          <div v-if="authStore.user?.tipo === 'artista'" class="flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1 text-sm font-semibold text-teal-400">
+            <span>🌟 Artista Reconhecido</span>
+          </div>
         </div>
+        
+        <BaseButton
+          color="danger"
+          label="Terminar Sessão"
+          class="bg-red-500 hover:bg-red-600 text-white font-semibold border-none"
+          @click="authStore.logout()"
+        />
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         <!-- Coluna 1: Dados Pessoais -->
-        <CardBox class="bg-slate-800 shadow-xl" is-form @submit.prevent="submitProfile">
-          <h2 class="mb-6 text-xl font-semibold text-slate-200">Dados Pessoais</h2>
+        <CardBox class="shadow-xl" is-form @submit.prevent="submitProfile">
+          <h2 class="mb-6 text-xl font-semibold text-gray-900">Dados Pessoais</h2>
           
           <div v-if="profileMessage" class="mb-4 rounded bg-teal-500/10 p-3 text-teal-400 text-sm border border-teal-500/20 text-center">
             {{ profileMessage }}
           </div>
 
-          <FormField label="Nome de Utilizador:" label-class="text-gray-400">
+          <FormField label="Nome de Utilizador:" label-class="text-gray-600">
             <FormControl
               v-model="profileForm.nome_utilizador"
               name="nome"
-              class="rounded border-slate-600 bg-slate-700 text-teal-400"
+              class="rounded"
               required
             />
           </FormField>
 
-          <FormField label="E-mail:" label-class="text-gray-400">
+          <FormField label="E-mail:" label-class="text-gray-600">
             <FormControl
               v-model="profileForm.email"
               type="email"
               name="email"
-              class="rounded border-slate-600 bg-slate-700 text-teal-400"
+              class="rounded"
               required
             />
           </FormField>
 
-          <FormField label="Telemóvel:" label-class="text-gray-400">
+          <FormField label="Telemóvel:" label-class="text-gray-600">
             <FormControl
               v-model="profileForm.numero_telemovel"
               type="tel"
               name="telemovel"
-              class="rounded border-slate-600 bg-slate-700 text-teal-400"
+              class="rounded"
             />
           </FormField>
 
@@ -144,39 +153,39 @@ const submitArtist = async () => {
         </CardBox>
 
         <!-- Coluna 2: Promover a Artista -->
-        <CardBox v-if="authStore.user?.tipo === 'utilizador'" class="bg-slate-800 shadow-xl border border-teal-500/20" is-form @submit.prevent="submitArtist">
+        <CardBox v-if="authStore.user?.tipo === 'utilizador'" class="shadow-xl border border-teal-500/20" is-form @submit.prevent="submitArtist">
           <div class="text-center mb-6">
-            <h2 class="text-2xl font-semibold text-teal-400 mb-2">Queres atuar nas ruas?</h2>
-            <p class="text-sm text-slate-400">Regista a tua licença para te tornares um Artista Oficial Spotlight.</p>
+            <h2 class="text-2xl font-semibold text-teal-600 mb-2">Queres atuar nas ruas?</h2>
+            <p class="text-sm text-gray-500">Regista a tua licença para te tornares um Artista Oficial Spotlight.</p>
           </div>
 
           <div v-if="artistMessage" class="mb-4 rounded bg-teal-500/10 p-3 text-teal-400 text-sm border border-teal-500/20 text-center">
             {{ artistMessage }}
           </div>
 
-          <FormField label="Número da Licença:" label-class="text-gray-400">
+          <FormField label="Número da Licença:" label-class="text-gray-600">
             <FormControl
               v-model="artistForm.numero_licenca"
               name="licenca"
-              class="rounded border-slate-600 bg-slate-700 text-teal-400"
+              class="rounded"
               required
             />
           </FormField>
 
-          <FormField label="Validade da Licença:" label-class="text-gray-400">
+          <FormField label="Validade da Licença:" label-class="text-gray-600">
             <FormControl
               v-model="artistForm.validade_licenca"
               type="date"
               name="validade"
-              class="rounded border-slate-600 bg-slate-700 text-teal-400"
+              class="rounded"
               required
             />
           </FormField>
 
-          <FormField label="Categoria de Atuação:" label-class="text-gray-400">
+          <FormField label="Categoria de Atuação:" label-class="text-gray-600">
             <select
               v-model="artistForm.categoria_id"
-              class="w-full rounded border-slate-600 bg-slate-700 text-teal-400 p-2 focus:ring focus:ring-teal-500"
+              class="w-full rounded border-gray-300 p-2 focus:ring focus:ring-teal-500"
               required
             >
               <option value="" disabled>Seleciona uma categoria...</option>
@@ -200,17 +209,3 @@ const submitArtist = async () => {
     </SectionMain>
   </LayoutAuthenticated>
 </template>
-
-<style scoped>
-/* Estilos para formulários consistentes com login/registo */
-input[type='text'],
-input[type='email'],
-input[type='password'],
-input[type='tel'],
-input[type='date'],
-select {
-  background-color: rgb(55, 65, 81);
-  border-color: rgb(30, 41, 59);
-  color: #2dd4bf;
-}
-</style>
