@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import http from 'http';
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -151,13 +151,27 @@ async function main() {
       .setChromeService(service)
       .build();
 
-    const fileUrl = `file:///${path.resolve(htmlReportPath).replace(/\\/g, '/')}`;
+    const fileUrl = pathToFileURL(htmlReportPath).toString();
     console.log(`[*] Loading report URL: ${fileUrl}`);
     await driver.get(fileUrl);
 
     // Wait for animations and layout to settle
     console.log("[*] Waiting for report to render...");
     await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // Get the full height of the page dynamically to avoid truncation
+    const scrollHeight = await driver.executeScript(() => {
+      return Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.documentElement.clientHeight
+      );
+    });
+    console.log(`[*] Adjusting browser window size to: 1280x${scrollHeight}`);
+    await driver.manage().window().setSize({ width: 1280, height: scrollHeight });
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Capture screenshot
     const screenshot = await driver.takeScreenshot();
