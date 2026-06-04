@@ -75,6 +75,18 @@ export const updateProfile = async (req, res, next) => {
       throw notFoundError('Utilizador', id);
     }
 
+    // Verificar se algum dado foi realmente enviado para ser alterado e se é diferente do atual
+    const isSameEmail = !email || email === conta.email;
+    const isSameNome = !nome_utilizador || nome_utilizador === conta.nome_utilizador;
+    const isSameTelemovel = numero_telemovel === undefined || String(numero_telemovel) === String(conta.numero_telemovel);
+    const isPasswordProvided = !!password;
+
+    if (isSameEmail && isSameNome && isSameTelemovel && !isPasswordProvided) {
+      throw validationError({ 
+        geral: ['Nenhum dado novo foi fornecido ou os dados são iguais aos atuais. Por favor altera algum valor para atualizar o perfil.'] 
+      });
+    }
+
     // Verificar se o novo email já está em uso por outra conta
     if (email && email !== conta.email) {
       const emailExistente = await Utilizador.findOne({ where: { email } });
@@ -90,6 +102,14 @@ export const updateProfile = async (req, res, next) => {
         throw validationError({ password: ['A password deve ter pelo menos 6 caracteres.'] });
       }
       novaPasswordHashed = await hashPassword(password);
+    }
+
+    // Validar telemóvel (exatamente 9 dígitos numéricos)
+    if (numero_telemovel !== undefined && numero_telemovel !== null && String(numero_telemovel).trim() !== '') {
+      const isNineDigits = /^\d{9}$/.test(String(numero_telemovel));
+      if (!isNineDigits) {
+        throw validationError({ numero_telemovel: ['O número de telemóvel tem de conter exatamente 9 dígitos numéricos.'] });
+      }
     }
 
     await conta.update({
@@ -152,6 +172,10 @@ export const changeUtilizadorRole = async (req, res, next) => {
         throw validationError({
           licenca: ['Os campos numero_licenca, validade_licenca e categoria_id são obrigatórios para atualizar para Artista.']
         });
+      }
+
+      if (!String(numero_licenca).startsWith('LIC-')) {
+        throw validationError({ numero_licenca: ['O número de licença tem de começar obrigatoriamente pelo prefixo "LIC-".'] });
       }
 
       const dataValidade = new Date(validade_licenca);

@@ -156,7 +156,7 @@ async function main() {
       url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
       body: {
         tipo: "artista",
-        numero_licenca: `LIC_${Date.now()}`,
+        numero_licenca: `LIC-${Date.now()}`,
         categoria_id: categoryId
       },
       expectedStatus: 400,
@@ -170,7 +170,7 @@ async function main() {
       url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
       body: {
         tipo: "artista",
-        numero_licenca: `LIC_${Date.now()}`,
+        numero_licenca: `LIC-${Date.now()}`,
         validade_licenca: "data-invalida",
         categoria_id: categoryId
       },
@@ -186,7 +186,7 @@ async function main() {
       url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
       body: {
         tipo: "artista",
-        numero_licenca: `LIC_${Date.now()}`,
+        numero_licenca: `LIC-${Date.now()}`,
         validade_licenca: "2030-12-31",
         categoria_id: categoryId
       },

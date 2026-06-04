@@ -7,7 +7,7 @@ import {
   deleteSpotById,
 
 } from '../controllers/spot.controller.js'
-import { verifyToken, isAdmin,isArtista } from '../middlewares/auth.middleware.js'
+import { verifyToken, isAdmin} from '../middlewares/auth.middleware.js'
 const router = express.Router()
 router.get('/', verifyToken, getAllSpots)
 router.get('/:id', verifyToken, getSpotById)

@@ -1,5 +1,6 @@
 import Utilizador from '../Models/utilizador.js'
 import { hashPassword, comparePassword, generateToken } from '../utils/auth.utils.js'
+import { Op } from 'sequelize'
 import { validationError, unauthorizedError, conflictError } from '../utils/error.utils.js'
 
 // Registar Conta
@@ -13,6 +14,14 @@ export const register = async (req, res, next) => {
     if (!password || password.length < 6)
       errors.password = ['A password deve ter pelo menos 6 caracteres.']
     if (!nome_utilizador) errors.nome_utilizador = ['O campo nome_utilizador é obrigatório.']
+
+    // Validar telemóvel (exatamente 9 dígitos numéricos)
+    if (numero_telemovel) {
+      const isNineDigits = /^\d{9}$/.test(String(numero_telemovel));
+      if (!isNineDigits) {
+        errors.numero_telemovel = ['O número de telemóvel tem de conter exatamente 9 dígitos numéricos.'];
+      }
+    }
 
     if (Object.keys(errors).length > 0) {
       throw validationError(errors)
@@ -52,14 +61,31 @@ export const register = async (req, res, next) => {
 // tentativa do POST /users/login - Autenticar Utilizador
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body
-
-    if (!email || !password) {
-      throw validationError({ credentials: ['Email e password são obrigatórios.'] })
+    // Verificar se o body tem chaves a mais
+    const allowedKeys = ['email', 'nome_utilizador', 'password'];
+    const bodyKeys = Object.keys(req.body);
+    const hasExtraKeys = bodyKeys.some(key => !allowedKeys.includes(key));
+    
+    if (hasExtraKeys) {
+      throw validationError({ request: ['No login apenas é permitido enviar os campos email (ou nome_utilizador) e password. Pedido rejeitado.'] })
     }
 
-    // 1. Procurar a conta pelo email
-    const conta = await Utilizador.findOne({ where: { email } })
+    const identifier = req.body.email || req.body.nome_utilizador;
+    const password = req.body.password;
+
+    if (!identifier || !password) {
+      throw validationError({ credentials: ['Email (ou nome_utilizador) e password são obrigatórios.'] })
+    }
+
+    // 1. Procurar a conta pelo email ou username
+    const conta = await Utilizador.findOne({ 
+      where: { 
+        [Op.or]: [
+          { email: identifier },
+          { nome_utilizador: identifier }
+        ]
+      } 
+    })
     if (!conta) {
       throw unauthorizedError('Credenciais de acesso inválidas.')
     }

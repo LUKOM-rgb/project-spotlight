@@ -25,6 +25,24 @@ export const createArtist = async (req, res, next) => {
       throw validationError(errors);
     }
 
+    if (!String(numero_licenca).startsWith('LIC-')) {
+      throw validationError({ numero_licenca: ['O número de licença tem de começar obrigatoriamente pelo prefixo "LIC-".'] });
+    }
+
+    // Verificar se o Utilizador já existe e já é artista ANTES de criar
+    const novaConta = await Utilizador.findOne({ where: { id_utilizador } });
+    if (!novaConta) {
+      throw notFoundError('Conta de Utilizador', id_utilizador);
+    }
+    if (novaConta.tipo === 'artista') {
+      throw conflictError('Esta conta já possui o cargo de artista. Não podes registar-te novamente.');
+    }
+
+    const licencaExistente = await Artista.findOne({ where: { numero_licenca } });
+    if (licencaExistente) {
+      throw conflictError('O número de licença fornecido já está registado noutro artista.');
+    }
+
     // Criar o registo do Artista primeiro
     const novoArtista = await Artista.create({
       numero_licenca,
@@ -32,10 +50,6 @@ export const createArtist = async (req, res, next) => {
       categoria_id
     });
 
-    const novaConta = await Utilizador.findOne({ where: { id_utilizador } });
-    if (!novaConta) {
-      throw notFoundError('Conta de Utilizador', id_utilizador);
-    }
     novaConta.id_artista = novoArtista.id_artista;
     novaConta.tipo = 'artista';
     await novaConta.save();
@@ -132,3 +146,10 @@ export const deleteArtist = async (req, res, next) => {
     next(error);
   }
 };
+
+
+
+//ADMIN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQwLCJlbWFpbCI6ImFkbWluZ29uY2Fsb0BlbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpZF9hcnRpc3RhIjpudWxsLCJpYXQiOjE3ODA2MTE0NzksImV4cCI6MTc4MDY5Nzg3OX0.nKf3HJkSen1D6qht8JFsjSXsdjEW9OYWPbVL5Finnkc
+
+
+//NORNAMAL: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQxLCJlbWFpbCI6InRlc3RlZ29uY2Fsb0BlbWFpbC5jb20iLCJyb2xlIjoiYXJ0aXN0YSIsImlkX2FydGlzdGEiOjMxLCJpYXQiOjE3ODA2MTE2NjIsImV4cCI6MTc4MDY5ODA2Mn0.yocBs55YA7Qs8nGOrPVF3_4chYIoV_Wxdx2ecUe2jk8

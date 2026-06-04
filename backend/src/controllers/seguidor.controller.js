@@ -1,7 +1,7 @@
 import Utilizador from '../Models/utilizador.js';
 import Artista from '../Models/artista.js';
 import Seguidor from '../Models/seguidor.js';
-import { validationError, notFoundError, conflictError } from '../utils/error.utils.js';
+import { validationError, notFoundError, conflictError, unauthorizedError } from '../utils/error.utils.js';
 
 // 1. Seguir um artista
 export const seguirArtista = async (req, res, next) => {
@@ -17,6 +17,11 @@ export const seguirArtista = async (req, res, next) => {
       });
     }
 
+    // Verificar se o id_utilizador enviado no body corresponde ao utilizador logado no Token
+    if (String(id_utilizador) !== String(req.utilizador.sub)) {
+      throw unauthorizedError('Não podes seguir artistas em nome de outro utilizador. O id_utilizador tem de corresponder à tua conta atual.');
+    }
+
     if (String(id_utilizador) === String(id_artista)) {
       throw conflictError('Um utilizador não pode seguir-se a si próprio.');
     }
@@ -27,15 +32,15 @@ export const seguirArtista = async (req, res, next) => {
       throw notFoundError('Conta de Utilizador (Seguidor)', id_utilizador);
     }
 
-    // Verificar se o artista alvo existe e obter o seu verdadeiro id_artista
-    const contaArtista = await Utilizador.findOne({ where: { id_utilizador: id_artista, tipo: 'artista' } });
-    if (!contaArtista || !contaArtista.id_artista) {
-      throw notFoundError('Conta de Artista (Alvo)', id_artista);
+    // Verificar se o artista alvo existe na tabela Artista
+    const artista = await Artista.findByPk(id_artista);
+    if (!artista) {
+      throw notFoundError('Artista', id_artista);
     }
 
     // Verificar se já segue
     const jaSegue = await Seguidor.findOne({
-      where: { id_utilizador: id_utilizador, id_artista: contaArtista.id_artista }
+      where: { id_utilizador: id_utilizador, id_artista: id_artista }
     });
     if (jaSegue) {
       throw conflictError('Já segues este artista.');
@@ -43,7 +48,7 @@ export const seguirArtista = async (req, res, next) => {
 
     await Seguidor.create({
       id_utilizador: id_utilizador,
-      id_artista: contaArtista.id_artista,
+      id_artista: id_artista,
       data_inicio: new Date()
     });
 
@@ -65,21 +70,26 @@ export const deixarSeguirArtista = async (req, res, next) => {
       });
     }
 
+    // Verificar se o id_utilizador corresponde ao utilizador logado no Token
+    if (String(id_utilizador) !== String(req.utilizador.sub)) {
+      throw unauthorizedError('Não podes deixar de seguir artistas em nome de outro utilizador. O id_utilizador tem de corresponder à tua conta atual.');
+    }
+
     // Verificar se a conta seguidora existe
     const conta = await Utilizador.findByPk(id_utilizador);
     if (!conta) {
       throw notFoundError('Conta de Utilizador (Seguidor)', id_utilizador);
     }
 
-    // Verificar se o artista existe e obter o seu verdadeiro id_artista
-    const contaArtista = await Utilizador.findOne({ where: { id_utilizador: id_artista, tipo: 'artista' } });
-    if (!contaArtista || !contaArtista.id_artista) {
-      throw notFoundError('Conta de Artista (Alvo)', id_artista);
+    // Verificar se o artista alvo existe na tabela Artista
+    const artista = await Artista.findByPk(id_artista);
+    if (!artista) {
+      throw notFoundError('Artista', id_artista);
     }
 
     // Verificar a relação de seguidor
     const segue = await Seguidor.findOne({
-      where: { id_utilizador: id_utilizador, id_artista: contaArtista.id_artista }
+      where: { id_utilizador: id_utilizador, id_artista: id_artista }
     });
 
     if (!segue) {
@@ -88,7 +98,10 @@ export const deixarSeguirArtista = async (req, res, next) => {
 
     await segue.destroy();
 
-    return res.status(200).json({ message: `Deixaste de seguir o artista ${contaArtista.nome_utilizador} com sucesso!` });
+    // Obter o nome do utilizador do artista apenas para a mensagem de sucesso
+    const contaArtista = await Utilizador.findOne({ where: { id_artista: id_artista } });
+
+    return res.status(200).json({ message: `Deixaste de seguir o artista ${contaArtista ? contaArtista.nome_utilizador : ''} com sucesso!`.trim() });
   } catch (error) {
     next(error);
   }
@@ -136,11 +149,11 @@ export const getSeguidores = async (req, res, next) => {
 
     // Se indicarmos o ID do Artista, mostramos todos os seus seguidores
     if (id_artista) {
-      // Obter o verdadeiro id_artista da tabela de artistas através da Utilizador
-      const contaArtista = await Utilizador.findOne({ where: { id_utilizador: id_artista, tipo: 'artista' } });
-      if (!contaArtista || !contaArtista.id_artista) throw notFoundError('Conta de Artista', id_artista);
+      // Procurar diretamente o artista na tabela de Artistas
+      const artista = await Artista.findByPk(id_artista);
+      if (!artista) throw notFoundError('Artista', id_artista);
 
-      const seguidoresRelacoes = await Seguidor.findAll({ where: { id_artista: contaArtista.id_artista } });
+      const seguidoresRelacoes = await Seguidor.findAll({ where: { id_artista } });
       const idsContasSeguidoras = seguidoresRelacoes.map(s => s.id_utilizador);
 
       // Obter as contas de quem segue o artista
@@ -150,7 +163,6 @@ export const getSeguidores = async (req, res, next) => {
       });
 
       return res.status(200).json({
-        artista: contaArtista.nome_utilizador,
         total_seguidores: seguidores.length,
         seguidores: seguidores
       });

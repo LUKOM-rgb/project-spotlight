@@ -28,6 +28,34 @@ const host = process.env.HOST || 'localhost'
 app.use(cors())
 app.use(express.json()) // Permite ler o Body em formato JSON enviado pelos clientes/Postman
 
+// Middleware para impedir pedidos PATCH com body vazio
+app.use((req, res, next) => {
+  if (req.method === 'PATCH') {
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'O corpo do pedido (body) não pode estar vazio num pedido PATCH. Deves enviar pelo menos um campo para atualizar.'
+      })
+    }
+  }
+  next()
+})
+
+// Middleware para garantir que os parâmetros de ID são sempre numéricos (bloqueia letras e caracteres inválidos)
+const validateIdParam = (req, res, next, id) => {
+  if (isNaN(id)) {
+    return res.status(400).json({
+      error: 'Parâmetro Inválido',
+      message: `O parâmetro enviado no URL (${id}) tem de ser um número válido.`
+    })
+  }
+  next()
+}
+app.param('id', validateIdParam)
+app.param('id_artista', validateIdParam)
+app.param('spotId', validateIdParam)
+app.param('artistaId', validateIdParam)
+
 // Registo de Rotas
 app.use('/api/ocorrencias', ocorrencias)
 app.use('/api/spots', spots)
