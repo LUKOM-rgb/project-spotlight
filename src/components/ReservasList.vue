@@ -12,15 +12,15 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="reservation in reservations" :key="reservation.id">
-          <td>{{ reservation.localizacao }}</td>
+        <tr v-for="reservation in reservations" :key="reservation.id_reserva">
+          <td>{{ reservation.id_spot }}</td>
           <td>{{ reservation.data_evento }}</td>
-          <td>{{ reservation.hora_inicio}}</td>
+          <td>{{ reservation.hora_inicio }}</td>
           <td>{{ reservation.hora_fim }}</td>
-          <td>{{ reservation.status }}</td>
+          <td>{{ reservation.status || 'N/A' }}</td>
           <td>
-            <button @click="" style="margin-right: 10px;">Edit</button>
-            <button @click="">Delete</button>
+            <button>Edit</button>
+            <button>Delete</button>
           </td>
         </tr>
       </tbody>
@@ -29,27 +29,33 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+const reservations = ref([])
+async function getReservations() {
+  const res = await fetch(
+    'http://localhost:3000/api/reservas/artista/me',
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    }
+  )
 
-const reservations = [
-  {
-    id: 1,
-    localizacao: 'Praça Central',
-    data_evento: '2024-07-15',
-    hora_inicio: '18:00',
-    hora_fim: '20:00',
-    status: 'Confirmed'
-  },
-  {
-    id: 2,
-    localizacao: 'Parque das Artes',
-    data_evento: '2024-07-20',
-    hora_inicio: '19:00',
-    hora_fim: '21:00',
-    status: 'Pending'},
-  ]
+  const data = await res.json()
 
+  if (res.status === 204) {
+    reservations.value = []
+    return
+  }
+
+  // 👇 IMPORTANT: extract only the array
+  reservations.value = data.data
+
+  console.log(reservations.value)
+}
+onMounted(() => {
+  getReservations()
+})
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

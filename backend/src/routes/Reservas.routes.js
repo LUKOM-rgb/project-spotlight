@@ -13,7 +13,9 @@ import { verifyToken, isArtista } from '../middlewares/auth.middleware.js';
 router.get('/', getAllReservas)
 router.get('/:id', getReservaById)
 router.get('/spot/:spotId', verifyToken, getReservasBySpotId)
-router.get('/artista/:artistaId',  getReservasByArtistaId)
+router.get('/artista/me', verifyToken,isArtista, getReservasByArtistaId)
+router.get('/artista/:id_artista',  getReservasByArtistaId)
+
 router.delete('/:id', verifyToken, isArtista, deleteReservaById)
 router.patch('/:id', verifyToken, isArtista, updateReservaById)
 router.post('/:id/', verifyToken, isArtista, createReserva)

@@ -61,13 +61,16 @@ export const getReservasBySpotId = async (req, res, next) => {
 }
 export const getReservasByArtistaId = async (req, res, next) => {
   try {
-    const { artistaId } = req.params
-    const artista = await Artista.findByPk(artistaId)
+    const id_artista = req.utilizador?.id_artista || req.params.id_artista
+    if (!id_artista) {
+      return res.status(400).json({ message: 'ID do artista não fornecido.' })
+    }
+    const artista = await Artista.findByPk(id_artista)
     if (!artista) {
-      throw notFoundError('Artista', artistaId)
+      throw notFoundError('Artista', id_artista)
     }
     const reservas = await Reservas.findAll({
-      where: { id_artista: artistaId },
+      where: { id_artista },
     })
     if (reservas.length === 0) {
       return res.status(204).json({
