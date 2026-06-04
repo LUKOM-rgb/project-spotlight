@@ -7,6 +7,7 @@ import {
   mdiClock,
 } from '@mdi/js'
 import ReservationChart from '@/components/ReservationChart.vue'
+import ReservasList from '@/components/ReservasList.vue'
 import Navbar from '@/components/NavBar.vue'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
@@ -28,17 +29,11 @@ L.Icon.Default.mergeOptions({
 })
 const selectedSpot = ref(null)
 const showSidebar = ref(false)
-const activeFilter = ref('all')
 
 const markers = new Map()
 const selectedSpotId = ref(null)
 
 let activeMarker = null
-
-const filters = [
-  { id: 'all', label: 'All' },
-  { id: 'street', label: 'Street Music' },
-]
 
 const defaultIcon = new L.Icon.Default()
 const activeIcon = L.icon({
@@ -124,18 +119,12 @@ const getSpotStatus = (spot) => {
   <SectionMain class="min-h-screen bg-[#f5f0e6]">
     <Navbar />
 
-    <!-- FILTERS -->
     <div class="mb-4 flex items-center gap-4">
-      <span class="text-sm text-gray-600">⚡ Spots</span>
+      <span class="text-sm text-gray-600">⚡Spot Map</span>
 
       <div class="flex gap-2">
-        <button v-for="filter in filters" :key="filter.id" :class="[
-          'rounded-full px-4 py-1 text-sm transition-colors',
-          activeFilter === filter.id
-            ? 'bg-[#e8e0d0] text-gray-700'
-            : 'bg-transparent text-gray-500 hover:bg-[#e8e0d0]/50',
-        ]" @click="activeFilter = filter.id">
-          {{ filter.label }}
+        <button>
+          My Reservations
         </button>
       </div>
     </div>
@@ -198,6 +187,7 @@ const getSpotStatus = (spot) => {
     </div>
     <br>
     <div>
+      <ReservasList />
       <ReservationChart :selectedSpotId="selectedSpotId" />
     </div>
 
