@@ -146,10 +146,3 @@ export const deleteArtist = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
-//ADMIN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQwLCJlbWFpbCI6ImFkbWluZ29uY2Fsb0BlbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpZF9hcnRpc3RhIjpudWxsLCJpYXQiOjE3ODA2MTE0NzksImV4cCI6MTc4MDY5Nzg3OX0.nKf3HJkSen1D6qht8JFsjSXsdjEW9OYWPbVL5Finnkc
-
-
-//NORNAMAL: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQxLCJlbWFpbCI6InRlc3RlZ29uY2Fsb0BlbWFpbC5jb20iLCJyb2xlIjoiYXJ0aXN0YSIsImlkX2FydGlzdGEiOjMxLCJpYXQiOjE3ODA2MTE2NjIsImV4cCI6MTc4MDY5ODA2Mn0.yocBs55YA7Qs8nGOrPVF3_4chYIoV_Wxdx2ecUe2jk8

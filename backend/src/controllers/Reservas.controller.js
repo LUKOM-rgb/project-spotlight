@@ -2,7 +2,7 @@ import Reservas from '../Models/reservas.js'
 import Spot from '../Models/spot.js'
 import Artista from '../Models/artista.js'
 
-import { validationError, notFoundError, conflictError } from '../utils/error.utils.js'
+import { validationError, notFoundError, conflictError,forbiddenError} from '../utils/error.utils.js'
 // Get all reservas
 export const getAllReservas = async (req, res, next) => {
   try {
@@ -89,6 +89,9 @@ export const updateReservaById = async (req, res, next) => {
   try {
     const { id } = req.params
     const id_artista = req.utilizador.id_artista
+    if (!id_artista) {
+      throw conflictError('ID do artista não fornecido.')
+    }
 
     const { data_evento, hora_inicio, hora_fim } = req.body
     // Verificar se a reserva existe e se pertence ao artista
@@ -99,12 +102,12 @@ export const updateReservaById = async (req, res, next) => {
       },
     })
     if (!reserva) {
-      throw notFoundError('Reserva', id)
+      throw forbiddenError('Esta reserva nao pertence ao artista', id)
     }
     const originalDateTime = new Date(`${reserva.data_evento}T${reserva.hora_inicio}`)
     const vinteQuatroHorasAntes = new Date(originalDateTime.getTime() - 24 * 60 * 60 * 1000)
     if (new Date() > vinteQuatroHorasAntes) {
-      throw conflictError(
+      throw validationError(
         'Não é possível atualizar a reserva com menos de 24 horas de antecedência.',
       )
     }

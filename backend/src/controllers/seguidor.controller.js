@@ -9,9 +9,13 @@ export const seguirArtista = async (req, res, next) => {
     // id_utilizador = conta de quem segue (Utilizador/Artista)
     // id_artista = conta do Artista que vai ser seguido
     const { id_utilizador, id_artista } = req.body;
-
+// ver se o artista nao para de seguir a si mesmo
+    const utilizadorLogado = req.utilizador.id_artista;
+    if (utilizadorLogado==id_artista) {
+      throw validationError('Não podes seguir-te a ti próprio.');
+    }
     if (!id_utilizador || !id_artista) {
-      throw validationError({ 
+      throw validationError({
         id_utilizador: !id_utilizador ? ['O campo id_utilizador é obrigatório.'] : undefined,
         id_artista: !id_artista ? ['O campo id_artista é obrigatório.'] : undefined,
       });
@@ -20,10 +24,6 @@ export const seguirArtista = async (req, res, next) => {
     // Verificar se o id_utilizador enviado no body corresponde ao utilizador logado no Token
     if (String(id_utilizador) !== String(req.utilizador.sub)) {
       throw unauthorizedError('Não podes seguir artistas em nome de outro utilizador. O id_utilizador tem de corresponder à tua conta atual.');
-    }
-
-    if (String(id_utilizador) === String(id_artista)) {
-      throw conflictError('Um utilizador não pode seguir-se a si próprio.');
     }
 
     // Verificar se a conta seguidora existe
@@ -64,7 +64,7 @@ export const deixarSeguirArtista = async (req, res, next) => {
     const { id_utilizador, id_artista } = req.body;
 
     if (!id_utilizador || !id_artista) {
-      throw validationError({ 
+      throw validationError({
         id_utilizador: !id_utilizador ? ['O campo id_utilizador é obrigatório.'] : undefined,
         id_artista: !id_artista ? ['O campo id_artista é obrigatório.'] : undefined,
       });
@@ -113,14 +113,14 @@ export const getSeguidores = async (req, res, next) => {
     const { id_utilizador, id_artista } = req.query;
 
     if (!id_utilizador && !id_artista) {
-      throw validationError({ 
-        query: ['É obrigatório enviar ?id_utilizador= ou ?id_artista= na query da pesquisa.'] 
+      throw validationError({
+        query: ['É obrigatório enviar ?id_utilizador= ou ?id_artista= na query da pesquisa.']
       });
     }
 
     if (id_utilizador && id_artista) {
-      throw validationError({ 
-        query: ['Por favor, envia apenas um parâmetro: ou ?id_utilizador= ou ?id_artista=, não ambos.'] 
+      throw validationError({
+        query: ['Por favor, envia apenas um parâmetro: ou ?id_utilizador= ou ?id_artista=, não ambos.']
       });
     }
 
