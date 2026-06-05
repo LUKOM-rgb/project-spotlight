@@ -24,12 +24,10 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(email, password) {
     try {
       const response = await api.post('/utilizadores/login', { email, password })
-      
+
       if (response.data && response.data.token) {
         setToken(response.data.token)
         
-        // Em muitas APIs, o login devolve o user, ou precisas de ir buscar em /me
-        // Vamos chamar a função /me para carregar os dados
         await fetchUser()
         return true
       }
@@ -59,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
       const userData = response.data
 
       user.value = userData
-      
+
       // Atualizar no mainStore para o ecrã mostrar o email/nome
       mainStore.setUser({
         name: userData.nome_utilizador || userData.email.split('@')[0],
