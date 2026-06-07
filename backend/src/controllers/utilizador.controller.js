@@ -5,7 +5,8 @@ import Categoria from '../Models/categorias.js';
 import { Op } from 'sequelize';
 import { notFoundError, validationError, conflictError } from '../utils/error.utils.js';
 import { hashPassword } from '../utils/auth.utils.js';
-// 1. Mostrar todos os utilizadores (Com filtros)
+
+//Mostrar todos os utilizadores
 export const getAllUtilizadores = async (req, res, next) => {
   try {
     const { nome, username, tipo } = req.query;
@@ -20,13 +21,13 @@ export const getAllUtilizadores = async (req, res, next) => {
       attributes: { exclude: ['password'] }
     });
 
-    return res.status(200).json(users);
+    return res.status(200).json({ data: users });
   } catch (error) {
     next(error);
   }
 };
 
-// 2. Mostrar info de utilizador específico
+//Mostrar info de utilizador específico
 export const getUtilizadorById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -39,13 +40,13 @@ export const getUtilizadorById = async (req, res, next) => {
       throw notFoundError('Utilizador', id);
     }
 
-    return res.status(200).json(conta);
+    return res.status(200).json({ data: conta });
   } catch (error) {
     next(error);
   }
 };
 
-// 2.5. Mostrar info do próprio utilizador (GET /me)
+//Mostrar info do próprio utilizador
 export const getMyProfile = async (req, res, next) => {
   try {
     const id = req.utilizador.sub;
@@ -58,13 +59,13 @@ export const getMyProfile = async (req, res, next) => {
       throw notFoundError('Utilizador', id);
     }
 
-    return res.status(200).json(conta);
+    return res.status(200).json({ data: conta });
   } catch (error) {
     next(error);
   }
 };
 
-// 3. Mudar dados do próprio perfil (PATCH /me)
+//Mudar dados do próprio perfil
 export const updateProfile = async (req, res, next) => {
   try {
     const id = req.utilizador.sub;
@@ -82,8 +83,8 @@ export const updateProfile = async (req, res, next) => {
     const isPasswordProvided = !!password;
 
     if (isSameEmail && isSameNome && isSameTelemovel && !isPasswordProvided) {
-      throw validationError({ 
-        geral: ['Nenhum dado novo foi fornecido ou os dados são iguais aos atuais. Por favor altera algum valor para atualizar o perfil.'] 
+      throw validationError({
+        geral: ['Nenhum dado novo foi fornecido ou os dados são iguais aos atuais. Por favor altera algum valor para atualizar o perfil.']
       });
     }
 
@@ -104,7 +105,7 @@ export const updateProfile = async (req, res, next) => {
       novaPasswordHashed = await hashPassword(password);
     }
 
-    // Validar telemóvel (exatamente 9 dígitos numéricos)
+    // Validar telemóvel
     if (numero_telemovel !== undefined && numero_telemovel !== null && String(numero_telemovel).trim() !== '') {
       const isNineDigits = /^\d{9}$/.test(String(numero_telemovel));
       if (!isNineDigits) {
@@ -119,18 +120,21 @@ export const updateProfile = async (req, res, next) => {
       numero_telemovel: numero_telemovel !== undefined ? numero_telemovel : conta.numero_telemovel
     });
 
-    return res.status(200).json({ message: 'Perfil atualizado com sucesso!', conta: {
-      id_utilizador: conta.id_utilizador,
-      email: conta.email,
-      nome_utilizador: conta.nome_utilizador,
-      numero_telemovel: conta.numero_telemovel
-    }});
+    return res.status(200).json({
+      message: 'Perfil atualizado com sucesso!',
+      data: {
+        id_utilizador: conta.id_utilizador,
+        email: conta.email,
+        nome_utilizador: conta.nome_utilizador,
+        numero_telemovel: conta.numero_telemovel
+      }
+    });
   } catch (error) {
     next(error);
   }
 };
 
-// 4. Apagar utilizador
+//Apagar utilizador
 export const deleteUtilizador = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -147,7 +151,7 @@ export const deleteUtilizador = async (req, res, next) => {
   }
 };
 
-// 5. Mudar cargo (Role) da Conta (REST API)
+//Mudar cargo da conta
 export const changeUtilizadorRole = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -196,17 +200,16 @@ export const changeUtilizadorRole = async (req, res, next) => {
       const novoArtista = await Artista.create({ numero_licenca, validade_licenca, categoria_id });
       await conta.update({ tipo: 'artista', id_artista: novoArtista.id_artista });
 
-      return res.status(200).json({ message: 'Conta promovida a Artista com sucesso!', conta });
+      return res.status(200).json({ message: 'Conta promovida a Artista com sucesso!', data: conta });
     }
 
-    // Se a mudança for para UTILIZADOR (Downgrade)
+    // Se a mudança for para UTILIZADOR
     if (tipo === 'utilizador') {
       await conta.update({ tipo: 'utilizador', id_artista: null });
-      return res.status(200).json({ message: 'Conta rebaixada a Utilizador com sucesso!', conta });
+      return res.status(200).json({ message: 'Conta rebaixada a Utilizador com sucesso!', data: conta });
     }
 
   } catch (error) {
     next(error);
   }
 };
-

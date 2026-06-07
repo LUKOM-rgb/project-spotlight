@@ -8,10 +8,10 @@ import process from 'process'
 import sequelize from './config/database.js'
 
 // Importar as Rotas da API
+import authRoutes from './routes/auth.routes.js' // CORREÇÃO 1: Importada a rota de auth
 import ocorrencias from './routes/ocorrencia.routes.js'
 import spots from './routes/spot.routes.js'
 import reservas from './routes/reservas.routes.js'
-
 import utilizadorRoutes from './routes/utilizador.routes.js'
 import artistaRoutes from './routes/artista.routes.js'
 import categoriaRoutes from './routes/categoria.routes.js'
@@ -26,7 +26,7 @@ const host = process.env.HOST || 'localhost'
 
 // Middlewares Globais
 app.use(cors())
-app.use(express.json()) // Permite ler o Body em formato JSON enviado pelos clientes/Postman
+app.use(express.json())
 
 // Middleware para impedir pedidos PATCH com body vazio
 app.use((req, res, next) => {
@@ -41,7 +41,7 @@ app.use((req, res, next) => {
   next()
 })
 
-// Middleware para garantir que os parâmetros de ID são sempre numéricos (bloqueia letras e caracteres inválidos)
+// Middleware para garantir que os parâmetros de ID são sempre numéricos
 const validateIdParam = (req, res, next, id) => {
   if (isNaN(id)) {
     return res.status(400).json({
@@ -57,19 +57,19 @@ app.param('spotId', validateIdParam)
 app.param('artistaId', validateIdParam)
 
 // Registo de Rotas
+app.use('/api/auth', authRoutes) // CORREÇÃO 1: Registada a rota de auth de forma independente
 app.use('/api/ocorrencias', ocorrencias)
 app.use('/api/spots', spots)
 app.use('/api/reservas', reservas)
 app.use('/api/artistas', artistaRoutes)
 app.use('/api/categorias', categoriaRoutes)
 app.use('/api/seguidores', seguidorRoutes)
-
 app.use('/api/utilizadores', utilizadorRoutes)
 
-// Rota base de teste rápido para verificar no browser ou Postman se a API está online
+// Rota base de teste
 app.get('/', (req, res) => {
   return res.status(200).json({
-    message: 'API do Project Spotlight está a correr com sucesso!',
+    message: 'API do SpotLight está a correr com sucesso!',
   })
 })
 
@@ -78,11 +78,10 @@ app.use((req, res, next) => {
   res.status(404).json({ message: 'Endpoint não encontrado' })
 })
 
-// Middleware Global de Tratamento de Erros (Consolidado e Robusto)
+// Middleware Global de Tratamento de Erros
 app.use((err, req, res, next) => {
   console.error(err)
 
-  // Erro do middleware express.json() se o body não for JSON válido
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({
       error: 'Payload JSON inválido! Verifique se os dados estão no formato correto.',
@@ -90,7 +89,6 @@ app.use((err, req, res, next) => {
     })
   }
 
-  // Erros de Validação do Sequelize (todos os Modelos)
   if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
     return res.status(400).json({
       error: 'Erro de Validação',
@@ -102,7 +100,6 @@ app.use((err, req, res, next) => {
     })
   }
 
-  // Erros de base de dados do Sequelize/MySQL
   if (err.name === 'SequelizeDatabaseError' && err.original) {
     if (err.original.code === 'ER_CHECK_CONSTRAINT_VIOLATED') {
       return res.status(400).json({
@@ -124,7 +121,6 @@ app.use((err, req, res, next) => {
     }
   }
 
-  // Outros erros personalizados ou de sistema
   const status = err.status || err.statusCode || 500
   const description = err.description || err.message || 'Internal Server Error'
   const errors = err.errors || null
@@ -138,16 +134,15 @@ app.use((err, req, res, next) => {
 
 // Sincronização da Base de Dados e Inicialização do Servidor
 sequelize
-  .sync({ }) // Sincroniza tabelas na BD se houver alterações nos Modelos
+  .sync({ })
   .then(() => {
-    console.log('✔ Database sincronizada com sucesso.')
+    console.log('- Database sincronizada com sucesso.')
     app.listen(port, host, () => {
-      console.log(`✔ Server running on http://${host}:${port}`)
-      console.log(`✔ Access: http://${host}:${port}/relatorios`)
+      console.log(`- Server running on http://${host}:${port}`)
     })
   })
   .catch((error) => {
-    console.error('✖ Erro ao sincronizar a Base de Dados:', error)
+    console.error('- Erro ao sincronizar a Base de Dados:', error)
   })
 
 export default app

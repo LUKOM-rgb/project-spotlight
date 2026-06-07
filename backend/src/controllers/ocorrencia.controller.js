@@ -2,8 +2,6 @@ import RelatorioOcorrencia from '../Models/ocorrencia.js'
 import Utilizador from '../Models/utilizador.js'
 import Spot from '../Models/spot.js'
 import { validationError, notFoundError } from '../utils/error.utils.js'
-
-// POST /ocorrencias - Criar nova ocorrência
 export const createOcorrencia = async (req, res, next) => {
   try {
     const {
@@ -54,7 +52,7 @@ export const createOcorrencia = async (req, res, next) => {
     const spotExiste = await Spot.findByPk(id_spot)
     if (!spotExiste) throw notFoundError('Spot', id_spot)
 
-    // 3. Criar a ocorrência na base de dados
+    //Criar a ocorrência na base de dados
     const novaOcorrencia = await RelatorioOcorrencia.create({
       data_ocorrencia: data_ocorrencia || new Date(),
       data_envio: new Date(),
@@ -66,7 +64,7 @@ export const createOcorrencia = async (req, res, next) => {
       id_spot,
     })
 
-    // 4. Responder com 201 Created
+    //Responder com 201 Created
     return res.status(201).json({
       message: 'Ocorrência registada com sucesso!',
       data: novaOcorrencia,

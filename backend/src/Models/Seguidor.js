@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../config/database.js'
+
 const Seguidor = sequelize.define(
   'Seguidor',
   {
@@ -14,6 +15,11 @@ const Seguidor = sequelize.define(
     id_artista: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      // Correção: Faltava a referência para o Artista
+      references: {
+        model: 'Artista',
+        key: 'id_artista',
+      },
     },
     data_inicio: {
       type: DataTypes.DATE,
@@ -26,6 +32,7 @@ const Seguidor = sequelize.define(
     timestamps: false,
   },
 )
+
 Seguidor.associate = (models) => {
   Seguidor.belongsTo(models.Artista, {
     foreignKey: 'id_artista',
@@ -34,4 +41,5 @@ Seguidor.associate = (models) => {
     foreignKey: 'id_utilizador',
   })
 }
+
 export default Seguidor
