@@ -4,17 +4,16 @@ import Seguidor from '../Models/seguidor.js';
 import { hashPassword } from '../utils/auth.utils.js';
 import { validationError, notFoundError, conflictError } from '../utils/error.utils.js';
 
-// 1. Criar Artista (Registo de um novo Artista)
+//Criar Artista
 export const createArtist = async (req, res, next) => {
   try {
-    const id_utilizador= req.utilizador.sub;
+    const id_utilizador = req.utilizador.sub;
 
     const {
       numero_licenca,
       validade_licenca,
       categoria_id
     } = req.body;
-
     // Validação básica
     const errors = {};
     if (!numero_licenca) errors.numero_licenca = ['O campo numero_licenca é obrigatório.'];
@@ -68,7 +67,7 @@ export const createArtist = async (req, res, next) => {
   }
 };
 
-// 2. Mostrar todos os Artistas
+//Mostrar todos os Artistas
 export const getAllArtists = async (req, res, next) => {
   try {
     const contas = await Utilizador.findAll({
@@ -77,46 +76,58 @@ export const getAllArtists = async (req, res, next) => {
       include: [{ model: Artista }]
     });
 
-    return res.status(200).json(contas);
+    return res.status(200).json({ data: contas });
   } catch (error) {
     next(error);
   }
 };
 
-// 3. Mostrar info de um Artista específico
+//Mostrar info de um Artista específico
 export const getArtistById = async (req, res, next) => {
   try {
     const { id_artista } = req.params;
-    const conta = await Utilizador.findOne({where: { id_artista: id_artista, tipo: 'artista' },attributes: { exclude: ['password', 'id_artista'] },
-      include: [{ model: Artista}],});
+    const conta = await Utilizador.findOne({
+      where: { id_artista: id_artista, tipo: 'artista' },
+      attributes: { exclude: ['password', 'id_artista'] },
+      include: [{ model: Artista }]
+    });
 
     if (!conta) {
       throw notFoundError('Artista', id_artista);
     }
 
-    return res.status(200).json(conta);
+    return res.status(200).json({ data: conta });
   } catch (error) {
     next(error);
   }
 };
 
-// 4. Mudar dados do Artista
+//Mudar dados do Artista
 export const updateArtist = async (req, res, next) => {
   try {
-    const { id_artista } = req.utilizador.id_artista ? req.utilizador : req.params; // Se for artista, pega do token, senão adicionar id
+    const id_artista = req.utilizador.id_artista || req.params.id_artista;
     const { numero_licenca, validade_licenca, categoria_id } = req.body;
-
 
     const artista = await Artista.findByPk(id_artista);
     if (!artista) {
       throw notFoundError('Perfil de Artista', id_artista);
     }
 
-    // Atualizar Artista
+    if (numero_licenca && !String(numero_licenca).startsWith('LIC-')) {
+      throw validationError({ numero_licenca: ['O número de licença tem de começar obrigatoriamente pelo prefixo "LIC-".'] });
+    }
+
+    if (numero_licenca) {
+      const licencaExistente = await Artista.findOne({ where: { numero_licenca } });
+      if (licencaExistente && licencaExistente.id_artista !== parseInt(id_artista)) {
+        throw conflictError('O número de licença fornecido já está registado noutro artista.');
+      }
+    }
+
     await artista.update({
-      numero_licenca: numero_licenca || artista.numero_licenca,
-      validade_licenca: validade_licenca || artista.validade_licenca,
-      categoria_id: categoria_id || artista.categoria_id
+      numero_licenca: numero_licenca ?? artista.numero_licenca,
+      validade_licenca: validade_licenca ?? artista.validade_licenca,
+      categoria_id: categoria_id ?? artista.categoria_id
     });
 
     return res.status(200).json({ message: 'Dados de artista atualizados com sucesso!', data: artista });
@@ -125,7 +136,7 @@ export const updateArtist = async (req, res, next) => {
   }
 };
 
-// 5. Apagar Artista, no admin o parametro é o id de artista CUIDADO
+//Apagar Artista
 export const deleteArtist = async (req, res, next) => {
   try {
     const { id_artista } = req.params;
@@ -134,12 +145,12 @@ export const deleteArtist = async (req, res, next) => {
     if (!conta) {
       throw notFoundError('Artista', id_artista);
     }
-    conta.tipo = 'utilizador'; // Reverter tipo para 'utilizador' antes de apagar o artista
-    conta.id_artista = null; // Desassociar o artista da conta
+
+    conta.tipo = 'utilizador';
+    conta.id_artista = null;
     await conta.save();
 
-    // Destruir Artista primeiro, depois a Conta (ou a BD faz cascade se configurado, mas vamos forçar)
-      await Artista.destroy({ where: { id_artista: id_artista } });
+    await Artista.destroy({ where: { id_artista: id_artista } });
 
     return res.status(200).json({ message: `Artista ${conta.nome_utilizador} removido com sucesso!` });
   } catch (error) {

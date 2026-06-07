@@ -7,15 +7,13 @@ import { validationError, unauthorizedError, conflictError } from '../utils/erro
 export const register = async (req, res, next) => {
   try {
     const { email, password, nome_utilizador, numero_telemovel } = req.body
-
-    // campos obrigatórios
     const errors = {}
     if (!email) errors.email = ['O campo email é obrigatório.']
     if (!password || password.length < 6)
       errors.password = ['A password deve ter pelo menos 6 caracteres.']
     if (!nome_utilizador) errors.nome_utilizador = ['O campo nome_utilizador é obrigatório.']
 
-    // Validar telemóvel (exatamente 9 dígitos numéricos)
+    // Validar telemóvel
     if (numero_telemovel) {
       const isNineDigits = /^\d{9}$/.test(String(numero_telemovel));
       if (!isNineDigits) {
@@ -27,24 +25,38 @@ export const register = async (req, res, next) => {
       throw validationError(errors)
     }
 
-    // 2. Verificar se o email ou username já existem
-    const existingAccount = await Utilizador.findOne({ where: { email } })
+    //Verificar se o email ou username já existem
+    const existingAccount = await Utilizador.findOne({
+      where: {
+        [Op.or]: [
+          { email },
+          { nome_utilizador }
+        ]
+      }
+    })
+
     if (existingAccount) {
-      throw conflictError('Este email já está registado.')
+      // Vamos ser específicos para ajudar o frontend a mostrar o erro no campo certo
+      if (existingAccount.email === email) {
+        throw conflictError('Este email já está registado.')
+      }
+      if (existingAccount.nome_utilizador === nome_utilizador) {
+        throw conflictError('Este nome de utilizador já está em uso.')
+      }
     }
 
-    // 3. Cifrar password e criar Conta Global
+    //Cifrar password e criar Conta Global
     const hashedPassword = await hashPassword(password)
     const novaConta = await Utilizador.create({
       email,
       password: hashedPassword,
-      tipo: 'utilizador', // Corrigido de tipo_utilizador para tipo
+      tipo: 'utilizador',
       data_registo: new Date(),
       nome_utilizador,
       numero_telemovel
     })
 
-    // 5. Responder com 201 Created (Sucesso no Postman)
+    //Responder com 201 Created
     return res.status(201).json({
       message: 'Utilizador registado com sucesso!',
       data: {
@@ -54,18 +66,18 @@ export const register = async (req, res, next) => {
       },
     })
   } catch (error) {
-    next(error) // Encaminha para o teu middleware global de erros
+    next(error)
   }
 }
 
-// tentativa do POST /users/login - Autenticar Utilizador
+//Tentativa do POST /users/login - Autenticar Utilizador
 export const login = async (req, res, next) => {
   try {
     // Verificar se o body tem chaves a mais
     const allowedKeys = ['email', 'nome_utilizador', 'password'];
     const bodyKeys = Object.keys(req.body);
     const hasExtraKeys = bodyKeys.some(key => !allowedKeys.includes(key));
-    
+
     if (hasExtraKeys) {
       throw validationError({ request: ['No login apenas é permitido enviar os campos email (ou nome_utilizador) e password. Pedido rejeitado.'] })
     }
@@ -77,29 +89,29 @@ export const login = async (req, res, next) => {
       throw validationError({ credentials: ['Email (ou nome_utilizador) e password são obrigatórios.'] })
     }
 
-    // 1. Procurar a conta pelo email ou username
-    const conta = await Utilizador.findOne({ 
-      where: { 
+    //Procurar a conta pelo email ou username
+    const conta = await Utilizador.findOne({
+      where: {
         [Op.or]: [
           { email: identifier },
           { nome_utilizador: identifier }
         ]
-      } 
+      }
     })
     if (!conta) {
       throw unauthorizedError('Credenciais de acesso inválidas.')
     }
 
-    // 2. Verificar a password
+    //Verificar a password
     const isPasswordValid = await comparePassword(password, conta.password)
     if (!isPasswordValid) {
       throw unauthorizedError('Credenciais de acesso inválidas.')
     }
 
-    // 3. Gerar o Token JWT
+    //Gerar o Token JWT
     const token = generateToken(conta)
 
-    // 4. Responder com 200 OK e o Token
+    //Responder com 200 OK e o Token
     return res.status(200).json({
       message: 'Login efetuado com sucesso!',
       token: token,

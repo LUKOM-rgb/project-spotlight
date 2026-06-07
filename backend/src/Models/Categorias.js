@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../config/database.js'
+
 const Categoria = sequelize.define(
   'Categoria',
   {
@@ -19,9 +20,11 @@ const Categoria = sequelize.define(
     timestamps: false,
   },
 )
+
 Categoria.associate = (models) => {
   Categoria.hasMany(models.Artista, {
     foreignKey: 'categoria_id',
   })
 }
+
 export default Categoria

@@ -33,6 +33,7 @@ const Artista = sequelize.define(
     timestamps: false,
   },
 )
+
 Artista.associate = (models) => {
   Artista.belongsTo(models.Categoria, {
     foreignKey: 'categoria_id',
@@ -41,6 +42,10 @@ Artista.associate = (models) => {
     foreignKey: 'id_artista',
   })
   Artista.hasMany(models.Reserva, {
+    foreignKey: 'id_artista',
+  })
+  // Associação inversa com Utilizador adicionada para facilitar includes
+  Artista.hasOne(models.Utilizador, {
     foreignKey: 'id_artista',
   })
 }

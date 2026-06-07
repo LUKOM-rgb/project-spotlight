@@ -3,7 +3,7 @@ import Artista from '../Models/artista.js';
 import Utilizador from '../Models/utilizador.js';
 import { validationError, notFoundError, conflictError } from '../utils/error.utils.js';
 
-// 1. Adicionar Categoria
+//Adicionar Categoria
 export const createCategoria = async (req, res, next) => {
   try {
     const { categoria_id, nome_categoria } = req.body;
@@ -33,24 +33,21 @@ export const createCategoria = async (req, res, next) => {
   }
 };
 
-// 2. Apagar Categoria
+//Apagar Categoria
 export const deleteCategoria = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    if (!id) {
-      throw validationError({ id: ['O ID da categoria a apagar é obrigatório.'] });
-    }
 
     const categoria = await Categoria.findByPk(id);
     if (!categoria) {
       throw notFoundError('Categoria', id);
     }
 
-    // Verificar se existem artistas associados a esta categoria antes de apagar
-    const artistasAssociados = await Artista.count({ where: { categoria_id: id } });
-    if (artistasAssociados > 0) {
-      throw conflictError('Não podes apagar esta categoria porque ainda tem artistas associados.');
+    // Não podemos apagar uma categoria que tenha artistas lá dentro, senão a bd explode pela foreign key
+    const artistasComEstaCategoria = await Artista.count({ where: { categoria_id: id } });
+
+    if (artistasComEstaCategoria > 0) {
+      throw conflictError('Não é possível apagar esta categoria porque ainda tem artistas associados.');
     }
 
     await categoria.destroy();
@@ -62,25 +59,21 @@ export const deleteCategoria = async (req, res, next) => {
   }
 };
 
-// 3. Ver todas as Categorias
+//Ver todas as Categorias
 export const getAllCategorias = async (req, res, next) => {
   try {
     const categorias = await Categoria.findAll();
 
-    return res.status(200).json(categorias);
+    return res.status(200).json({ data: categorias });
   } catch (error) {
     next(error);
   }
 };
 
-// 4. Ver os artistas por categoria
+//Ver os artistas por categoria
 export const getArtistasByCategoria = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    if (!id) {
-      throw validationError({ id: ['O ID da categoria é obrigatório.'] });
-    }
 
     // Verificar se a categoria existe
     const categoria = await Categoria.findByPk(id);
@@ -88,7 +81,7 @@ export const getArtistasByCategoria = async (req, res, next) => {
       throw notFoundError('Categoria', id);
     }
 
-    // Buscar artistas associados à categoria (juntando com Utilizador para ter nome, email, etc.)
+    // Buscar artistas associados à categoria
     const contas = await Utilizador.findAll({
       where: { tipo: 'artista' },
       attributes: { exclude: ['password'] },
@@ -100,10 +93,7 @@ export const getArtistasByCategoria = async (req, res, next) => {
       ]
     });
 
-    return res.status(200).json({
-      categoria: categoria.nome_categoria,
-      artistas: contas
-    });
+    return res.status(200).json({ data: contas });
   } catch (error) {
     next(error);
   }

@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../config/database.js'
+
 const Utilizador = sequelize.define(
   'Utilizador',
   {
@@ -51,5 +52,9 @@ Utilizador.associate = (models) => {
   Utilizador.hasMany(models.Ocorrencia, {
     foreignKey: 'id_utilizador',
   })
+  Utilizador.hasMany(models.Seguidor, {
+    foreignKey: 'id_utilizador',
+  })
 }
+
 export default Utilizador

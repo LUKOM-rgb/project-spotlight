@@ -1,6 +1,6 @@
 import Spot from '../Models/spot.js'
 import { validationError, notFoundError, conflictError } from '../utils/error.utils.js'
-// Get all spots
+
 export const getAllSpots = async (req, res, next) => {
   try {
     const spots = await Spot.findAll()
@@ -9,6 +9,7 @@ export const getAllSpots = async (req, res, next) => {
     next(error)
   }
 }
+
 export const getSpotById = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -24,7 +25,7 @@ export const getSpotById = async (req, res, next) => {
     next(error)
   }
 }
-// - localizacao: string -longitude: decimal -latitude: decimal -abertura:time(00:00:00) -fecho:time(00:00:00)
+
 export const createSpot = async (req, res, next) => {
   try {
     const { localizacao, longitude, latitude, abertura, fecho } = req.body
@@ -40,10 +41,9 @@ export const createSpot = async (req, res, next) => {
       throw validationError(errors)
     }
 
-    // Obter todos os spots para comparar com precisão absoluta as coordenadas no JavaScript
     const todosSpots = await Spot.findAll()
-    const isDuplicate = todosSpots.some((s) => 
-      Number(s.latitude).toFixed(5) === Number(latitude).toFixed(5) && 
+    const isDuplicate = todosSpots.some((s) =>
+      Number(s.latitude).toFixed(5) === Number(latitude).toFixed(5) &&
       Number(s.longitude).toFixed(5) === Number(longitude).toFixed(5)
     )
 
@@ -65,12 +65,12 @@ export const createSpot = async (req, res, next) => {
     next(error)
   }
 }
+
 export const updateSpot = async (req, res, next) => {
   try {
     const { id } = req.params
     const { localizacao, longitude, latitude, abertura, fecho } = req.body
 
-    // Impede a mudança do id_spot
     if (req.body.id_spot) {
       throw validationError({ id_spot: ['Não é permitido alterar o ID de um spot.'] })
     }
@@ -94,6 +94,7 @@ export const updateSpot = async (req, res, next) => {
     next(error)
   }
 }
+
 export const deleteSpotById = async (req, res, next) => {
   try {
     const { id } = req.params
