@@ -89,7 +89,9 @@ export const deixarSeguirArtista = async (req, res, next) => {
       throw conflictError('Não segues este artista.');
     }
 
-    await segue.destroy();
+    await Seguidor.destroy({
+      where: { id_utilizador: id_utilizador, id_artista: id_artista }
+    });
 
     const contaArtista = await Utilizador.findOne({ where: { id_artista: id_artista } });
 
@@ -102,12 +104,10 @@ export const deixarSeguirArtista = async (req, res, next) => {
 //Ver seguidores ou quem o utilizador segue
 export const getSeguidores = async (req, res, next) => {
   try {
-    const { id_utilizador, id_artista } = req.query;
+    let { id_utilizador, id_artista } = req.query;
 
     if (!id_utilizador && !id_artista) {
-      throw validationError({
-        query: ['É obrigatório enviar ?id_utilizador= ou ?id_artista= na query da pesquisa.']
-      });
+      id_utilizador = req.utilizador.sub;
     }
 
     if (id_utilizador && id_artista) {

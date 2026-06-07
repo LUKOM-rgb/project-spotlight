@@ -25,13 +25,18 @@ export const register = async (req, res, next) => {
       throw validationError(errors)
     }
 
-    //Verificar se o email ou username já existem
+    //Verificar se o email, username ou telemóvel já existem
+    const queryOr = [
+      { email },
+      { nome_utilizador }
+    ]
+    if (numero_telemovel) {
+      queryOr.push({ numero_telemovel })
+    }
+
     const existingAccount = await Utilizador.findOne({
       where: {
-        [Op.or]: [
-          { email },
-          { nome_utilizador }
-        ]
+        [Op.or]: queryOr
       }
     })
 
@@ -42,6 +47,9 @@ export const register = async (req, res, next) => {
       }
       if (existingAccount.nome_utilizador === nome_utilizador) {
         throw conflictError('Este nome de utilizador já está em uso.')
+      }
+      if (numero_telemovel && existingAccount.numero_telemovel === numero_telemovel) {
+        throw conflictError('Este número de telemóvel já está associado a outra conta.')
       }
     }
 

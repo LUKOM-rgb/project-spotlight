@@ -79,6 +79,23 @@ export const updateSpot = async (req, res, next) => {
     if (!spot) {
       throw notFoundError('Spot', id)
     }
+
+    const todosSpots = await Spot.findAll()
+
+    if (longitude !== undefined) {
+      const isLonTaken = todosSpots.some(s => String(s.id_spot) !== String(id) && Number(s.longitude).toFixed(5) === Number(longitude).toFixed(5))
+      if (isLonTaken) throw conflictError('Já existe um Spot registado com esta mesma longitude.')
+    }
+
+    if (latitude !== undefined) {
+      const isLatTaken = todosSpots.some(s => String(s.id_spot) !== String(id) && Number(s.latitude).toFixed(5) === Number(latitude).toFixed(5))
+      if (isLatTaken) throw conflictError('Já existe um Spot registado com esta mesma latitude.')
+    }
+
+    if (localizacao !== undefined) {
+      const isLocTaken = todosSpots.some(s => String(s.id_spot) !== String(id) && s.localizacao === localizacao)
+      if (isLocTaken) throw conflictError('Já existe um Spot registado com esta mesma localização.')
+    }
     await spot.update({
       localizacao: localizacao ?? spot.localizacao,
       longitude: longitude ?? spot.longitude,

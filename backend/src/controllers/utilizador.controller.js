@@ -88,11 +88,25 @@ export const updateProfile = async (req, res, next) => {
       });
     }
 
-    // Verificar se o novo email já está em uso por outra conta
+    // Verificar se o novo email, nome_utilizador ou numero_telemovel já estão em uso por outra conta
     if (email && email !== conta.email) {
       const emailExistente = await Utilizador.findOne({ where: { email } });
       if (emailExistente) {
         throw conflictError('Este email já está associado a outra conta.');
+      }
+    }
+
+    if (nome_utilizador && nome_utilizador !== conta.nome_utilizador) {
+      const nomeExistente = await Utilizador.findOne({ where: { nome_utilizador } });
+      if (nomeExistente) {
+        throw conflictError('Este nome de utilizador já está em uso.');
+      }
+    }
+
+    if (numero_telemovel && String(numero_telemovel) !== String(conta.numero_telemovel)) {
+      const telemovelExistente = await Utilizador.findOne({ where: { numero_telemovel } });
+      if (telemovelExistente) {
+        throw conflictError('Este número de telemóvel já está associado a outra conta.');
       }
     }
 
