@@ -54,7 +54,7 @@ onMounted(async () => {
 const submitProfile = async () => {
   try {
     profileMessage.value = ''
-    const { data } = await api.patch('/utilizadores/me', profileForm)
+    await api.patch('/utilizadores/me', profileForm)
     // Atualizar a store após alteração
     await authStore.fetchUser()
     profileMessage.value = 'Perfil atualizado com sucesso!'
@@ -191,7 +191,7 @@ const submitArtist = async () => {
               required
             >
               <option value="" disabled>Seleciona uma categoria...</option>
-              <option v-for="cat in categories" :key="cat.id_categoria" :value="cat.id_categoria">
+              <option v-for="cat in categories" :key="cat.categoria_id" :value="cat.categoria_id">
                 {{ cat.nome_categoria }}
               </option>
             </select>

@@ -72,7 +72,8 @@ onMounted(async () => {
       headers,
     })
     if (spotsRes.ok) {
-      spotsList.value = await spotsRes.json()
+      const result = await spotsRes.json()
+      spotsList.value = result.data || []
     }
   } catch (err) {
     console.error('Erro ao carregar spots:', err)
