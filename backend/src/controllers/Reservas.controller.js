@@ -130,7 +130,21 @@ export const updateReservaById = async (req, res, next) => {
         'Não é possível atualizar a reserva com menos de 24 horas de antecedência.',
       )
     }
+<<<<<<< HEAD
+    if (data_evento) {
+      const inputDate = new Date(data_evento)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      inputDate.setHours(0, 0, 0, 0)
+      if (inputDate < today) {
+        throw validationError({
+          data_evento: ['A data do evento só pode ser a partir do dia de hoje.']
+        })
+      }
+    }
+=======
 
+>>>>>>> ee180fdb5ea822b64c6384fb74c226f250aa3967
     const novaData = data_evento || reserva.data_evento
     const novoInicio = hora_inicio || reserva.hora_inicio
     const novoFim = hora_fim || reserva.hora_fim
