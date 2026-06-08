@@ -18,15 +18,14 @@ const selectedSpotId = ref(null)
 </script>
 
 <template>
-  <SectionMain class="min-h-screen bg-[#f5f0e6]">
+  <SectionMain class="min-h-screen bg-[#f5f0e6] transition-colors dark:bg-slate-900">
     <Navbar />
 
     <div class="mb-4 flex items-center gap-4">
 
       <div class="flex gap-2">
-        <base-button class="text-sm text-gray-600" @click="selectedView='map'" label="Spot Map"></base-button>
-        <base-button class="text-sm text-gray-600" @click="selectedView='Reservations'" label="My Reservations"></base-button>
-
+        <base-button class="text-sm text-gray-600 dark:text-gray-300 dark:hover:text-teal-400" @click="selectedView='map'" label="Spot Map"></base-button>
+        <base-button class="text-sm text-gray-600 dark:text-gray-300 dark:hover:text-teal-400" @click="selectedView='Reservations'" label="My Reservations"></base-button>
       </div>
     </div>
 

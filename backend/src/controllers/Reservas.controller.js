@@ -130,7 +130,7 @@ export const updateReservaById = async (req, res, next) => {
         'Não é possível atualizar a reserva com menos de 24 horas de antecedência.',
       )
     }
-<<<<<<< HEAD
+
     if (data_evento) {
       const inputDate = new Date(data_evento)
       const today = new Date()
@@ -142,9 +142,7 @@ export const updateReservaById = async (req, res, next) => {
         })
       }
     }
-=======
 
->>>>>>> ee180fdb5ea822b64c6384fb74c226f250aa3967
     const novaData = data_evento || reserva.data_evento
     const novoInicio = hora_inicio || reserva.hora_inicio
     const novoFim = hora_fim || reserva.hora_fim

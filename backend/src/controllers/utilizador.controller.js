@@ -158,7 +158,14 @@ export const deleteUtilizador = async (req, res, next) => {
       throw notFoundError('Utilizador', id);
     }
 
+    const id_artista_para_apagar = conta.id_artista;
+
     await conta.destroy();
+
+    // Se a conta pertencia a um artista, apaga também o registo de artista para não ficar órfão
+    if (id_artista_para_apagar) {
+      await Artista.destroy({ where: { id_artista: id_artista_para_apagar } });
+    }
     return res.status(200).json({ message: `Conta ${conta.email} removida com sucesso!` });
   } catch (error) {
     next(error);
@@ -219,7 +226,15 @@ export const changeUtilizadorRole = async (req, res, next) => {
 
     // Se a mudança for para UTILIZADOR
     if (tipo === 'utilizador') {
+      const id_artista_para_apagar = conta.id_artista;
+      
       await conta.update({ tipo: 'utilizador', id_artista: null });
+
+      // Apagar o registo de artista antigo para não ficar órfão na base de dados
+      if (id_artista_para_apagar) {
+        await Artista.destroy({ where: { id_artista: id_artista_para_apagar } });
+      }
+      
       return res.status(200).json({ message: 'Conta rebaixada a Utilizador com sucesso!', data: conta });
     }
 

@@ -12,27 +12,27 @@
 
       <transition name="slide">
 
-        <CardBox v-if="showSidebar && selectedSpot" class="w-80 flex-shrink-0 overflow-hidden rounded-2xl bg-white">
+        <CardBox v-if="showSidebar && selectedSpot" class="w-80 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border dark:border-slate-700">
 
           <div class="flex justify-end p-2">
-            <button class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200"
+            <button class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600"
               @click="closeSidebar">
-              <BaseIcon :path="mdiClose" size="18" class="text-gray-500" />
+              <BaseIcon :path="mdiClose" size="18" class="text-gray-500 dark:text-gray-300" />
             </button>
           </div>
 
           <div class="space-y-3 p-4">
 
             <div class="flex items-start gap-3">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8e0d0]">
-                <BaseIcon :path="mdiMapMarkerRadius" size="16" class="text-gray-600" />
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8e0d0] dark:bg-slate-700">
+                <BaseIcon :path="mdiMapMarkerRadius" size="16" class="text-gray-600 dark:text-gray-300" />
               </div>
 
               <div>
-                <p class="text-sm font-medium text-gray-700">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-200">
                   {{ selectedSpot.localizacao }}
                 </p>
-                <p class="text-xs text-gray-500">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
                   {{ selectedSpot.latitude }}, {{ selectedSpot.longitude }}
                 </p>
               </div>
@@ -40,12 +40,12 @@
 
 
             <div class="flex items-center gap-3">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8e0d0]">
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8e0d0] dark:bg-slate-700">
                 <BaseIcon v-if="getSpotStatus(selectedSpot) === 'open'" :path="mdiClock" size="16"
-                  class="text-green-600" />
+                  class="text-green-600 dark:text-green-400" />
                 <BaseIcon v-else :path="mdiClock" size="16" class="text-red-400" />
               </div>
-              <p class="text-sm text-gray-700">
+              <p class="text-sm text-gray-700 dark:text-gray-200">
                 {{ getSpotStatus(selectedSpot) }}:
                 {{ selectedSpot.abertura }} - {{ selectedSpot.fecho }}
               </p>

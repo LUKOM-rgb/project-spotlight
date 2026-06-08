@@ -22,7 +22,7 @@ getReservations()
 </script>
 
 <template>
-  <SectionMain class="min-h-screen bg-[#f5f0e6]">
+  <SectionMain class="min-h-screen bg-[#f5f0e6] transition-colors dark:bg-slate-900">
     <Navbar />
     <ReservasList />
 

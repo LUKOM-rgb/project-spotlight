@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import api from '@/api/axios.js'
 import { mdiMusicNote, mdiCity, mdiShieldCheck } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
@@ -7,11 +8,16 @@ import BaseButton from '@/components/BaseButton.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
 import Navbar from '@/components/NavBar.vue' // Importação do novo componente
 
-const popularArtists = ref([
-  { name: 'Chiquinho Taquinas', followers: 10000 },
-  { name: 'Homem do piano', followers: 13000 },
-  { name: 'Mia_Rap', followers: 9000 },
-])
+const popularArtists = ref([])
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/artistas/top')
+    popularArtists.value = response.data.data
+  } catch (error) {
+    console.error('Erro ao buscar artistas populares:', error)
+  }
+})
 
 const problemCards = ref([
   {
@@ -38,7 +44,7 @@ const formatFollowers = (num) => {
 </script>
 
 <template>
-  <SectionMain class="min-h-screen bg-[#f5f0e6]">
+  <SectionMain class="min-h-screen bg-[#f5f0e6] transition-colors dark:bg-slate-900">
     <Navbar />
 
     <div class="relative mb-8 overflow-hidden rounded-lg">
@@ -70,45 +76,49 @@ const formatFollowers = (num) => {
     </div>
 
     <div class="mb-8">
-      <h2 class="mb-6 text-xl font-semibold text-[#5b9a8b]">
+      <h2 class="mb-6 text-xl font-semibold text-[#5b9a8b] dark:text-teal-400">
         Everyone shares the city. No one shares the system.
       </h2>
 
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div v-for="(card, index) in problemCards" :key="index" class="p-4 text-center">
           <div class="mb-3 flex justify-center">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#e8e0d0]">
-              <BaseIcon :path="card.icon" class="text-gray-600" size="24" />
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#e8e0d0] dark:bg-slate-800">
+              <BaseIcon :path="card.icon" class="text-gray-600 dark:text-gray-400" size="24" />
             </div>
           </div>
-          <h3 class="mb-1 text-sm font-semibold text-gray-700">{{ card.title }}</h3>
-          <p class="text-xs leading-relaxed text-gray-500">{{ card.description }}</p>
+          <h3 class="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-200">{{ card.title }}</h3>
+          <p class="text-xs leading-relaxed text-gray-500 dark:text-gray-400">{{ card.description }}</p>
         </div>
       </div>
     </div>
 
     <div>
-      <h2 class="mb-4 text-xl font-semibold text-[#5b9a8b]">Most Popular Artists</h2>
+      <h2 class="mb-4 text-xl font-semibold text-[#5b9a8b] dark:text-teal-400">Most Popular Artists</h2>
 
-      <div class="space-y-3">
+      <div v-if="popularArtists.length === 0" class="text-sm italic text-gray-500 dark:text-gray-400">
+        Ainda não há artistas com seguidores na plataforma.
+      </div>
+
+      <div v-else class="space-y-3">
         <CardBox
           v-for="(artist, index) in popularArtists"
           :key="index"
-          class="rounded-lg bg-[#7dd3c0]/30 px-4 py-3"
+          class="rounded-lg bg-[#7dd3c0]/30 px-4 py-3 dark:bg-slate-800 dark:border dark:border-slate-700"
         >
           <div class="flex items-center justify-between">
-            <span class="font-medium text-gray-700">{{ artist.name }}</span>
-            <span class="text-sm text-gray-500">{{ formatFollowers(artist.followers) }}</span>
+            <span class="font-medium text-gray-700 dark:text-gray-200">{{ artist.name }}</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatFollowers(artist.followers) }}</span>
           </div>
         </CardBox>
       </div>
     </div>
 
     <!-- Call to Action Section (Link to FormsView) -->
-    <div class="mt-12 rounded-2xl bg-gradient-to-r from-[#40798C] to-[#5b9a8b] p-8 text-white shadow-lg md:flex md:items-center md:justify-between">
+    <div class="mt-12 rounded-2xl bg-gradient-to-r from-[#40798C] to-[#5b9a8b] p-8 text-white shadow-lg md:flex md:items-center md:justify-between dark:from-slate-800 dark:to-slate-700 dark:border dark:border-slate-700">
       <div class="mb-6 md:mb-0 md:mr-8">
-        <h2 class="text-2xl font-bold mb-2">Need to contact us or submit a request?</h2>
-        <p class="text-sm opacity-90 leading-relaxed max-w-xl">
+        <h2 class="text-2xl font-bold mb-2 text-white">Need to contact us or submit a request?</h2>
+        <p class="text-sm opacity-90 leading-relaxed max-w-xl text-white dark:text-slate-300">
           Whether you want to suggest a new performance space, report an issue, or apply for an urban permit, our forms are ready to help you get in touch with the administration team.
         </p>
       </div>

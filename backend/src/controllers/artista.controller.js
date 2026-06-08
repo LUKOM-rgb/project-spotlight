@@ -4,6 +4,38 @@ import Seguidor from '../Models/seguidor.js';
 import { hashPassword } from '../utils/auth.utils.js';
 import { validationError, notFoundError, conflictError } from '../utils/error.utils.js';
 
+// Obter os top 3 artistas com mais seguidores
+export const getTopArtists = async (req, res, next) => {
+  try {
+    const contas = await Utilizador.findAll({
+      where: { tipo: 'artista' },
+      attributes: ['nome_utilizador'],
+      include: [
+        {
+          model: Artista,
+          include: [{ model: Seguidor }]
+        }
+      ]
+    });
+
+    const artistsWithFollowers = contas
+      .map(conta => {
+        const artistaObj = conta.Artistum || conta.Artista;
+        return {
+          name: conta.nome_utilizador,
+          followers: artistaObj && artistaObj.Seguidors ? artistaObj.Seguidors.length : 0
+        };
+      })
+      .filter(artist => artist.followers > 0);
+
+    artistsWithFollowers.sort((a, b) => b.followers - a.followers);
+
+    return res.status(200).json({ data: artistsWithFollowers.slice(0, 3) });
+  } catch (error) {
+    next(error);
+  }
+};
+
 //Criar Artista
 export const createArtist = async (req, res, next) => {
   try {
@@ -73,7 +105,12 @@ export const getAllArtists = async (req, res, next) => {
     const contas = await Utilizador.findAll({
       where: { tipo: 'artista' },
       attributes: { exclude: ['password'] },
-      include: [{ model: Artista }]
+      include: [
+        {
+          model: Artista,
+          include: [{ model: Seguidor }]
+        }
+      ]
     });
 
     return res.status(200).json({ data: contas });

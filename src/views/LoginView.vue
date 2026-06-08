@@ -10,7 +10,7 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const loginForm = reactive({
-  email: '',
+  identifier: '',
   password: '',
 })
 
@@ -21,10 +21,16 @@ const submitLogin = async () => {
   try {
     errorMessage.value = ''
     isLoading.value = true
-    await authStore.login(loginForm.email, loginForm.password)
+    await authStore.login(loginForm.identifier, loginForm.password)
     router.push('/') // Redirect to dashboard after login
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || 'Erro ao efetuar login. Verifique as suas credenciais.'
+    const data = error.response?.data
+    if (data?.details) {
+      const firstKey = Object.keys(data.details)[0]
+      errorMessage.value = data.details[firstKey][0]
+    } else {
+      errorMessage.value = data?.error || 'Erro ao efetuar login. Verifique as suas credenciais.'
+    }
   } finally {
     isLoading.value = false
   }
@@ -32,9 +38,9 @@ const submitLogin = async () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-amber-50 p-4">
+  <div class="flex min-h-screen items-center justify-center bg-amber-50 dark:bg-slate-900 transition-colors duration-300 p-4">
     <CardBox
-      class="w-full max-w-md rounded-lg shadow-xl bg-white"
+      class="w-full max-w-md rounded-lg shadow-xl dark:bg-slate-800"
       is-form
       @submit.prevent="submitLogin"
     >
@@ -46,13 +52,13 @@ const submitLogin = async () => {
         {{ errorMessage }}
       </div>
 
-      <!-- Campo E-mail -->
-      <FormField label="Email:" label-class="text-teal-400 text-sm font-semibold">
+      <!-- Campo Identificador -->
+      <FormField label="Email ou Nome de Utilizador:" label-class="text-teal-400 text-sm font-semibold">
         <FormControl
-          v-model="loginForm.email"
-          type="email"
-          name="email"
-          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
+          v-model="loginForm.identifier"
+          type="text"
+          name="identifier"
+          input-class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>
@@ -63,7 +69,7 @@ const submitLogin = async () => {
           v-model="loginForm.password"
           type="password"
           name="password"
-          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
+          input-class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>

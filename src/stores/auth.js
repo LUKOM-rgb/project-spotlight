@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (!token.value) return;
 
       const response = await api.get('/utilizadores/me')
-      const userData = response.data
+      const userData = response.data.data // O backend devolve { data: conta }
 
       user.value = userData
 

@@ -6,6 +6,7 @@ defineProps({
   labelFor: String,
   help: String,
   error: String,
+  labelClass: String,
 })
 
 const slots = useSlots()
@@ -32,7 +33,7 @@ const wrapperClass = computed(() => {
       v-if="label"
       :for="labelFor"
       class="mb-2 block font-bold"
-      :class="{ 'text-red-600 dark:text-red-500': !!error }"
+      :class="[error ? 'text-red-600 dark:text-red-500' : labelClass]"
       >{{ label }}</label
     >
     <div :class="wrapperClass">

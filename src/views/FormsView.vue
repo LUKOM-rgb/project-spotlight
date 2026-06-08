@@ -167,7 +167,7 @@ const submit = async () => {
     <Navbar />
 
     <div class="p-4 max-w-3xl mx-auto">
-      <h1 class="mb-8 text-center text-2xl font-bold text-[#40798C]">REGISTO DE OCORRÊNCIA</h1>
+      <h1 class="mb-8 text-center text-2xl font-bold text-[#40798C] dark:text-teal-400">REGISTO DE OCORRÊNCIA</h1>
 
       <!-- Mensagens de Feedback -->
       <div
@@ -250,13 +250,13 @@ const submit = async () => {
               <BaseButton
                 type="submit"
                 color=""
-                class="rounded-lg border-none bg-[#40798C] text-white hover:bg-[#0B2027] transition-all px-4 py-2 font-semibold"
+                class="rounded-lg border-none bg-[#40798C] text-white hover:bg-[#0B2027] transition-all px-4 py-2 font-semibold dark:bg-teal-600 dark:hover:bg-teal-700"
                 label="Registar Ocorrência"
               />
               <BaseButton
                 type="reset"
                 color=""
-                class="rounded-lg border border-[#40798C] text-[#40798C] hover:bg-[#40798C] hover:text-white transition-all px-4 py-2 font-semibold bg-white"
+                class="rounded-lg border border-[#40798C] text-[#40798C] hover:bg-[#40798C] hover:text-white transition-all px-4 py-2 font-semibold bg-white dark:bg-slate-800 dark:text-teal-400 dark:border-teal-500/50 dark:hover:bg-slate-700"
                 outline
                 label="Limpar"
               />

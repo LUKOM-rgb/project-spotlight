@@ -31,7 +31,13 @@ const submitRegister = async () => {
       router.push('/login')
     }, 2000)
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || 'Erro ao criar conta. Verifique os dados introduzidos.'
+    const data = error.response?.data
+    if (data?.details) {
+      const firstKey = Object.keys(data.details)[0]
+      errorMessage.value = data.details[firstKey][0]
+    } else {
+      errorMessage.value = data?.error || 'Erro ao criar conta. Verifique os dados introduzidos.'
+    }
   } finally {
     isLoading.value = false
   }
@@ -39,9 +45,9 @@ const submitRegister = async () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-amber-50 p-4">
+  <div class="flex min-h-screen items-center justify-center bg-amber-50 dark:bg-slate-900 transition-colors duration-300 p-4">
     <CardBox
-      class="w-full max-w-md rounded-lg shadow-xl bg-white"
+      class="w-full max-w-md rounded-lg shadow-xl dark:bg-slate-800"
       is-form
       @submit.prevent="submitRegister"
     >
@@ -61,7 +67,7 @@ const submitRegister = async () => {
         <FormControl
           v-model="registerForm.nome_utilizador"
           name="nome_utilizador"
-          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
+          input-class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>
@@ -72,7 +78,7 @@ const submitRegister = async () => {
           v-model="registerForm.email"
           type="email"
           name="email"
-          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
+          input-class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>
@@ -83,7 +89,7 @@ const submitRegister = async () => {
           v-model="registerForm.numero_telemovel"
           type="tel"
           name="numero_telemovel"
-          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
+          input-class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>
@@ -94,7 +100,7 @@ const submitRegister = async () => {
           v-model="registerForm.password"
           type="password"
           name="password"
-          class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
+          input-class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
           required
         />
       </FormField>

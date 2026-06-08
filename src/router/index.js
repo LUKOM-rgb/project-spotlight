@@ -113,6 +113,11 @@ router.beforeEach(async (to, from, next) => {
     next('/')
   } 
   else {
+    if (to.meta.guestOnly) {
+      const { useDarkModeStore } = await import('@/stores/darkMode.js')
+      const darkModeStore = useDarkModeStore()
+      darkModeStore.set(false)
+    }
     next()
   }
 })

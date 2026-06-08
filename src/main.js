@@ -28,7 +28,12 @@ mainStore.fetchSampleHistory()
 import { useDarkModeStore } from '@/stores/darkMode.js'
 
 const darkModeStore = useDarkModeStore(pinia)
-darkModeStore.set(true)
+
+if (localStorage.getItem('darkMode') === '1') {
+  darkModeStore.set(true)
+} else {
+  darkModeStore.set(false)
+}
 
 // Default title tag
 const defaultDocumentTitle = 'Admin One Vue 3 Tailwind'

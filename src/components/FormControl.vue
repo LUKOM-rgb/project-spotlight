@@ -24,6 +24,7 @@ const props = defineProps({
   borderless: Boolean,
   transparent: Boolean,
   ctrlKFocus: Boolean,
+  inputClass: String,
 })
 
 const emit = defineEmits(['update:modelValue', 'setRef'])
@@ -45,6 +46,10 @@ const inputElClass = computed(() => {
 
   if (props.icon) {
     base.push('pl-10')
+  }
+
+  if (props.inputClass) {
+    base.push(props.inputClass)
   }
 
   return base

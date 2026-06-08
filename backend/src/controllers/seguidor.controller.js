@@ -1,6 +1,7 @@
 import Utilizador from '../Models/utilizador.js';
 import Artista from '../Models/artista.js';
 import Seguidor from '../Models/seguidor.js';
+import { Op } from 'sequelize';
 import { validationError, notFoundError, conflictError, unauthorizedError } from '../utils/error.utils.js';
 
 //Seguir um artista
@@ -125,7 +126,7 @@ export const getSeguidores = async (req, res, next) => {
       const idsArtistas = seguindo.map(s => s.id_artista);
 
       const artistasSeguidos = await Utilizador.findAll({
-        where: { tipo: 'artista', id_artista: idsArtistas },
+        where: { tipo: 'artista', id_artista: { [Op.in]: idsArtistas } },
         attributes: { exclude: ['password'] },
         include: [{ model: Artista }]
       });
@@ -145,7 +146,7 @@ export const getSeguidores = async (req, res, next) => {
       const idsContasSeguidoras = seguidoresRelacoes.map(s => s.id_utilizador);
 
       const seguidores = await Utilizador.findAll({
-        where: { id_utilizador: idsContasSeguidoras },
+        where: { id_utilizador: { [Op.in]: idsContasSeguidoras } },
         attributes: { exclude: ['password'] }
       });
 

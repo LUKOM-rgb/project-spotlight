@@ -19,7 +19,7 @@ export function unauthorizedError(message = 'Authentication required') {
   return createError({
     status: 401,
     description: message,
-    errors: { authentication: ['Acesso negado. Credenciais inválidas ou token em falta.'] },
+    errors: { authentication: ['Acesso negado. Credenciais inválidas'] },
   })
 }
 

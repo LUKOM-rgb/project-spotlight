@@ -67,12 +67,6 @@ const logout = () => {
           />
         </div>
       </div>
-      <BaseIcon
-        :path="mdiLogout"
-        class="cursor-pointer text-[#40798C] transition-colors hover:text-gray-800 dark:hover:text-white"
-        size="20"
-        @click="logout"
-      />
     </nav>
   </CardBox>
 </template>

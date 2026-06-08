@@ -1,69 +1,105 @@
 <template>
-  <div class="reservations-wrapper">
-    <div class="table-header">
-      <h2 class="table-title">My Reservations</h2>
-      <span class="table-count">{{ reservations.length }} bookings</span>
+  <div class="mb-8 mt-4">
+    <div class="mb-6 flex items-center justify-between">
+      <h2 class="text-2xl font-light tracking-widest text-teal-600 dark:text-teal-400">MINHAS RESERVAS</h2>
+      <span class="rounded-full bg-teal-100 px-3 py-1 text-sm font-medium text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">
+        {{ reservations.length }} {{ reservations.length === 1 ? 'reserva' : 'reservas' }}
+      </span>
     </div>
 
-    <div class="table-container">
-      <table class="reservations-table">
-        <thead>
-          <tr>
-            <th>Spot</th>
-            <th>Date</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(reservation, index) in reservations" :key="reservation.id_reserva" class="table-row"
-            :style="{ animationDelay: `${index * 60}ms` }">
-            <td class="spot-cell">
-              {{ reservation.id_spot }}
-            </td>
-            <td class="date-cell">{{ formatDate(reservation.data_evento) }}</td>
-            <td class="time-cell">{{ reservation.hora_inicio }}</td>
-            <td class="time-cell">{{ reservation.hora_fim }}</td>
-            <td>
-              <span class="status-badge" :class="getStatusClass(reservation)">
-                {{ new Date(`${reservation.data_evento}T${reservation.hora_fim}`) < new Date() ? 'Past' : 'Upcoming' }}
-                  </span>
-            </td>
-            <td class="actions-cell">
-              <button class="btn-edit" @click="modalEditOpen = true">Edit</button>
-              <button class="btn-delete" @click="modalDeleteOpen = true">Delete</button>
-            </td>
-          </tr>
-          <tr v-if="reservations.length === 0">
-            <td colspan="6" class="empty-state">No reservations found.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <div>
-    <div v-if="modalEditOpen" class="modal">
-      <div class="modal-content">
-        <h3>Edit Reservation</h3>
-        <!-- Edit form goes here -->
-        <button @click="modalEditOpen = false">Close</button>
-      </div>
-    </div>
-    <div v-if="modalDeleteOpen" class="modal">
-      <div class="modal-content">
-        <h3>Delete Reservation</h3>
-        <!-- Delete form goes here -->
-        <button @click="modalDeleteOpen = false">Close</button>
+    <CardBox class="overflow-hidden border border-gray-200 bg-white shadow-xl rounded-2xl dark:border-slate-700 dark:bg-slate-800">
+      
+      <!-- Table Header -->
+      <div class="hidden md:grid grid-cols-12 gap-2 bg-teal-600 p-4 text-sm font-bold text-white uppercase tracking-wider dark:bg-teal-700">
+        <div class="col-span-2 pl-2">Spot</div>
+        <div class="col-span-3">Data</div>
+        <div class="col-span-2">Início</div>
+        <div class="col-span-2">Fim</div>
+        <div class="col-span-2">Estado</div>
+        <div class="col-span-1 text-center">Ações</div>
       </div>
 
+      <!-- Table Body -->
+      <div class="divide-y divide-gray-100 dark:divide-slate-700/50">
+        <div v-for="reservation in reservations" :key="reservation.id_reserva"
+          class="grid grid-cols-1 md:grid-cols-12 gap-2 p-4 md:items-center hover:bg-gray-50 transition-colors dark:hover:bg-slate-700/50">
+          
+          <div class="md:col-span-2 md:pl-2 font-medium text-gray-800 dark:text-gray-200 flex justify-between md:block">
+            <span class="md:hidden font-bold text-xs uppercase text-gray-400">Spot</span>
+            Spot #{{ reservation.id_spot }}
+          </div>
+          
+          <div class="md:col-span-3 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
+            <span class="md:hidden font-bold text-xs uppercase text-gray-400">Data</span>
+            {{ formatDate(reservation.data_evento) }}
+          </div>
+          
+          <div class="md:col-span-2 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
+            <span class="md:hidden font-bold text-xs uppercase text-gray-400">Início</span>
+            {{ reservation.hora_inicio.slice(0, 5) }}
+          </div>
+          
+          <div class="md:col-span-2 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
+            <span class="md:hidden font-bold text-xs uppercase text-gray-400">Fim</span>
+            {{ reservation.hora_fim.slice(0, 5) }}
+          </div>
+          
+          <div class="md:col-span-2 flex justify-between md:block">
+            <span class="md:hidden font-bold text-xs uppercase text-gray-400">Estado</span>
+            <span v-if="new Date(`${reservation.data_evento}T${reservation.hora_fim}`) < new Date()"
+              class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
+              Passada
+            </span>
+            <span v-else
+              class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+              Agendada
+            </span>
+          </div>
+          
+          <div class="md:col-span-1 flex justify-end md:justify-center gap-4 md:gap-2 mt-2 md:mt-0">
+            <button @click="modalEditOpen = true" class="text-gray-400 hover:text-teal-600 transition-colors dark:hover:text-teal-400" title="Editar">
+              <BaseIcon :path="mdiPencil" size="18" />
+            </button>
+            <button @click="modalDeleteOpen = true" class="text-gray-400 hover:text-red-600 transition-colors dark:hover:text-red-400" title="Apagar">
+              <BaseIcon :path="mdiTrashCan" size="18" />
+            </button>
+          </div>
+        </div>
+        
+        <div v-if="reservations.length === 0" class="p-8 text-center text-slate-400 dark:text-slate-500 text-sm">
+          Nenhuma reserva encontrada de momento.
+        </div>
+      </div>
+    </CardBox>
+
+    <!-- Modals -->
+    <div v-if="modalEditOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <CardBox class="w-full max-w-md bg-white p-6 shadow-2xl dark:bg-slate-800">
+        <h3 class="mb-4 text-xl font-bold text-gray-800 dark:text-white">Editar Reserva</h3>
+        <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Funcionalidade em desenvolvimento.</p>
+        <div class="flex justify-end">
+          <button @click="modalEditOpen = false" class="rounded bg-teal-600 px-4 py-2 text-white hover:bg-teal-700">Fechar</button>
+        </div>
+      </CardBox>
+    </div>
+
+    <div v-if="modalDeleteOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <CardBox class="w-full max-w-md bg-white p-6 shadow-2xl dark:bg-slate-800">
+        <h3 class="mb-4 text-xl font-bold text-gray-800 dark:text-white">Apagar Reserva</h3>
+        <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Funcionalidade em desenvolvimento.</p>
+        <div class="flex justify-end">
+          <button @click="modalDeleteOpen = false" class="rounded bg-rose-600 px-4 py-2 text-white hover:bg-rose-700">Fechar</button>
+        </div>
+      </CardBox>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import CardBox from '@/components/CardBox.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
+import { mdiPencil, mdiTrashCan } from '@mdi/js'
 
 const reservations = ref([])
 const modalEditOpen = ref(false)
@@ -101,192 +137,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.reservations-wrapper {
-  font-family: 'Georgia', serif;
-  padding: 1.5rem 0;
-}
 
-.table-header {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.table-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #0b2027;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-.table-count {
-  font-size: 0.8rem;
-  color: #9a8f80;
-  font-family: 'Courier New', monospace;
-}
-
-.table-container {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid #e2d9cc;
-  box-shadow: 0 2px 16px rgba(11, 32, 39, 0.06);
-}
-
-.reservations-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-}
-
-thead tr {
-  background: #0b2027;
-}
-
-thead th {
-  padding: 0.85rem 1.1rem;
-  text-align: left;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #c8bfaf;
-  font-family: 'Courier New', monospace;
-  border: none;
-}
-
-.table-row {
-  background: #fff;
-  border-bottom: 1px solid #f0ebe2;
-}
-
-.table-row:hover {
-  background: unset !important;
-}
-
-.table-row:last-child {
-  border-bottom: none;
-}
-
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-td {
-  padding: 0.9rem 1.1rem;
-  font-size: 0.875rem;
-  color: #3a3028;
-  vertical-align: middle;
-}
-
-.spot-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-  color: #0b2027;
-}
-
-.spot-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #0b2027;
-  flex-shrink: 0;
-}
-
-.date-cell {
-  color: #5a4e42;
-}
-
-.time-cell {
-  font-family: 'Courier New', monospace;
-  font-size: 0.82rem;
-  color: #6b5f52;
-}
-
-/* Status badges */
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: capitalize;
-}
-
-.status-confirmed {
-  background: #d4edda;
-  color: #2d6a4f;
-}
-
-.status-pending {
-  background: #fff3cd;
-  color: #7d5a00;
-}
-
-.status-cancelled {
-  background: #fde8e8;
-  color: #9b1c1c;
-}
-
-.status-na {
-  background: #ede8e0;
-  color: #7a6e63;
-}
-
-/* Action buttons */
-.actions-cell {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-edit,
-.btn-delete {
-  padding: 0.3rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
-}
-
-.btn-edit {
-  background: #e8e0d0;
-  color: #0b2027;
-}
-
-.btn-edit:hover {
-  background: #d4c9b5;
-}
-
-.btn-delete {
-  background: transparent;
-  color: #b85050;
-  border: 1px solid #e8c8c8;
-}
-
-.btn-delete:hover {
-  background: #fde8e8;
-}
-
-.empty-state {
-  text-align: center;
-  color: #9a8f80;
-  font-style: italic;
-  padding: 2.5rem;
-}
-</style>

@@ -17,20 +17,6 @@ export default [
         label: 'O Meu Perfil',
         to: '/profile',
       },
-      {
-        isDivider: true,
-      },
-      {
-        icon: mdiLogout,
-        label: 'Terminar Sessão',
-        isLogout: true,
-      },
     ],
-  },
-  {
-    icon: mdiLogout,
-    label: 'Sair',
-    isDesktopNoLabel: true,
-    isLogout: true,
   },
 ]
