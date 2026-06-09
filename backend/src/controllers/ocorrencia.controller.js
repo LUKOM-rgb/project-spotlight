@@ -2,6 +2,8 @@ import RelatorioOcorrencia from '../Models/ocorrencia.js'
 import Utilizador from '../Models/utilizador.js'
 import Spot from '../Models/spot.js'
 import { validationError, notFoundError } from '../utils/error.utils.js'
+
+// Post /ocorrencias - Criar uma nova ocorrência
 export const createOcorrencia = async (req, res, next) => {
   try {
     const {
