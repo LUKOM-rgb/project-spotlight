@@ -198,8 +198,8 @@ const chartOptions = computed(() => ({
     <form class="reservation-form" @submit.prevent="submitReservation">
 
       <div class="form-group">
-        <label>Event Date</label>
-        <input
+        <label class="text-sm text-gray-600 dark:text-gray-600">Event Date</label>
+        <input class="text-sm text-gray-600 dark:text-gray-600"
           type="date"
           v-model="form.date"
           required
@@ -207,8 +207,8 @@ const chartOptions = computed(() => ({
       </div>
 
       <div class="form-group">
-        <label>Start Time</label>
-        <input
+        <label class="text-sm text-gray-600 dark:text-gray-600">Start Time</label>
+        <input class="text-sm text-gray-600 dark:text-gray-600"
           type="time"
           v-model="form.startTime"
           required
@@ -216,15 +216,15 @@ const chartOptions = computed(() => ({
       </div>
 
       <div class="form-group">
-        <label>End Time</label>
-        <input
+        <label class="text-sm text-gray-600 dark:text-gray-600">End Time</label>
+        <input class="text-sm text-gray-600 dark:text-gray-600"
           type="time"
           v-model="form.endTime"
           required
         />
       </div>
 
-      <button type="submit">
+      <button type="submit" class="text-sm text-gray-600 dark:text-gray-600">
         Confirm Reservation
       </button>
     </form>
