@@ -1,7 +1,7 @@
 import Artista from '../Models/artista.js';
 import Utilizador from '../Models/utilizador.js';
 import Seguidor from '../Models/seguidor.js';
-import { hashPassword } from '../utils/auth.utils.js';
+import { generateToken } from '../utils/auth.utils.js';
 import { validationError, notFoundError, conflictError } from '../utils/error.utils.js';
 
 // Obter os top 3 artistas com mais seguidores
@@ -84,6 +84,7 @@ export const createArtist = async (req, res, next) => {
     novaConta.id_artista = novoArtista.id_artista;
     novaConta.tipo = 'artista';
     await novaConta.save();
+    const token = generateToken(novaConta);
 
     return res.status(201).json({
       message: 'Artista criado com sucesso!',
@@ -92,7 +93,8 @@ export const createArtist = async (req, res, next) => {
         nome_utilizador: novaConta.nome_utilizador,
         email: novaConta.email,
         id_artista: novoArtista.id_artista
-      }
+      },
+      bearerToken: token
     });
   } catch (error) {
     next(error);
