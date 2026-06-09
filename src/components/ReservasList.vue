@@ -1,14 +1,14 @@
 <template>
   <div class="mb-8 mt-4">
     <div class="mb-6 flex items-center justify-between">
-      <h2 class="text-2xl font-light tracking-widest text-teal-600 dark:text-teal-400">MINHAS RESERVAS</h2>
+      <h2 class="text-2xl font-light tracking-widest text-teal-600 dark:text-teal-400">RESERVAS</h2>
       <span class="rounded-full bg-teal-100 px-3 py-1 text-sm font-medium text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">
         {{ reservations.length }} {{ reservations.length === 1 ? 'reserva' : 'reservas' }}
       </span>
     </div>
 
     <CardBox class="overflow-hidden border border-gray-200 bg-white shadow-xl rounded-2xl dark:border-slate-700 dark:bg-slate-800">
-      
+
       <!-- Table Header -->
       <div class="hidden md:grid grid-cols-12 gap-2 bg-teal-600 p-4 text-sm font-bold text-white uppercase tracking-wider dark:bg-teal-700">
         <div class="col-span-2 pl-2">Spot</div>
@@ -23,27 +23,27 @@
       <div class="divide-y divide-gray-100 dark:divide-slate-700/50">
         <div v-for="reservation in reservations" :key="reservation.id_reserva"
           class="grid grid-cols-1 md:grid-cols-12 gap-2 p-4 md:items-center hover:bg-gray-50 transition-colors dark:hover:bg-slate-700/50">
-          
+
           <div class="md:col-span-2 md:pl-2 font-medium text-gray-800 dark:text-gray-200 flex justify-between md:block">
             <span class="md:hidden font-bold text-xs uppercase text-gray-400">Spot</span>
             Spot #{{ reservation.id_spot }}
           </div>
-          
+
           <div class="md:col-span-3 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
             <span class="md:hidden font-bold text-xs uppercase text-gray-400">Data</span>
             {{ formatDate(reservation.data_evento) }}
           </div>
-          
+
           <div class="md:col-span-2 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
             <span class="md:hidden font-bold text-xs uppercase text-gray-400">Início</span>
             {{ reservation.hora_inicio.slice(0, 5) }}
           </div>
-          
+
           <div class="md:col-span-2 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
             <span class="md:hidden font-bold text-xs uppercase text-gray-400">Fim</span>
             {{ reservation.hora_fim.slice(0, 5) }}
           </div>
-          
+
           <div class="md:col-span-2 flex justify-between md:block">
             <span class="md:hidden font-bold text-xs uppercase text-gray-400">Estado</span>
             <span v-if="new Date(`${reservation.data_evento}T${reservation.hora_fim}`) < new Date()"
@@ -55,7 +55,7 @@
               Agendada
             </span>
           </div>
-          
+
           <div class="md:col-span-1 flex justify-end md:justify-center gap-4 md:gap-2 mt-2 md:mt-0">
             <button @click="modalEditOpen = true" class="text-gray-400 hover:text-teal-600 transition-colors dark:hover:text-teal-400" title="Editar">
               <BaseIcon :path="mdiPencil" size="18" />
@@ -65,7 +65,7 @@
             </button>
           </div>
         </div>
-        
+
         <div v-if="reservations.length === 0" class="p-8 text-center text-slate-400 dark:text-slate-500 text-sm">
           Nenhuma reserva encontrada de momento.
         </div>

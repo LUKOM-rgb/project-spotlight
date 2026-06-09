@@ -10,7 +10,6 @@ import ReservationChart from '@/components/ReservationChart.vue'
 import ReservasList from '@/components/ReservasList.vue'
 import Navbar from '@/components/NavBar.vue'
 import SectionMain from '@/components/SectionMain.vue'
-import CardBox from '@/components/CardBox.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SpotMap from '@/components/SpotMap.vue'
 const selectedView = ref('map')
@@ -24,13 +23,14 @@ const selectedSpotId = ref(null)
     <div class="mb-4 flex items-center gap-4">
 
       <div class="flex gap-2">
-        <base-button class="text-sm text-gray-600 dark:text-gray-300 dark:hover:text-teal-400" @click="selectedView='map'" label="Spot Map"></base-button>
-        <base-button class="text-sm text-gray-600 dark:text-gray-300 dark:hover:text-teal-400" @click="selectedView='Reservations'" label="My Reservations"></base-button>
+        <base-button class="text-sm text-gray-600 dark:text-gray-600 dark:hover:text-teal-400" @click="selectedView='map'" label="Spot Map"></base-button>
+        <base-button class="text-sm text-gray-600 dark:text-gray-600 dark:hover:text-teal-400" @click="selectedView='Reservations'" label="My Reservations"></base-button>
       </div>
     </div>
 
     <div v-show="selectedView=='map'" class="relative h-[400px]">
       <SpotMap @spot-selected="selectedSpotId = $event" />
+      <br>
       <ReservationChart  :selectedSpotId="selectedSpotId" />
     </div>
     <br>
