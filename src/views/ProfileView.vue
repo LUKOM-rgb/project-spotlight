@@ -109,7 +109,12 @@ const submitArtist = async () => {
       validade_licenca: artistForm.validade_licenca,
       categoria_id: artistForm.categoria_id
     }
-    await api.post(`/artistas`, payload)
+    const response = await api.post(`/artistas`, payload)
+    
+    // Atualizar o token localmente para que o utilizador ganhe as permissões de artista imediatamente
+    if (response.data?.bearerToken) {
+      authStore.setToken(response.data.bearerToken)
+    }
     
     // Sucesso, atualizar o user na store para refletir o novo role
     await authStore.fetchUser()
@@ -137,9 +142,6 @@ const submitArtist = async () => {
       <div class="mb-8 flex items-center justify-between">
         <div class="flex items-center gap-4">
           <h1 class="text-3xl font-light tracking-widest text-teal-400 dark:text-teal-300">O MEU PERFIL</h1>
-          <div v-if="authStore.user?.tipo === 'artista'" class="flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1 text-sm font-semibold text-teal-400 dark:text-teal-300">
-            <span>🌟 Artista Reconhecido</span>
-          </div>
         </div>
         
         <BaseButton

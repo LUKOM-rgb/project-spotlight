@@ -14,6 +14,9 @@ import {
 import CardBox from '@/components/CardBox.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
 
+import { computed } from 'vue'
+
+const authStore = useAuthStore()
 const router = useRouter()
 const darkModeStore = useDarkModeStore()
 
@@ -21,19 +24,26 @@ const toggleDarkMode = () => {
   darkModeStore.set(null, true)
 }
 
-const navItems = [
-  {
-    icon: mdiAccountCircle,
-    label: 'Perfil',
-    action: () => router.push('/Profile'),
-  },
-  { icon: mdiAccountMusic, label: 'Artistas', action: () => router.push('/tables') },
-  { icon: mdiMusicNote, label: 'Música', action: () => router.push('/Spots') },
-  { icon: mdiThemeLightDark, label: 'Modo', action: toggleDarkMode },
-]
+const navItems = computed(() => {
+  const items = [
+    {
+      icon: mdiAccountCircle,
+      label: 'Perfil',
+      action: () => router.push('/Profile'),
+    },
+    { icon: mdiAccountMusic, label: 'Artistas', action: () => router.push('/tables') },
+  ]
+
+  if (['admin', 'artista'].includes(authStore.user?.tipo)) {
+    items.push({ icon: mdiMusicNote, label: 'Música', action: () => router.push('/Spots') })
+  }
+
+  items.push({ icon: mdiThemeLightDark, label: 'Modo', action: toggleDarkMode })
+  
+  return items
+})
 
 const logout = () => {
-  const authStore = useAuthStore()
 
   authStore.token = null
   authStore.user = null

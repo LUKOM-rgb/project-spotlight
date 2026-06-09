@@ -43,7 +43,8 @@ const routes = [
   {
     meta: {
       title: 'Spots',
-      requiresAuth: true
+      requiresAuth: true,
+      requiresRole: ['artista', 'admin']
     },
     path: '/spots',
     name: 'spots',
@@ -52,6 +53,8 @@ const routes = [
   {
   meta: {
       title: 'My Reservations',
+      requiresAuth: true,
+      requiresRole: ['artista', 'admin']
     },
     path: '/reservas',
     name: 'reservas',
@@ -104,10 +107,19 @@ router.beforeEach(async (to, from, next) => {
 
   const isAuthenticated = !!authStore.token
 
-  // Rotas que exigem estar autenticado (placeholder para o futuro, para já protege a dashboard)
+  // Rotas que exigem estar autenticado
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login')
   } 
+  // Verificar roles
+  else if (to.meta.requiresRole && isAuthenticated) {
+    if (!to.meta.requiresRole.includes(authStore.user?.tipo)) {
+      // Se não tiver permissão, volta para a página inicial
+      next('/')
+    } else {
+      next()
+    }
+  }
   // Rotas exclusivas para não autenticados (ex: Login, Registar)
   else if (to.meta.guestOnly && isAuthenticated) {
     next('/')
