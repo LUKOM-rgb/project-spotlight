@@ -432,10 +432,7 @@ const goToUsersPage = (page) => {
             </span>
             <!-- Edit Button -->
             <button
-              @click="
-                ocorrenciaEditId = item.id
-                ocorrenciaEditState = item.tags[0]
-              "
+              @click="((ocorrenciaEditId = item.id), (ocorrenciaEditState = item.tags[0]))"
               class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-colors hover:border-teal-200 hover:bg-teal-50 hover:text-teal-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-teal-700 dark:hover:bg-teal-900/50 dark:hover:text-teal-300"
               title="Editar estado"
             >
