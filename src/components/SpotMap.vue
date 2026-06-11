@@ -65,6 +65,7 @@ import { mdiClose, mdiMapMarkerRadius, mdiClock } from '@mdi/js'
 import BaseIcon from '@/components/BaseIcon.vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import CardBox from '@/components/CardBox.vue'
 
 const emit = defineEmits(['spot-selected'])
 
