@@ -1,16 +1,16 @@
 <template>
-  <div class="mb-8 mt-4">
+  <div class="mt-4">
     <div class="mb-6 flex items-center justify-between">
-      <h2 class="list-title">Reservations</h2>
-      <span class="list-count">{{ reservations.length }} {{ reservations.length === 1 ? 'reserva' : 'reservas' }}</span>
+      <h2 class="text-2xl font-light tracking-widest text-teal-600 dark:text-teal-400">RESERVAS</h2>
+      <span class="rounded-full bg-teal-100 px-3 py-1 text-sm font-medium text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">
+        {{ reservations.length }} {{ reservations.length === 1 ? 'reserva' : 'reservas' }}
+      </span>
     </div>
 
-    <CardBox
-      class="overflow-hidden border border-gray-200 bg-white shadow-xl rounded-2xl dark:border-slate-700 dark:bg-slate-800">
+    <CardBox class="overflow-hidden shadow-xl dark:bg-slate-800">
 
-      <div
-        class="hidden md:grid grid-cols-12 gap-2 bg-[#0b2027] p-4 text-xs font-semibold text-[#c8bfaf] uppercase tracking-widest"
-        style="font-family: 'Courier New', monospace">
+      <!-- Header -->
+      <div class="hidden md:grid grid-cols-12 gap-2 bg-[#40798C] p-4 text-xs font-bold uppercase tracking-wider text-white dark:bg-teal-700">
         <div class="col-span-2 pl-2">Spot</div>
         <div class="col-span-3">Data</div>
         <div class="col-span-2">Início</div>
@@ -19,56 +19,68 @@
         <div class="col-span-1 text-center">Ações</div>
       </div>
 
+      <!-- Rows -->
       <div class="divide-y divide-gray-100 dark:divide-slate-700/50">
-        <div v-for="reservation in reservations" :key="reservation.id_reserva"
-          class="grid grid-cols-1 md:grid-cols-12 gap-2 p-4 md:items-center transition-colors"
-          style="font-family: 'Georgia', serif">
-          <div
-            class="md:col-span-2 md:pl-2 font-medium text-[#0b2027] dark:text-gray-200 flex justify-between md:block">
-            <span class="md:hidden field-label">Spot</span>
-            <span class="flex items-center gap-2">
-              <span class="spot-dot"></span>
-              {{ reservation.id_spot }}
-            </span>
+        <div
+          v-for="reservation in reservations"
+          :key="reservation.id_reserva"
+          class="grid grid-cols-1 md:grid-cols-12 gap-2 p-4 md:items-center transition-colors hover:bg-gray-50 dark:hover:bg-slate-700/30"
+        >
+          <div class="md:col-span-2 md:pl-2 font-medium text-gray-800 dark:text-gray-200 flex justify-between md:block">
+            <span class="md:hidden text-xs font-bold uppercase text-gray-400">Spot</span>
+            Spot #{{ reservation.id_spot }}
           </div>
 
-          <div class="md:col-span-3 text-sm text-[#5a4e42] dark:text-gray-400 flex justify-between md:block">
-            <span class="md:hidden field-label">Data</span>
+          <div class="md:col-span-3 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
+            <span class="md:hidden text-xs font-bold uppercase text-gray-400">Data</span>
             {{ formatDate(reservation.data_evento) }}
           </div>
 
-          <div class="md:col-span-2 text-sm flex justify-between md:block"
-            style="font-family: 'Courier New', monospace; color: #6b5f52">
-            <span class="md:hidden field-label">Início</span>
+          <div class="md:col-span-2 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
+            <span class="md:hidden text-xs font-bold uppercase text-gray-400">Início</span>
             {{ reservation.hora_inicio.slice(0, 5) }}
           </div>
 
-          <div class="md:col-span-2 text-sm flex justify-between md:block"
-            style="font-family: 'Courier New', monospace; color: #6b5f52">
-            <span class="md:hidden field-label">Fim</span>
+          <div class="md:col-span-2 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">
+            <span class="md:hidden text-xs font-bold uppercase text-gray-400">Fim</span>
             {{ reservation.hora_fim.slice(0, 5) }}
           </div>
 
           <div class="md:col-span-2 flex justify-between md:block">
-            <span class="md:hidden field-label">Estado</span>
-            <span class="status-badge"
-              :class="new Date(`${reservation.data_evento}T${reservation.hora_fim}`) < new Date() ? 'status-past' : 'status-upcoming'">
-              {{ new Date(`${reservation.data_evento}T${reservation.hora_fim}`) < new Date() ? 'Passada' : 'Agendada' }}
-                </span>
+            <span class="md:hidden text-xs font-bold uppercase text-gray-400">Estado</span>
+            <span
+              v-if="new Date(`${reservation.data_evento}T${reservation.hora_fim}`) < new Date()"
+              class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400"
+            >
+              Passada
+            </span>
+            <span
+              v-else
+              class="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700 dark:bg-teal-900/30 dark:text-teal-400"
+            >
+              Agendada
+            </span>
           </div>
 
           <div class="md:col-span-1 flex justify-end md:justify-center gap-3 mt-2 md:mt-0">
-            <button @click="openEdit(reservation)" class="action-btn edit-btn" title="Editar">
+            <button
+              @click="openEdit(reservation)"
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-teal-100 hover:text-teal-600 transition-colors dark:bg-slate-700 dark:text-gray-400 dark:hover:bg-teal-900/40 dark:hover:text-teal-400"
+              title="Editar"
+            >
               <BaseIcon :path="mdiPencil" size="16" />
             </button>
-            <button @click="openDelete(reservation)" class="action-btn delete-btn" title="Apagar">
+            <button
+              @click="openDelete(reservation)"
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-600 transition-colors dark:bg-slate-700 dark:text-gray-400 dark:hover:bg-red-900/40 dark:hover:text-red-400"
+              title="Apagar"
+            >
               <BaseIcon :path="mdiTrashCan" size="16" />
             </button>
           </div>
         </div>
 
-        <div v-if="reservations.length === 0" class="p-10 text-center text-[#9a8f80] text-sm italic"
-          style="font-family: 'Georgia', serif">
+        <div v-if="reservations.length === 0" class="p-8 text-center text-sm italic text-gray-400 dark:text-slate-500">
           Nenhuma reserva encontrada de momento.
         </div>
       </div>
@@ -76,62 +88,74 @@
 
     <!-- Edit Modal -->
     <Teleport to="body">
-      <div v-if="editModal.open" class="modal-overlay" @click.self="editModal.open = false">
-        <div class="modal">
-          <div class="modal-header">
-            <h3 class="modal-title">Editar Reserva</h3>
-            <button class="modal-close" @click="editModal.open = false">✕</button>
+      <div v-if="editModal.open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="editModal.open = false">
+        <CardBox class="w-full max-w-md bg-white shadow-2xl dark:bg-slate-800">
+          <h3 class="mb-4 text-xl font-light tracking-widest text-teal-600 dark:text-teal-400">EDITAR RESERVA</h3>
+
+          <div v-if="editError" class="mb-4 rounded bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-600 dark:text-red-400">
+            {{ editError }}
           </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label>Data</label>
-              <input type="date" v-model="editForm.data_evento" />
+
+          <div class="mb-4">
+            <label class="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">Data</label>
+            <input type="date" v-model="editForm.data_evento"
+              class="w-full rounded border border-gray-300 p-2 text-sm focus:border-teal-500 focus:ring focus:ring-teal-500/30 dark:bg-slate-700 dark:border-slate-600 dark:text-white" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <label class="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">Início</label>
+              <input type="time" v-model="editForm.hora_inicio"
+                class="w-full rounded border border-gray-300 p-2 text-sm focus:border-teal-500 focus:ring focus:ring-teal-500/30 dark:bg-slate-700 dark:border-slate-600 dark:text-white" />
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Início</label>
-                <input type="time" v-model="editForm.hora_inicio" />
-              </div>
-              <div class="form-group">
-                <label>Fim</label>
-                <input type="time" v-model="editForm.hora_fim" />
-              </div>
+            <div>
+              <label class="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">Fim</label>
+              <input type="time" v-model="editForm.hora_fim"
+                class="w-full rounded border border-gray-300 p-2 text-sm focus:border-teal-500 focus:ring focus:ring-teal-500/30 dark:bg-slate-700 dark:border-slate-600 dark:text-white" />
             </div>
-            <div v-if="editError" class="feedback error">{{ editError }}</div>
           </div>
-          <div class="modal-footer">
-            <button class="btn-cancel" @click="editModal.open = false">Cancelar</button>
-            <button class="btn-confirm" @click="confirmEdit">Guardar</button>
+
+          <div class="flex justify-end gap-3">
+            <button @click="editModal.open = false"
+              class="rounded border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-slate-600 dark:text-gray-400 dark:hover:bg-slate-700">
+              Cancelar
+            </button>
+            <button @click="confirmEdit"
+              class="rounded bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700">
+              Guardar
+            </button>
           </div>
-        </div>
+        </CardBox>
       </div>
     </Teleport>
 
     <!-- Delete Modal -->
     <Teleport to="body">
-      <div v-if="deleteModal.open" class="modal-overlay" @click.self="deleteModal.open = false">
-        <div class="modal modal-sm">
-          <div class="modal-header">
-            <h3 class="modal-title">Apagar Reserva</h3>
-            <button class="modal-close" @click="deleteModal.open = false">✕</button>
-          </div>
-          <div class="modal-body">
-            <p class="delete-message">
-              Tens a certeza que queres apagar a reserva do
-              <strong>Spot {{ deleteModal.reservation?.id_spot }}</strong>
-              em <strong>{{ formatDate(deleteModal.reservation?.data_evento) }}</strong>?
-              Esta ação não pode ser desfeita.
-            </p>
+      <div v-if="deleteModal.open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="deleteModal.open = false">
+        <CardBox class="w-full max-w-sm bg-white shadow-2xl dark:bg-slate-800">
+          <h3 class="mb-4 text-xl font-light tracking-widest text-teal-600 dark:text-teal-400">APAGAR RESERVA</h3>
+          <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+            Tens a certeza que queres apagar a reserva do
+            <strong class="text-gray-700 dark:text-gray-200">Spot {{ deleteModal.reservation?.id_spot }}</strong>
+            em <strong class="text-gray-700 dark:text-gray-200">{{ formatDate(deleteModal.reservation?.data_evento) }}</strong>?
+            Esta ação não pode ser desfeita.
+          </p>
 
-            <div v-if="deleteError" class="feedback error">
-              {{ deleteError }}
-            </div>
+          <div v-if="deleteError" class="mb-4 rounded bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-600 dark:text-red-400">
+            {{ deleteError }}
           </div>
-          <div class="modal-footer">
-            <button class="btn-cancel" @click="deleteModal.open = false">Cancelar</button>
-            <button class="btn-danger" @click="confirmDelete">Apagar</button>
+
+          <div class="flex justify-end gap-3">
+            <button @click="deleteModal.open = false"
+              class="rounded border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-slate-600 dark:text-gray-400 dark:hover:bg-slate-700">
+              Cancelar
+            </button>
+            <button @click="confirmDelete"
+              class="rounded bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600">
+              Apagar
+            </button>
           </div>
-        </div>
+        </CardBox>
       </div>
     </Teleport>
   </div>
@@ -149,6 +173,7 @@ const deleteModal = ref({ open: false, reservation: null })
 const editForm = ref({ data_evento: '', hora_inicio: '', hora_fim: '' })
 const editError = ref('')
 const deleteError = ref('')
+
 function formatDate(dateStr) {
   if (!dateStr) return '—'
   const d = new Date(dateStr)
@@ -185,16 +210,12 @@ async function confirmEdit() {
   })
   if (!res.ok) {
     const result = await res.json()
-
     editError.value =
       typeof result.details === 'string'
         ? result.details
-        : Object.values(result.details || {})
-          .flat()
-          .find(Boolean) ||
-        result.message ||
-        'Erro ao atualizar.'
-
+        : Object.values(result.details || {}).flat().find(Boolean) ||
+          result.message ||
+          'Erro ao atualizar.'
     return
   }
   editModal.value.open = false
@@ -205,22 +226,14 @@ async function confirmDelete() {
   deleteError.value = ''
   const id = deleteModal.value.reservation.id_reserva
   try {
-    const res = await fetch(
-      `http://localhost:3000/api/reservas/${id}`,
-      {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      }
-    )
+    const res = await fetch(`http://localhost:3000/api/reservas/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    })
     if (!res.ok) {
       const result = await res.json()
-      console.log('DELETE ERROR:', result)
       deleteError.value =
-        Object.values(result.details || {})
-          .flat()
-          .find(Boolean) ||
+        Object.values(result.details || {}).flat().find(Boolean) ||
         result.message ||
         'Erro ao apagar reserva.'
       return
@@ -228,7 +241,6 @@ async function confirmDelete() {
     deleteModal.value.open = false
     await getReservations()
   } catch (error) {
-    console.error('Error deleting reservation:', error)
     deleteError.value = 'Erro de ligação.'
   }
 }
@@ -244,300 +256,3 @@ async function getReservations() {
 
 onMounted(() => { getReservations() })
 </script>
-
-<style scoped>
-.list-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #0b2027;
-  letter-spacing: -0.02em;
-  margin: 0;
-  font-family: 'Georgia', serif;
-}
-
-.list-count {
-  font-size: 0.78rem;
-  color: #9a8f80;
-  font-family: 'Courier New', monospace;
-  background: #f0ebe2;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-}
-
-.field-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #c8bfaf;
-  font-family: 'Courier New', monospace;
-}
-
-.spot-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #0b2027;
-  flex-shrink: 0;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 0.22rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  font-family: 'Courier New', monospace;
-}
-
-.status-upcoming {
-  background: #d4edda;
-  color: #2d6a4f;
-}
-
-.status-past {
-  background: #fde8e8;
-  color: #9b1c1c;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.edit-btn {
-  background: #e8e0d0;
-  color: #0b2027;
-}
-
-.edit-btn:hover {
-  background: #d4c9b5;
-}
-
-.delete-btn {
-  background: transparent;
-  color: #b85050;
-  border: 1px solid #e8c8c8;
-}
-
-.delete-btn:hover {
-  background: #fde8e8;
-}
-
-/* Modals */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(11, 32, 39, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  backdrop-filter: blur(2px);
-  animation: fadeIn 0.15s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.modal {
-  background: #fff;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 440px;
-  box-shadow: 0 20px 60px rgba(11, 32, 39, 0.18);
-  animation: slideUp 0.2s ease;
-  font-family: 'Georgia', serif;
-}
-
-.modal-sm {
-  max-width: 360px;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem 0;
-}
-
-.modal-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #0b2027;
-  margin: 0;
-}
-
-.modal-close {
-  background: #f0ebe2;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: #6b5f52;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-}
-
-.modal-close:hover {
-  background: #e2d9cc;
-}
-
-.modal-body {
-  padding: 1.25rem 1.5rem;
-}
-
-.delete-message {
-  font-size: 0.875rem;
-  color: #5a4e42;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
-}
-
-.form-group:last-child {
-  margin-bottom: 0;
-}
-
-.form-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.form-row .form-group {
-  flex: 1;
-}
-
-.form-group label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #9a8f80;
-  font-family: 'Courier New', monospace;
-}
-
-.form-group input {
-  padding: 0.55rem 0.75rem;
-  border: 1px solid #e2d9cc;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: #0b2027;
-  font-family: 'Georgia', serif;
-  outline: none;
-  transition: border-color 0.15s;
-  background: #faf7f2;
-}
-
-.form-group input:focus {
-  border-color: #0b2027;
-}
-
-.feedback {
-  font-size: 0.8rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  margin-top: 0.5rem;
-}
-
-.feedback.error {
-  background: #fde8e8;
-  color: #9b1c1c;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  padding: 0 1.5rem 1.25rem;
-}
-
-.btn-cancel {
-  padding: 0.5rem 1.1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: 1px solid #e2d9cc;
-  background: transparent;
-  color: #6b5f52;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-
-.btn-cancel:hover {
-  background: #f5f0e6;
-}
-
-.btn-confirm {
-  padding: 0.5rem 1.1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: none;
-  background: #0b2027;
-  color: #fff;
-  cursor: pointer;
-  font-family: inherit;
-  transition: opacity 0.15s;
-}
-
-.btn-confirm:hover {
-  opacity: 0.85;
-}
-
-.btn-danger {
-  padding: 0.5rem 1.1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: none;
-  background: #b85050;
-  color: #fff;
-  cursor: pointer;
-  font-family: inherit;
-  transition: opacity 0.15s;
-}
-
-.btn-danger:hover {
-  opacity: 0.85;
-}
-</style>

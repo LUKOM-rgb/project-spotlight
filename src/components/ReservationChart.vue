@@ -1,21 +1,15 @@
 <script setup>
 import { ref, watch, onMounted, computed, reactive } from 'vue'
 import { Bar } from 'vue-chartjs'
+import CardBox from '@/components/CardBox.vue'
 import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement,
-  CategoryScale,
-  LinearScale
+  Chart as ChartJS, Title, Tooltip, Legend,
+  BarElement, CategoryScale, LinearScale
 } from 'chart.js'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
-const props = defineProps({
-  selectedSpotId: Number
-})
+const props = defineProps({ selectedSpotId: Number })
 
 const toHours = (time) => {
   const [h, m] = time.split(':').map(Number)
@@ -38,38 +32,33 @@ const form = reactive({ date: '', startTime: '', endTime: '' })
 async function submitReservation() {
   errorMsg.value = ''
   successMsg.value = ''
-if (!form.date || !form.startTime || !form.endTime) {
-    errorMsg.value = 'Please fill in all fields.'
+
+  if (!form.date || !form.startTime || !form.endTime) {
+    errorMsg.value = 'Por favor preenche todos os campos.'
     return
   }
+
   try {
-    const res = await fetch(
-      `http://localhost:3000/api/reservas/${props.selectedSpotId}/`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          data_evento: form.date,
-          hora_inicio: form.startTime,
-          hora_fim: form.endTime,
-        }),
-      }
-    )
+    const res = await fetch(`http://localhost:3000/api/reservas/${props.selectedSpotId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({
+        data_evento: form.date,
+        hora_inicio: form.startTime,
+        hora_fim: form.endTime,
+      }),
+    })
 
     const result = await res.json()
 
     if (!res.ok) {
-
       errorMsg.value =
-        Object.values(result.details || {})
-          .flat()
-          .find(Boolean) ||
+        Object.values(result.details || {}).flat().find(Boolean) ||
         result.message ||
         'Erro ao criar reserva.'
-
       return
     }
 
@@ -103,7 +92,7 @@ async function getReservations() {
         x: [toHours(r.hora_inicio), toHours(r.hora_fim)],
         y: '',
       })),
-      backgroundColor: 'rgba(11, 32, 39, 0.75)',
+      backgroundColor: 'rgba(64, 121, 140, 0.75)',
       borderRadius: 6,
     }],
   }
@@ -147,22 +136,17 @@ const chartOptions = computed(() => ({
       ticks: {
         stepSize: 1,
         callback: (value) => `${value}:00`,
-        font: { family: 'Courier New', size: 11 },
-        color: '#9a8f80',
+        color: '#6b7280',
+        font: { size: 11 }
       },
-      border: { color: '#e2d9cc' }
+      border: { color: '#e5e7eb' }
     },
-    y: {
-      grid: { display: false },
-      ticks: { display: false }
-    }
+    y: { grid: { display: false }, ticks: { display: false } }
   },
   plugins: {
     legend: { display: false },
     tooltip: {
       backgroundColor: '#0b2027',
-      titleFont: { family: 'Georgia' },
-      bodyFont: { family: 'Courier New' },
       callbacks: {
         displayColors: false,
         label: (context) => {
@@ -176,187 +160,69 @@ const chartOptions = computed(() => ({
 </script>
 
 <template>
-  <div v-if="props.selectedSpotId" class="reservation-panel">
+  <div v-if="props.selectedSpotId" class="mt-6">
+    <CardBox class="shadow-xl dark:bg-slate-800">
 
-    <div class="panel-header">
-      <span class="panel-label">Book this Spot</span>
-    </div>
+      <h2 class="mb-6 text-xl font-light tracking-widest text-teal-600 dark:text-teal-400">RESERVAR SPOT</h2>
 
-    <div class="panel-body">
       <!-- Form -->
-      <div class="booking-form">
-        <div class="field-row">
-          <div class="field">
-            <label>Date</label>
-            <input type="date" v-model="form.date" />
-          </div>
-          <div class="field">
-            <label>Start</label>
-            <input type="time" v-model="form.startTime"  required/>
-          </div>
-          <div class="field">
-            <label>End</label>
-            <input type="time" v-model="form.endTime" required />
-          </div>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-4">
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">Data do Evento</label>
+          <input
+            type="date"
+            v-model="form.date"
+            class="w-full rounded border border-gray-300 p-2 text-sm focus:border-teal-500 focus:ring focus:ring-teal-500/30 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+          />
         </div>
-
-        <div v-if="errorMsg" class="feedback error">{{ errorMsg }}</div>
-        <div v-if="successMsg" class="feedback success">{{ successMsg }}</div>
-
-        <button class="btn-reserve" @click="submitReservation">
-          Confirm Reservation
-        </button>
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">Hora de Início</label>
+          <input
+            type="time"
+            v-model="form.startTime"
+            required
+            class="w-full rounded border border-gray-300 p-2 text-sm focus:border-teal-500 focus:ring focus:ring-teal-500/30 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+          />
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">Hora de Fim</label>
+          <input
+            type="time"
+            v-model="form.endTime"
+            required
+            class="w-full rounded border border-gray-300 p-2 text-sm focus:border-teal-500 focus:ring focus:ring-teal-500/30 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+          />
+        </div>
       </div>
+
+      <!-- Feedback -->
+      <div v-if="errorMsg" class="mb-4 rounded bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-600 dark:text-red-400">
+        {{ errorMsg }}
+      </div>
+      <div v-if="successMsg" class="mb-4 rounded bg-teal-500/10 border border-teal-500/20 p-3 text-sm text-teal-600 dark:text-teal-400">
+        {{ successMsg }}
+      </div>
+
+      <button
+        @click="submitReservation"
+        class="mb-6 rounded bg-teal-600 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700"
+      >
+        Confirmar Reserva
+      </button>
 
       <!-- Chart -->
-      <div class="chart-area">
-        <p class="chart-label">Occupied slots for selected day</p>
-        <div class="chart-wrapper">
+      <div>
+        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          Ocupação do dia selecionado
+        </p>
+        <div class="h-20 w-full">
           <Bar :data="chartData" :options="chartOptions" />
         </div>
-        <p v-if="!chartData.datasets.length" class="chart-empty">No reservations yet for this day.</p>
+        <p v-if="!chartData.datasets.length" class="mt-2 text-xs italic text-gray-400 dark:text-gray-500">
+          Sem reservas para este dia.
+        </p>
       </div>
-    </div>
 
+    </CardBox>
   </div>
 </template>
-
-<style scoped>
-.reservation-panel {
-  margin-top: 1.5rem;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid #e2d9cc;
-  background: #fff;
-  box-shadow: 0 2px 16px rgba(11, 32, 39, 0.06);
-  font-family: 'Georgia', serif;
-}
-
-.panel-header {
-  background: #0b2027;
-  padding: 0.75rem 1.25rem;
-}
-
-.panel-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #c8bfaf;
-  font-family: 'Courier New', monospace;
-}
-
-.panel-body {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.25rem;
-}
-
-.booking-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.field-row {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  flex: 1;
-  min-width: 120px;
-}
-
-.field label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #9a8f80;
-  font-family: 'Courier New', monospace;
-}
-
-.field input {
-  padding: 0.5rem 0.7rem;
-  border: 1px solid #e2d9cc;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: #0b2027;
-  background: #faf7f2;
-  font-family: 'Georgia', serif;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.field input:focus {
-  border-color: #0b2027;
-}
-
-.btn-reserve {
-  align-self: flex-start;
-  padding: 0.55rem 1.25rem;
-  background: #0b2027;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: 'Georgia', serif;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.btn-reserve:hover {
-  opacity: 0.85;
-}
-
-.feedback {
-  font-size: 0.8rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-}
-
-.feedback.error {
-  background: #fde8e8;
-  color: #9b1c1c;
-}
-
-.feedback.success {
-  background: #d4edda;
-  color: #2d6a4f;
-}
-
-.chart-area {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.chart-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #9a8f80;
-  font-family: 'Courier New', monospace;
-  margin: 0;
-}
-
-.chart-wrapper {
-  height: 80px;
-  width: 100%;
-}
-
-.chart-empty {
-  font-size: 0.8rem;
-  color: #c8bfaf;
-  font-style: italic;
-  margin: 0;
-}
-</style>
