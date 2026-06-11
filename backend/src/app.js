@@ -34,7 +34,8 @@ app.use((req, res, next) => {
     if (!req.body || Object.keys(req.body).length === 0) {
       return res.status(400).json({
         error: 'Bad Request',
-        message: 'O corpo do pedido (body) não pode estar vazio num pedido PATCH. Deves enviar pelo menos um campo para atualizar.'
+        message:
+          'O corpo do pedido (body) não pode estar vazio num pedido PATCH. Deves enviar pelo menos um campo para atualizar.',
       })
     }
   }
@@ -46,7 +47,7 @@ const validateIdParam = (req, res, next, id) => {
   if (isNaN(id)) {
     return res.status(400).json({
       error: 'Parâmetro Inválido',
-      message: `O parâmetro enviado no URL (${id}) tem de ser um número válido.`
+      message: `O parâmetro enviado no URL (${id}) tem de ser um número válido.`,
     })
   }
   next()
@@ -134,7 +135,7 @@ app.use((err, req, res, next) => {
 
 // Sincronização da Base de Dados e Inicialização do Servidor
 sequelize
-  .sync({ })
+  .sync({})
   .then(() => {
     console.log('- Database sincronizada com sucesso.')
     app.listen(port, host, () => {

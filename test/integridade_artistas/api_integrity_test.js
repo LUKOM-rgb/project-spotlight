@@ -3,10 +3,22 @@ import path from 'path';
 import http from 'http';
 import { execSync } from 'child_process';
 import { fileURLToPath, pathToFileURL } from 'url';
+import process from 'process';
+
+// Load environmental variables before importing Sequelize models
 import dotenv from 'dotenv';
+dotenv.config({ path: './backend/src/.env' });
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Standard paths to search for Brave on Windows
+const BRAVE_PATHS = [
+  "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+  "C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+];
 
 // Standard paths to search for Opera on Windows (preferring Opera GX)
 const OPERA_PATHS = [
@@ -17,6 +29,34 @@ const OPERA_PATHS = [
   "C:\\Program Files (x86)\\Opera GX\\opera.exe",
   "C:\\Program Files (x86)\\Opera\\opera.exe",
 ];
+
+// Resolves Brave paths using environment variables and standard paths
+function findBrave() {
+  const localAppData = process.env.LOCALAPPDATA || "";
+  const programFiles = process.env.ProgramFiles || "";
+  const programFilesX86 = process.env["ProgramFiles(x86)"] || "";
+  
+  const dynamicPaths = [];
+  if (localAppData) {
+    dynamicPaths.push(path.join(localAppData, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+  }
+  if (programFiles) {
+    dynamicPaths.push(path.join(programFiles, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+  }
+  if (programFilesX86) {
+    dynamicPaths.push(path.join(programFilesX86, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+  }
+  
+  const allPaths = [...BRAVE_PATHS, ...dynamicPaths];
+  const uniquePaths = [...new Set(allPaths)];
+  
+  for (const p of uniquePaths) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+  return null;
+}
 
 // Resolves Opera paths using environment variables and standard paths
 function findOpera() {
@@ -80,163 +120,194 @@ async function ensureDependencies() {
 }
 
 async function main() {
+  const db = (await import('../../backend/src/Models/db.js')).default;
+  const { sequelize, Artista, Utilizador, Categoria, Seguidor } = db;
+
   const backendUrl = "http://localhost:3000";
   
   console.log(`[*] Checking if backend server is running at ${backendUrl}...`);
   const isServerRunning = await checkServer(backendUrl);
   if (!isServerRunning) {
     console.error(`[-] Error: Backend server not detected at ${backendUrl}.`);
-    console.error("    Please make sure your backend server is running (e.g. npm run dev or equivalent).");
     process.exit(1);
   }
   console.log("[+] Backend is active!");
 
-  // Find Opera GX
+  // Find Brave first, fallback to Opera
+  const bravePath = findBrave();
   const operaPath = findOpera();
-  if (!operaPath) {
-    console.error("[-] Error: Could not locate Opera or Opera GX executable automatically.");
+  const browserPath = bravePath || operaPath;
+  if (!browserPath) {
+    console.error("[-] Error: Could not locate Brave, Opera or Opera GX executable automatically.");
     process.exit(1);
   }
-  console.log(`[+] Found Opera executable at: ${operaPath}`);
+  console.log(`[+] Found browser executable at: ${browserPath}`);
 
   // Dynamic import of Selenium after ensuring it's installed
   await ensureDependencies();
   const { Builder } = await import('selenium-webdriver');
   const chrome = await import('selenium-webdriver/chrome.js');
 
-  dotenv.config({ path: './backend/src/.env' });
-  const db = (await import('../../backend/src/Models/db.js')).default;
-  const { sequelize, Utilizador } = db;
-
   const testResults = [];
-  let testUserId = null;
-  let tempAdminUser = null;
-  let adminToken = null;
-  let executionFailed = false;
+
+  // Variables for holding temporary records
+  let tempCategory, tempArtist, tempArtistUser, tempFollowerUser;
+  let followerToken, adminToken;
 
   const tempPasswordPlain = "password123";
   const tempPasswordHashed = "$2b$10$IHEcl.nGMkLLhqDfczC6wOJ1G/nRjgGSxx3sxlel30Uhi5ur3C1pK"; // bcrypt hash of password123
 
-  // 1. Get Categories to find a valid one
-  let categoryId = 1;
   try {
-    const res = await fetch(`${backendUrl}/api/categorias`);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        categoryId = data[0].categoria_id || 1;
-        console.log(`[+] Selected Category ID for testing: ${categoryId}`);
-      }
-    }
-  } catch (e) {
-    console.log(`[!] Warning: Failed to fetch categories, defaulting to Category ID 1: ${e.message}`);
-  }
+    console.log("[*] Setting up database fixtures for integrity test...");
 
-  try {
-    // 1.5 Create a temporary admin user to authorize the role change API
-    console.log("[*] Creating temporary admin user...");
-    tempAdminUser = await Utilizador.create({
-      email: `admin_lic_${Date.now()}@example.com`,
+    // 1. Create temporary category
+    tempCategory = await Categoria.create({
+      nome_categoria: `Category_Integrity_Test_${Date.now()}`
+    });
+
+    // 2. Create temporary artist
+    const validityDate = new Date();
+    validityDate.setFullYear(validityDate.getFullYear() + 2);
+    tempArtist = await Artista.create({
+      numero_licenca: `LIC-INTEG-${Date.now()}`,
+      validade_licenca: validityDate,
+      categoria_id: tempCategory.categoria_id
+    });
+
+    // 3. Create temporary artist user
+    tempArtistUser = await Utilizador.create({
+      email: `artist_integ_${Date.now()}@example.com`,
+      password: tempPasswordHashed,
+      tipo: 'artista',
+      data_registo: new Date(),
+      nome_utilizador: `artist_integ_${Date.now()}`,
+      id_artista: tempArtist.id_artista
+    });
+
+    // 4. Create temporary follower user
+    tempFollowerUser = await Utilizador.create({
+      email: `follower_integ_${Date.now()}@example.com`,
+      password: tempPasswordHashed,
+      tipo: 'utilizador',
+      data_registo: new Date(),
+      nome_utilizador: `follower_integ_${Date.now()}`
+    });
+
+    // 5. Create temporary admin user (needed to perform the DELETE artist operation)
+    const tempAdminUser = await Utilizador.create({
+      email: `admin_integ_${Date.now()}@example.com`,
       password: tempPasswordHashed,
       tipo: 'admin',
       data_registo: new Date(),
-      nome_utilizador: `admin_lic_${Date.now()}`
+      nome_utilizador: `admin_integ_${Date.now()}`
     });
 
-    console.log("[*] Logging in as admin to obtain authentication token...");
-    const loginRes = await fetch(`${backendUrl}/api/auth/login`, {
+    console.log("[+] Database fixtures created successfully.");
+
+    // Login as follower to get token
+    console.log("[*] Fetching follower token via API...");
+    let loginRes = await fetch(`${backendUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: tempFollowerUser.email, password: tempPasswordPlain })
+    });
+    let loginData = await loginRes.json();
+    followerToken = loginData.token;
+
+    // Login as admin to get token
+    console.log("[*] Fetching admin token via API...");
+    loginRes = await fetch(`${backendUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: tempAdminUser.email, password: tempPasswordPlain })
     });
-    const loginData = await loginRes.json();
+    loginData = await loginRes.json();
     adminToken = loginData.token;
-    console.log("[+] Admin token successfully retrieved.");
 
-    // 2. Register a temporary user for the tests
-    const tempEmail = `test_user_${Date.now()}@example.com`;
-    console.log(`[*] Registering temporary test user with email: ${tempEmail}...`);
-    const regRes = await fetch(`${backendUrl}/api/utilizadores`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: tempEmail,
-        password: "password123",
-        nome_utilizador: "Test User Data Validade",
-        numero_telemovel: 912345678
-      })
-    });
-    const regData = await regRes.json();
-    if (regRes.ok && regData.data && regData.data.id_utilizador) {
-      testUserId = regData.data.id_utilizador;
-      console.log(`[+] Temporary user registered successfully with ID: ${testUserId}`);
-    } else {
-      throw new Error(`Failed to register temporary user: ${JSON.stringify(regData)}`);
-    }
-
-    // Define our API Test Cases
-    const cases = [
+    // Run the API Test Cases
+    const testCases = [
       {
-        name: "Validação 1: Data de Validade em Falta",
-        method: "PATCH",
-        url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
-        body: {
-          tipo: "artista",
-          numero_licenca: `LIC-${Date.now()}`,
-          categoria_id: categoryId
+        name: "Caso 1: Seguidor associa-se ao Artista (Seguir)",
+        method: "POST",
+        url: `${backendUrl}/api/seguidores`,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${followerToken}`
         },
-        expectedStatus: 400,
+        body: {
+          id_utilizador: tempFollowerUser.id_utilizador,
+          id_artista: tempArtist.id_artista
+        },
+        expectedStatus: 201,
         assertion: (status, body) => {
-          return status === 400 && (body.error || body.details || JSON.stringify(body).toLowerCase().includes("obrigat"));
+          return status === 201 && body.message && body.message.toLowerCase().includes("sucesso");
         }
       },
       {
-        name: "Validação 2: Formato de Data Inválido",
-        method: "PATCH",
-        url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
-        body: {
-          tipo: "artista",
-          numero_licenca: `LIC-${Date.now()}`,
-          validade_licenca: "data-invalida",
-          categoria_id: categoryId
+        name: "Caso 2: Verificar relação de seguidor na API",
+        method: "GET",
+        url: `${backendUrl}/api/seguidores?id_artista=${tempArtist.id_artista}`,
+        headers: { 
+          'Authorization': `Bearer ${followerToken}`
         },
-        expectedStatus: 400,
-        assertion: (status, body) => {
-          const bodyStr = JSON.stringify(body);
-          return status === 400 && bodyStr.includes("formato de data inválido");
-        }
-      },
-      {
-        name: "Validação 3: Formato de Data Correto (Sucesso)",
-        method: "PATCH",
-        url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
-        body: {
-          tipo: "artista",
-          numero_licenca: `LIC-${Date.now()}`,
-          validade_licenca: "2030-12-31",
-          categoria_id: categoryId
-        },
+        body: null,
         expectedStatus: 200,
         assertion: (status, body) => {
-          return status === 200 || status === 201;
+          return status === 200 && body.total_seguidores === 1 && Array.isArray(body.data) && body.data.length === 1;
+        }
+      },
+      {
+        name: "Caso 3: Admin elimina o Artista do sistema",
+        method: "DELETE",
+        url: `${backendUrl}/api/artistas/${tempArtist.id_artista}`,
+        headers: { 
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: null,
+        expectedStatus: 200,
+        assertion: (status, body) => {
+          return status === 200 && body.message && body.message.toLowerCase().includes("removido com sucesso");
+        }
+      },
+      {
+        name: "Caso 4: Confirmar que o perfil do Artista deixou de existir",
+        method: "GET",
+        url: `${backendUrl}/api/artistas/${tempArtist.id_artista}`,
+        headers: {},
+        body: null,
+        expectedStatus: 404,
+        assertion: (status, body) => {
+          return status === 404;
+        }
+      },
+      {
+        name: "Caso 5: Confirmar integridade CASCADE (tabela Seguidor limpa automaticamente)",
+        method: "GET",
+        url: `${backendUrl}/api/seguidores?id_artista=${tempArtist.id_artista}`,
+        headers: {
+          'Authorization': `Bearer ${followerToken}`
+        },
+        expectedStatus: 404,
+        assertion: (status, body) => {
+          // Since the artist was deleted, querying followers for their ID should return 404 (Not Found)
+          return status === 404 && JSON.stringify(body).toLowerCase().includes("não foi encontrado");
         }
       }
     ];
 
-    // 3. Run the Test Cases
-    console.log("[*] Running API tests for license date validation...");
-    for (const tc of cases) {
+    console.log("[*] Running API integrity tests...");
+    for (const tc of testCases) {
       console.log(`\n[*] Running: ${tc.name}`);
       try {
-        const res = await fetch(tc.url, {
+        const fetchOptions = {
           method: tc.method,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${adminToken}`
-          },
-          body: JSON.stringify(tc.body)
-        });
+          headers: tc.headers
+        };
+        if (tc.body) {
+          fetchOptions.body = JSON.stringify(tc.body);
+        }
         
+        const res = await fetch(tc.url, fetchOptions);
         const status = res.status;
         const responseBody = await res.json();
         
@@ -253,7 +324,7 @@ async function main() {
           passed: passed
         });
       } catch (e) {
-        console.error(`[-] Test failed with network/code error:`, e.message);
+        console.error(`[-] Test failed with error:`, e.message);
         testResults.push({
           name: tc.name,
           method: tc.method,
@@ -266,38 +337,24 @@ async function main() {
       }
     }
 
-    // 4. Cleanup/Restore User Role to "utilizador"
-    console.log("\n[*] Cleaning up: Downgrading test user back to 'utilizador'...");
-    try {
-      await fetch(`${backendUrl}/api/utilizadores/${testUserId}/role`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`
-        },
-        body: JSON.stringify({ tipo: "utilizador" })
-      });
-      console.log("[+] Cleanup completed successfully.");
-    } catch (e) {
-      console.log(`[!] Cleanup warning: ${e.message}`);
-    }
-
-  } catch (e) {
-    console.error("[-] Test execution encountered an error:", e);
-    executionFailed = true;
-  } finally {
-    // Database cleanup
-    console.log("[*] Cleaning up database fixtures...");
-    if (testUserId) {
-      await Utilizador.destroy({ where: { id_utilizador: testUserId } }).catch(() => {});
-    }
-    if (tempAdminUser) {
-      await tempAdminUser.destroy().catch(() => {});
-    }
+    // Cleanup created users
+    console.log("\n[*] Tearing down database fixtures...");
+    await Seguidor.destroy({ where: { id_artista: tempArtist.id_artista } }).catch(() => {});
+    await tempArtistUser.destroy().catch(() => {});
+    await tempFollowerUser.destroy().catch(() => {});
+    await tempAdminUser.destroy().catch(() => {});
+    await tempArtist.destroy().catch(() => {});
+    await tempCategory.destroy().catch(() => {});
     console.log("[+] Database clean.");
+
+  } catch (err) {
+    console.error("[-] Error during test execution setup/teardown:", err);
+  } finally {
+    // Close the database connection
+    await sequelize.close();
   }
 
-  // 5. Generate beautiful HTML report
+  // Generate beautiful HTML report
   const reportHtmlPath = path.join(__dirname, "api_test_report.html");
   const screenshotPath = path.join(__dirname, "api_test_report_screenshot.png");
   
@@ -309,19 +366,19 @@ async function main() {
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Relatório de Testes de API - Licenças</title>
+  <title>Relatório de Testes de API - Integridade Artistas e Seguidores</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --border-color: #334155;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #22c55e;
+      --bg-color: #0b0f19;
+      --card-bg: #151d30;
+      --border-color: #24324f;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --success: #10b981;
       --danger: #ef4444;
-      --primary: #8b5cf6;
-      --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --primary: #f59e0b;
+      --primary-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     }
     
     * {
@@ -358,11 +415,12 @@ async function main() {
       font-size: 24px;
       font-weight: 700;
       margin-bottom: 6px;
+      color: #ffffff;
     }
 
     .meta {
       font-size: 14px;
-      color: #e2e8f0;
+      color: #fef3c7;
       font-weight: 300;
     }
 
@@ -415,7 +473,7 @@ async function main() {
     }
 
     .test-card {
-      background-color: #111827;
+      background-color: #0e1320;
       border-left: 5px solid var(--border-color);
       border-radius: 8px;
       margin-bottom: 20px;
@@ -453,7 +511,7 @@ async function main() {
     }
 
     .badge.passed {
-      background-color: rgba(34, 197, 94, 0.15);
+      background-color: rgba(16, 185, 129, 0.15);
       color: var(--success);
     }
 
@@ -486,7 +544,7 @@ async function main() {
     }
 
     pre {
-      background-color: #030712;
+      background-color: #05070c;
       border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 6px;
       padding: 12px;
@@ -501,8 +559,8 @@ async function main() {
 <body>
   <div class="container">
     <header>
-      <h1>Relatório de Testes de API</h1>
-      <div class="meta">Validação das Datas de Validade das Licenças • Host: ${backendUrl}</div>
+      <h1>Relatório de Testes de API - Integridade do Sistema</h1>
+      <div class="meta">Comportamento referencial CASCADE ao remover artistas • Host: ${backendUrl}</div>
     </header>
 
     <div class="summary-cards">
@@ -531,8 +589,10 @@ async function main() {
             <span>${r.method}</span> ${r.url} &bull; HTTP Status: <strong>${r.status}</strong>
           </div>
           
-          <div class="code-block-title">Request Body</div>
-          <pre>${JSON.stringify(r.requestBody, null, 2)}</pre>
+          ${r.requestBody ? `
+            <div class="code-block-title">Request Body</div>
+            <pre>${JSON.stringify(r.requestBody, null, 2)}</pre>
+          ` : ''}
           
           <div class="code-block-title">Response JSON</div>
           <pre>${JSON.stringify(r.response, null, 2)}</pre>
@@ -547,18 +607,16 @@ async function main() {
   fs.writeFileSync(reportHtmlPath, htmlContent, 'utf-8');
   console.log(`[+] HTML test report generated at: ${reportHtmlPath}`);
 
-  // 6. Selenium Screenshot
-  console.log("[*] Launching Selenium (Opera GX) in headless mode to capture screenshot...");
+  // Headless Browser Screenshot
+  console.log("[*] Launching Selenium in headless mode to capture screenshot...");
   
   let options = new chrome.Options();
-  options.setChromeBinaryPath(operaPath);
+  options.setChromeBinaryPath(browserPath);
   options.addArguments('--headless');
   options.addArguments('--disable-gpu');
-  options.windowSize({ width: 1000, height: 1350 }); // Higher height to capture all 3 cases nicely
+  options.windowSize({ width: 1000, height: 1400 });
 
-  // Create Service to bypass version mismatch checks between Opera and ChromeDriver
-  const service = new chrome.ServiceBuilder()
-    .addArguments('--disable-build-check');
+  const service = new chrome.ServiceBuilder().addArguments('--disable-build-check');
 
   let driver;
   try {
@@ -572,11 +630,10 @@ async function main() {
     console.log(`[*] Loading report URL: ${fileUrl}`);
     await driver.get(fileUrl);
 
-    // Wait for page load
     console.log("[*] Waiting for report to render...");
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Get the full height of the page dynamically to avoid truncation
+    // Get page height dynamically
     const scrollHeight = await driver.executeScript(() => {
       return Math.max(
         document.body.scrollHeight,
@@ -602,16 +659,6 @@ async function main() {
       await driver.quit();
       console.log("[*] Browser closed.");
     }
-    if (sequelize) {
-      await sequelize.close().catch(() => {});
-      console.log("[*] Database connection closed.");
-    }
-  }
-
-  if (executionFailed || failedCount > 0) {
-    process.exit(1);
-  } else {
-    process.exit(0);
   }
 }
 

@@ -3,19 +3,19 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Relatório de Testes de API - Licenças</title>
+  <title>Relatório de Testes de API - Integridade Artistas e Seguidores</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --border-color: #334155;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #22c55e;
+      --bg-color: #0b0f19;
+      --card-bg: #151d30;
+      --border-color: #24324f;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --success: #10b981;
       --danger: #ef4444;
-      --primary: #8b5cf6;
-      --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --primary: #f59e0b;
+      --primary-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     }
     
     * {
@@ -52,11 +52,12 @@
       font-size: 24px;
       font-weight: 700;
       margin-bottom: 6px;
+      color: #ffffff;
     }
 
     .meta {
       font-size: 14px;
-      color: #e2e8f0;
+      color: #fef3c7;
       font-weight: 300;
     }
 
@@ -109,7 +110,7 @@
     }
 
     .test-card {
-      background-color: #111827;
+      background-color: #0e1320;
       border-left: 5px solid var(--border-color);
       border-radius: 8px;
       margin-bottom: 20px;
@@ -147,7 +148,7 @@
     }
 
     .badge.passed {
-      background-color: rgba(34, 197, 94, 0.15);
+      background-color: rgba(16, 185, 129, 0.15);
       color: var(--success);
     }
 
@@ -180,7 +181,7 @@
     }
 
     pre {
-      background-color: #030712;
+      background-color: #05070c;
       border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 6px;
       padding: 12px;
@@ -195,108 +196,136 @@
 <body>
   <div class="container">
     <header>
-      <h1>Relatório de Testes de API</h1>
-      <div class="meta">Validação das Datas de Validade das Licenças • Host: http://localhost:3000</div>
+      <h1>Relatório de Testes de API - Integridade do Sistema</h1>
+      <div class="meta">Comportamento referencial CASCADE ao remover artistas • Host: http://localhost:3000</div>
     </header>
 
     <div class="summary-cards">
       <div class="summary-card">
         <h3>Total Testes</h3>
-        <p>3</p>
+        <p>5</p>
       </div>
       <div class="summary-card passed">
         <h3>Passaram</h3>
-        <p>0</p>
+        <p>5</p>
       </div>
       <div class="summary-card failed">
         <h3>Falharam</h3>
-        <p>3</p>
+        <p>0</p>
       </div>
     </div>
 
     <div class="results-container">
       
-        <div class="test-card failed">
+        <div class="test-card passed">
           <div class="test-header">
-            <div class="test-title">Validação 1: Data de Validade em Falta</div>
-            <div class="badge failed">Falhou</div>
+            <div class="test-title">Caso 1: Seguidor associa-se ao Artista (Seguir)</div>
+            <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>PATCH</span> http://localhost:3000/api/utilizadores/76/role &bull; HTTP Status: <strong>401</strong>
+            <span>POST</span> http://localhost:3000/api/seguidores &bull; HTTP Status: <strong>201</strong>
           </div>
           
-          <div class="code-block-title">Request Body</div>
-          <pre>{
-  "tipo": "artista",
-  "numero_licenca": "LIC-1781193897851",
-  "categoria_id": 1
+          
+            <div class="code-block-title">Request Body</div>
+            <pre>{
+  "id_utilizador": 79,
+  "id_artista": 58
 }</pre>
+          
           
           <div class="code-block-title">Response JSON</div>
           <pre>{
-  "error": "Token inválido.",
-  "message": "Token inválido.",
+  "message": "Passaste a seguir o artista com sucesso!"
+}</pre>
+        </div>
+      
+        <div class="test-card passed">
+          <div class="test-header">
+            <div class="test-title">Caso 2: Verificar relação de seguidor na API</div>
+            <div class="badge passed">Passou</div>
+          </div>
+          <div class="test-details">
+            <span>GET</span> http://localhost:3000/api/seguidores?id_artista=58 &bull; HTTP Status: <strong>200</strong>
+          </div>
+          
+          
+          
+          <div class="code-block-title">Response JSON</div>
+          <pre>{
+  "total_seguidores": 1,
+  "data": [
+    {
+      "id_utilizador": 79,
+      "email": "follower_integ_1781194182198@example.com",
+      "tipo": "utilizador",
+      "data_registo": "2026-06-11T16:09:42.000Z",
+      "nome_utilizador": "follower_integ_1781194182198",
+      "numero_telemovel": null,
+      "id_artista": null
+    }
+  ]
+}</pre>
+        </div>
+      
+        <div class="test-card passed">
+          <div class="test-header">
+            <div class="test-title">Caso 3: Admin elimina o Artista do sistema</div>
+            <div class="badge passed">Passou</div>
+          </div>
+          <div class="test-details">
+            <span>DELETE</span> http://localhost:3000/api/artistas/58 &bull; HTTP Status: <strong>200</strong>
+          </div>
+          
+          
+          
+          <div class="code-block-title">Response JSON</div>
+          <pre>{
+  "message": "Artista artist_integ_1781194182168 removido com sucesso!"
+}</pre>
+        </div>
+      
+        <div class="test-card passed">
+          <div class="test-header">
+            <div class="test-title">Caso 4: Confirmar que o perfil do Artista deixou de existir</div>
+            <div class="badge passed">Passou</div>
+          </div>
+          <div class="test-details">
+            <span>GET</span> http://localhost:3000/api/artistas/58 &bull; HTTP Status: <strong>404</strong>
+          </div>
+          
+          
+          
+          <div class="code-block-title">Response JSON</div>
+          <pre>{
+  "error": "Resource not found",
+  "message": "Resource not found",
   "details": {
-    "authentication": [
-      "Acesso negado. Credenciais inválidas"
+    "artista": [
+      "O recurso Artista com o ID 58 não foi encontrado."
     ]
   }
 }</pre>
         </div>
       
-        <div class="test-card failed">
+        <div class="test-card passed">
           <div class="test-header">
-            <div class="test-title">Validação 2: Formato de Data Inválido</div>
-            <div class="badge failed">Falhou</div>
+            <div class="test-title">Caso 5: Confirmar integridade CASCADE (tabela Seguidor limpa automaticamente)</div>
+            <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>PATCH</span> http://localhost:3000/api/utilizadores/76/role &bull; HTTP Status: <strong>401</strong>
+            <span>GET</span> http://localhost:3000/api/seguidores?id_artista=58 &bull; HTTP Status: <strong>404</strong>
           </div>
           
-          <div class="code-block-title">Request Body</div>
-          <pre>{
-  "tipo": "artista",
-  "numero_licenca": "LIC-1781193897851",
-  "validade_licenca": "data-invalida",
-  "categoria_id": 1
-}</pre>
+          
           
           <div class="code-block-title">Response JSON</div>
           <pre>{
-  "error": "Token inválido.",
-  "message": "Token inválido.",
+  "error": "Resource not found",
+  "message": "Resource not found",
   "details": {
-    "authentication": [
-      "Acesso negado. Credenciais inválidas"
-    ]
-  }
-}</pre>
-        </div>
-      
-        <div class="test-card failed">
-          <div class="test-header">
-            <div class="test-title">Validação 3: Formato de Data Correto (Sucesso)</div>
-            <div class="badge failed">Falhou</div>
-          </div>
-          <div class="test-details">
-            <span>PATCH</span> http://localhost:3000/api/utilizadores/76/role &bull; HTTP Status: <strong>401</strong>
-          </div>
-          
-          <div class="code-block-title">Request Body</div>
-          <pre>{
-  "tipo": "artista",
-  "numero_licenca": "LIC-1781193897851",
-  "validade_licenca": "2030-12-31",
-  "categoria_id": 1
-}</pre>
-          
-          <div class="code-block-title">Response JSON</div>
-          <pre>{
-  "error": "Token inválido.",
-  "message": "Token inválido.",
-  "details": {
-    "authentication": [
-      "Acesso negado. Credenciais inválidas"
+    "artista": [
+      "O recurso Artista com o ID 58 não foi encontrado."
     ]
   }
 }</pre>

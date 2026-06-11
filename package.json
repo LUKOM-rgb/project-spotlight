@@ -12,7 +12,18 @@
     "preview": "vite preview",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "faker": "npx tsx backend/faker/index.ts"
+    "faker": "npx tsx backend/faker/index.ts",
+    "test:login_artista": "node test/login_artista/test_login_artista.js",
+    "test:integridade": "node test/integridade_artistas/api_integrity_test.js",
+    "test:crud": "node test/crud_contas/api_crud_test.js",
+    "test:conflitos": "node test/conflitos_reservas/api_conflict_test.js",
+    "test:cancelamento": "node test/cancelamento_reserva/test_cancelamento_reserva.js",
+    "test:mapa": "node test/navegacao_mapa/test_navegacao_mapa.js",
+    "test:perfil": "node test/perfil/test_perfil.js",
+    "test:reserva": "node test/fluxo_reserva/test_reserva_spot.js",
+    "test:licenca": "node test/licença/api_license_test.js",
+    "test:acessibilidade": "node test/acessibilidade_ui/lighthouse_audit.js",
+    "test:relatorios": "node test/gerar_relatorios.js"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
