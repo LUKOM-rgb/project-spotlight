@@ -1,7 +1,7 @@
 <template>
   <div class="mt-4">
     <div class="mb-6 flex items-center justify-between">
-      <h2 class="text-2xl font-light tracking-widest text-teal-600 dark:text-teal-400">RESERVAS</h2>
+
       <span
         class="rounded-full bg-teal-100 px-3 py-1 text-sm font-medium text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">
         {{ reservations.length }} {{ reservations.length === 1 ? 'reserva' : 'reservas' }}
@@ -27,7 +27,7 @@
           class="grid grid-cols-1 md:grid-cols-12 gap-2 p-4 md:items-center transition-colors hover:bg-gray-50 dark:hover:bg-slate-700/30">
           <div class="md:col-span-2 md:pl-2 font-medium text-gray-800 dark:text-gray-200 flex justify-between md:block">
             <span class="md:hidden text-xs font-bold uppercase text-gray-400">Spot</span>
-            Spot #{{ reservation.id_spot }}
+            Spot {{ reservation.id_spot }}{{ reservation.spot_local ? `- ${reservation.spot_local}` : '' }}
           </div>
 
           <div class="md:col-span-3 text-sm text-gray-600 dark:text-gray-400 flex justify-between md:block">

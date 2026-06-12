@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ReservationChart from '@/components/ReservationChart.vue'
 import ReservasList from '@/components/ReservasList.vue'
 import Navbar from '@/components/NavBar.vue'
@@ -9,6 +9,7 @@ import SpotMap from '@/components/SpotMap.vue'
 const selectedView = ref('map')
 const selectedSpotId = ref(null)
 const reservations = ref([])
+const spots = ref([])
 async function getReservations() {
   const res = await fetch('http://localhost:3000/api/reservas/artista/me', {
     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -18,8 +19,29 @@ async function getReservations() {
   console.log(data.data)
   reservations.value = data.data
 }
+async function getSpots() {
+  const res = await fetch('http://localhost:3000/api/spots', {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+  })
+  const data = await res.json()
+  console.log(data.data)
+  spots.value = data.data
+}
 onMounted(() => {
   getReservations()
+  getSpots()
+})
+const reservationsWithLocal = computed(() => {
+  return reservations.value.map(reserva => {
+    const spot = spots.value.find(
+      s => s.id_spot === reserva.id_spot
+    )
+
+    return {
+      ...reserva,
+      spot_local: spot?.localizacao ?? 'Unknown'
+    }
+  })
 })
 </script>
 
@@ -49,7 +71,7 @@ onMounted(() => {
     </div>
 
     <div v-if="selectedView === 'Reservations'">
-      <ReservasList :reservations="reservations" @updated="getReservations" />
+      <ReservasList :reservations="reservationsWithLocal" @updated="getReservations" />
     </div>
 
   </SectionMain>
