@@ -56,7 +56,7 @@ const routes = [
       requiresAuth: true,
       requiresRole: ['artista', 'admin']
     },
-    path: '/reservas',
+    path: '/reservas/:id_artista',
     name: 'reservas',
     component: () => import('@/views/ReservasView.vue'),
   },
@@ -99,7 +99,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
+
   // Se o utilizador tem token mas ainda não tem os dados carregados na store
   if (authStore.token && !authStore.user) {
     await authStore.fetchUser()
@@ -110,7 +110,7 @@ router.beforeEach(async (to, from, next) => {
   // Rotas que exigem estar autenticado
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login')
-  } 
+  }
   // Verificar roles
   else if (to.meta.requiresRole && isAuthenticated) {
     if (!to.meta.requiresRole.includes(authStore.user?.tipo)) {
@@ -123,7 +123,7 @@ router.beforeEach(async (to, from, next) => {
   // Rotas exclusivas para não autenticados (ex: Login, Registar)
   else if (to.meta.guestOnly && isAuthenticated) {
     next('/')
-  } 
+  }
   else {
     if (to.meta.guestOnly) {
       const { useDarkModeStore } = await import('@/stores/darkMode.js')
