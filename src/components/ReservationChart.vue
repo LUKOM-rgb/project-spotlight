@@ -39,7 +39,7 @@ async function submitReservation() {
   }
 
   try {
-    const res = await fetch(`http://localhost:3000/api/reservas/${props.selectedSpotId}/`, {
+    const res = await fetch(`/api/reservas/${props.selectedSpotId}/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ async function submitReservation() {
     form.endTime = ''
     getReservations()
 
-  } catch (err) {
+  } catch {
     errorMsg.value = 'Erro de ligação.'
   }
 }
@@ -75,7 +75,7 @@ async function submitReservation() {
 async function getReservations() {
   if (!form.date || !props.selectedSpotId) return
   const res = await fetch(
-    `http://localhost:3000/api/reservas/spot/${props.selectedSpotId}/?date=${form.date}`,
+    `/api/reservas/spot/${props.selectedSpotId}/?date=${form.date}`,
     { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
   )
   if (res.status === 204) {
@@ -116,7 +116,7 @@ onMounted(() => {
 
 async function fetchSpotData() {
   if (!props.selectedSpotId) return
-  const res = await fetch(`http://localhost:3000/api/spots/${props.selectedSpotId}`, {
+  const res = await fetch(`/api/spots/${props.selectedSpotId}`, {
     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
   })
   const spot = await res.json()
@@ -130,8 +130,8 @@ const chartOptions = computed(() => ({
   maintainAspectRatio: false,
   scales: {
     x: {
-      min: openTime.value - 1 ?? 0,
-      max: closeTime.value + 1 ?? 24,
+      min: typeof openTime.value === 'number' ? openTime.value - 1 : 0,
+      max: typeof closeTime.value === 'number' ? closeTime.value + 1 : 24,
       grid: { color: 'rgba(0,0,0,0.05)' },
       ticks: {
         stepSize: 1,

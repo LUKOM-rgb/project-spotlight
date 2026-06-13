@@ -3,8 +3,6 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   mdiAccount,
-  mdiAccountMusic,
-  mdiCalendarCheck,
   mdiChevronLeft,
   mdiChevronRight,
   mdiFilterOutline,

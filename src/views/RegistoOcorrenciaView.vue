@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, ref, onMounted, computed } from 'vue'
+import api from '@/api/axios.js'
 import { mdiBallotOutline, mdiAccount, mdiCalendar, mdiClock, mdiMapMarker } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
@@ -68,12 +69,9 @@ onMounted(async () => {
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
-    const spotsRes = await fetch('http://localhost:3000/api/spots', {
-      headers,
-    })
-    if (spotsRes.ok) {
-      const result = await spotsRes.json()
-      spotsList.value = result.data || []
+    const spotsRes = await api.get('/spots')
+    if (spotsRes.status === 200) {
+      spotsList.value = spotsRes.data.data || []
     }
   } catch (err) {
     console.error('Erro ao carregar spots:', err)
@@ -137,15 +135,9 @@ const submit = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/api/ocorrencias', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    })
+    const response = await api.post('/ocorrencias', payload)
 
-    const result = await response.json()
-
-    if (response.ok) {
+    if (response.status === 200 || response.status === 201) {
       successMessage.value = 'Ocorrência registada com sucesso!'
       // Resetar formulário
       form.selectedSpot = null
@@ -153,11 +145,11 @@ const submit = async () => {
       form.hora_ocorrencia = ''
       form.descricao_ocorrencia = ''
     } else {
-      errorMessage.value = result.message || 'Erro ao registar a ocorrência.'
+      errorMessage.value = response.data.message || 'Erro ao registar a ocorrência.'
     }
   } catch (error) {
     console.error('Erro ao submeter ocorrência:', error)
-    errorMessage.value = 'Erro de rede: Não foi possível ligar ao servidor.'
+    errorMessage.value = error.response?.data?.message || 'Erro de rede: Não foi possível ligar ao servidor.'
   }
 }
 </script>

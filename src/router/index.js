@@ -18,18 +18,18 @@ const routes = [
       title: 'Artistas',
       requiresAuth: true
     },
-    path: '/tables',
-    name: 'tables',
-    component: () => import('@/views/TablesView.vue'),
+    path: '/artistas',
+    name: 'artistas',
+    component: () => import('@/views/ArtistasView.vue'),
   },
   {
     meta: {
-      title: 'Forms',
+      title: 'Registo Ocorrência',
       requiresAuth: true
     },
-    path: '/forms',
-    name: 'forms',
-    component: () => import('@/views/FormsView.vue'),
+    path: '/ocorrencias',
+    name: 'ocorrencias',
+    component: () => import('@/views/RegistoOcorrenciaView.vue'),
   },
   {
     meta: {

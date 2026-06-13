@@ -3,11 +3,8 @@ import { useRouter } from 'vue-router'
 import { useDarkModeStore } from '@/stores/darkMode.js'
 import { useAuthStore } from '@/stores/auth.js'
 import {
-  mdiEmail,
   mdiMusicNote,
-  mdiAccountGroup,
   mdiAccountMusic,
-  mdiLogout,
   mdiAccountCircle,
   mdiThemeLightDark,
 } from '@mdi/js'
@@ -31,7 +28,7 @@ const navItems = computed(() => {
       label: 'Perfil',
       action: () => router.push('/Profile'),
     },
-    { icon: mdiAccountMusic, label: 'Artistas', action: () => router.push('/tables') },
+    { icon: mdiAccountMusic, label: 'Artistas', action: () => router.push('/artistas') },
   ]
 
   if (['admin', 'artista'].includes(authStore.user?.tipo)) {
@@ -43,15 +40,7 @@ const navItems = computed(() => {
   return items
 })
 
-const logout = () => {
 
-  authStore.token = null
-  authStore.user = null
-
-  localStorage.removeItem('token')
-
-  router.push('/login')
-}
 </script>
 
 <template>

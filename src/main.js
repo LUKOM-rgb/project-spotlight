@@ -3,7 +3,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-import { useMainStore } from '@/stores/main.js'
+// useMainStore apagado
 
 import './css/main.css'
 
@@ -16,12 +16,9 @@ app.use(pinia)
 app.use(router)
 app.mount('#app')
 
-// Init main store
-const mainStore = useMainStore(pinia)
+// Init main store apagado
 
-// Fetch sample data
-mainStore.fetchSampleClients()
-mainStore.fetchSampleHistory()
+// Fetch sample data removido
 
 // Dark mode
 // Dark mode

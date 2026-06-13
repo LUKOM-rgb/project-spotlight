@@ -196,7 +196,7 @@ function openDelete(reservation) {
 async function confirmEdit() {
   editError.value = ''
   const id = editModal.value.reservation.id_reserva
-  const res = await fetch(`http://localhost:3000/api/reservas/${id}`, {
+  const res = await fetch(`/api/reservas/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -222,7 +222,7 @@ async function confirmDelete() {
   deleteError.value = ''
   const id = deleteModal.value.reservation.id_reserva
   try {
-    const res = await fetch(`http://localhost:3000/api/reservas/${id}`, {
+    const res = await fetch(`/api/reservas/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
@@ -236,11 +236,11 @@ async function confirmDelete() {
     }
     deleteModal.value.open = false
     emit('updated')
-  } catch (error) {
+  } catch {
     deleteError.value = 'Erro de ligação.'
   }
 }
-const props = defineProps({
+defineProps({
   reservations: {
     type: Array,
     default: () => [],

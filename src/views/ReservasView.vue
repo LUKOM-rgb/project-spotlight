@@ -1,11 +1,7 @@
 <script setup>
-import { ref } from 'vue'
-import { mdiMusicNote, mdiCity, mdiShieldCheck } from '@mdi/js'
-import SectionMain from '@/components/SectionMain.vue'
-import CardBox from '@/components/CardBox.vue'
-import BaseButton from '@/components/BaseButton.vue'
-import BaseIcon from '@/components/BaseIcon.vue'
+import { computed, ref } from 'vue'
 import Navbar from '@/components/NavBar.vue' // Importação do novo componente
+import SectionMain from '@/components/SectionMain.vue'
 import ReservasList from '@/components/ReservasList.vue'
 import { useRoute } from 'vue-router'
 
@@ -35,7 +31,6 @@ const getSpots = async () => {
     console.error('Error fetching spots:', error)
   }
 }
-import { computed } from 'vue'
 
 const reservationsWithLocal = computed(() => {
   return reservations.value.map(reserva => {

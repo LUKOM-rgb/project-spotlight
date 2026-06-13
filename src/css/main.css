@@ -9,11 +9,8 @@
   --transition-position: right, left, top, bottom, margin, padding;
 }
 
-@import './_checkbox-radio-switch.css';
 @import './_keyframes.css';
-@import './_progress.css';
 @import './_scrollbars.css';
-@import './_table.css';
 
 @import './styles/_basic.css';
 @import './styles/_white.css';

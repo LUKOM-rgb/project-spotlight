@@ -1,5 +1,4 @@
 import Artista from '../Models/artista.js';
-import Seguidor from '../Models/seguidor.js';
 import Utilizador from '../Models/utilizador.js';
 import Categoria from '../Models/categorias.js';
 import { Op } from 'sequelize';

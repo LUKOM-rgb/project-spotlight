@@ -127,7 +127,7 @@ const formatFollowers = (num) => {
           label="Go to Forms"
           color=""
           class="w-full md:w-auto rounded-lg border-none bg-white text-[#40798C] font-semibold px-6 py-3 shadow-md hover:bg-[#e8e0d0] hover:text-[#0B2027] transition-all"
-          to="/forms"
+          to="/ocorrencias"
         />
       </div>
     </div>
