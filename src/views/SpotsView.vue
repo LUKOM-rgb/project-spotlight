@@ -60,7 +60,7 @@ const reservationsWithLocal = computed(() => {
       <button class="px-5 py-2.5 text-sm font-semibold tracking-wide transition-colors border-b-2 -mb-px" :class="selectedView === 'Reservations'
         ? 'border-teal-500 text-teal-600 dark:text-teal-400 dark:border-teal-400'
         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
-        @click="selectedView = 'Reservations'">
+        @click="selectedView = 'Reservations';getReservations()">
         My Reservations
       </button>
     </div>

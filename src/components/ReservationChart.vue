@@ -53,7 +53,7 @@ async function submitReservation() {
     })
 
     const result = await res.json()
-
+    console.log(result)
     if (!res.ok) {
       errorMsg.value =
         Object.values(result.details || {}).flat().find(Boolean) ||

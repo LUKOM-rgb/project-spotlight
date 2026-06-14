@@ -12,17 +12,19 @@
 
       <transition name="slide">
 
-        <CardBox v-if="showSidebar && selectedSpot" class="w-80 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border dark:border-slate-700">
+        <CardBox v-if="showSidebar && selectedSpot"
+          class="w-80 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border dark:border-slate-700">
 
-          <div class="flex justify-end p-2">
-            <button class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600"
+          <div class="flex justify-between align-bottom p-2">
+            <h1 style="display: flex; align-items: center">Spot #{{ selectedSpot.id_spot }}</h1>
+            <button
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600"
               @click="closeSidebar">
               <BaseIcon :path="mdiClose" size="18" class="text-gray-500 dark:text-gray-300" />
             </button>
           </div>
 
           <div class="space-y-3 p-4">
-
             <div class="flex items-start gap-3">
               <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8e0d0] dark:bg-slate-700">
                 <BaseIcon :path="mdiMapMarkerRadius" size="16" class="text-gray-600 dark:text-gray-300" />
@@ -109,6 +111,7 @@ const selectSpot = (spot) => {
 const closeSidebar = () => {
   showSidebar.value = false
   selectedSpot.value = null
+  activeMarker?.setIcon(defaultIcon)
 }
 
 onMounted(async () => {
