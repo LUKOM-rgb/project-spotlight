@@ -91,9 +91,26 @@ Para testar os pedidos e scripts do repositório, o backend e o frontend têm de
 - Lucas Silva
 - Sérgio Gonçalves
 
+### 7. Credencias de Diversos Perfils
+
+
+1. ADMIN
+
+nome_utilizador: ADMIN
+email: admingoncalo@email.com
+password: admin1
+
+2. ARTISTA
+
+nome_utilizador: TesteGoncalo
+email: testegoncalo@email.com
+password: teste1
+
+3. UTILIZADOR
+
+nome_utilizador: Johny20
+email: johny20@email.com
+password: johny1
+
 >Interface administrativa baseada no template fornecido por JustBoil.
-
----
-
-
 
