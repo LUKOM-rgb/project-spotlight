@@ -53,8 +53,7 @@ const routes = [
   {
   meta: {
       title: 'My Reservations',
-      requiresAuth: true,
-      requiresRole: ['artista', 'admin']
+      requiresAuth: true
     },
     path: '/reservas/:id_artista',
     name: 'reservas',

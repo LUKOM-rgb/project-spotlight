@@ -7,6 +7,7 @@ import CardBox from '@/components/CardBox.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
 import Navbar from '@/components/NavBar.vue' // Importação do novo componente
+import SpotMap from '@/components/SpotMap.vue' // Importação do novo componente
 
 const popularArtists = ref([])
 
@@ -92,10 +93,13 @@ const formatFollowers = (num) => {
         </div>
       </div>
     </div>
-
+    <div>
+      <h2 class="mb-4 text-xl font-semibold text-[#5b9a8b] dark:text-teal-400">Spots Map</h2>
+      <SpotMap />
+    </div>
+    <br>
     <div>
       <h2 class="mb-4 text-xl font-semibold text-[#5b9a8b] dark:text-teal-400">Most Popular Artists</h2>
-
       <div v-if="popularArtists.length === 0" class="text-sm italic text-gray-500 dark:text-gray-400">
         Ainda não há artistas com seguidores na plataforma.
       </div>
