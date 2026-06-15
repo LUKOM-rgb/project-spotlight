@@ -3,8 +3,6 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   mdiAccount,
-  mdiAccountMusic,
-  mdiCalendarCheck,
   mdiChevronLeft,
   mdiChevronRight,
   mdiFilterOutline,
@@ -33,7 +31,7 @@ onMounted(async () => {
       api.get('/categorias'),
       api.get('/reservas')
     ])
-    
+
     // As in AdminPanel, /artistas returns { data: [...] } and /categorias might return [...] directly
     artistsList.value = resArtists.data?.data || resArtists.data || []
     categoriesList.value = resCategories.data?.data || resCategories.data || []
@@ -155,7 +153,7 @@ const toggleFollow = async (artist) => {
 
       <section>
         <CardBox class="overflow-hidden border border-gray-200 bg-white shadow-xl rounded-2xl dark:border-slate-700 dark:bg-slate-800">
-          
+
           <!-- Filtros e Ordenação -->
           <div class="flex flex-col sm:flex-row justify-between items-center bg-gray-50 p-4 border-b border-gray-100 gap-4 dark:bg-slate-800 dark:border-slate-700">
             <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -167,7 +165,7 @@ const toggleFollow = async (artist) => {
                 </option>
               </select>
             </div>
-            
+
             <div class="flex items-center gap-2 w-full sm:w-auto">
               <BaseIcon :path="mdiSortAlphabeticalAscending" size="20" class="text-teal-600 dark:text-teal-400" />
               <select v-model="sortBy" class="w-full sm:w-auto rounded-lg border-gray-300 text-sm focus:border-teal-500 focus:ring-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
@@ -199,14 +197,14 @@ const toggleFollow = async (artist) => {
               <div class="col-span-3 text-gray-600 dark:text-slate-400 truncate">{{ (artist.Artistum || artist.Artista) ? getCategoryName((artist.Artistum || artist.Artista).categoria_id) : 'N/A' }}</div>
               <div class="col-span-2 text-center font-bold text-teal-600 dark:text-teal-400">{{ (artist.Artistum || artist.Artista)?.Seguidors?.length || 0 }}</div>
               <div class="col-span-2 flex justify-center pr-2">
-                <button @click="router.push('/reservas')" class="flex h-8 w-8 items-center justify-center rounded-full bg-teal-100 text-teal-700 font-bold hover:bg-teal-600 hover:text-white transition-colors dark:bg-teal-900/50 dark:text-teal-300 dark:hover:bg-teal-600 dark:hover:text-white">
+                <button @click="router.push(`/reservas/${(artist.Artistum || artist.Artista)?.id_artista}`)" class="flex h-8 w-8 items-center justify-center rounded-full bg-teal-100 text-teal-700 font-bold hover:bg-teal-600 hover:text-white transition-colors dark:bg-teal-900/50 dark:text-teal-300 dark:hover:bg-teal-600 dark:hover:text-white">
                   {{ getReservationsCount((artist.Artistum || artist.Artista)?.id_artista) }}
                 </button>
               </div>
               <div class="col-span-1 flex justify-center">
-                <button 
+                <button
                   v-if="(artist.Artistum || artist.Artista)?.id_artista !== authStore.user?.id_artista"
-                  @click="toggleFollow(artist)" 
+                  @click="toggleFollow(artist)"
                   class="flex h-8 w-8 items-center justify-center rounded-full transition-colors"
                   :class="isFollowing(artist.Artistum || artist.Artista) ? 'bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-400 dark:hover:bg-red-900' : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-400 dark:hover:bg-emerald-900'"
                   :title="isFollowing(artist.Artistum || artist.Artista) ? 'Deixar de seguir' : 'Seguir'"

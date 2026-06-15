@@ -1,13 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '@/api/axios.js'
-import { useRouter } from 'vue-router'
 import { useMainStore } from './main.js'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('token') || null)
   const user = ref(null) // Para guardar dados do utilizador logado
-  const router = useRouter()
   const mainStore = useMainStore()
 
   // Define o token no estado local e no localStorage

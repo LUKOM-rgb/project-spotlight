@@ -16,6 +16,7 @@ export default defineConfig([
     languageOptions: {
       globals: {
         ...globals.browser,
+        ...globals.node,
       },
     },
   },
@@ -23,4 +24,11 @@ export default defineConfig([
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
   skipFormatting,
+
+  {
+    files: ['test/**/*.js'],
+    rules: {
+      'no-unused-vars': 'off',
+    },
+  },
 ])

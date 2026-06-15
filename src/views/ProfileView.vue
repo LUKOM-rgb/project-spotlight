@@ -9,7 +9,7 @@ import FormField from '@/components/FormField.vue'
 import FormControl from '@/components/FormControl.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import AdminPanel from '@/components/AdminPanel.vue'
-import { mdiAccount, mdiAccountMusic, mdiAccountMinus } from '@mdi/js'
+import { mdiAccountMusic, mdiAccountMinus } from '@mdi/js'
 import BaseIcon from '@/components/BaseIcon.vue'
 
 const authStore = useAuthStore()

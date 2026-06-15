@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ReservationChart from '@/components/ReservationChart.vue'
 import ReservasList from '@/components/ReservasList.vue'
 import Navbar from '@/components/NavBar.vue'
@@ -8,6 +8,41 @@ import SpotMap from '@/components/SpotMap.vue'
 
 const selectedView = ref('map')
 const selectedSpotId = ref(null)
+const reservations = ref([])
+const spots = ref([])
+async function getReservations() {
+  const res = await fetch('http://localhost:3000/api/reservas/artista/me', {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+  })
+  if (res.status === 204) { reservations.value = []; return }
+  const data = await res.json()
+  console.log(data.data)
+  reservations.value = data.data
+}
+async function getSpots() {
+  const res = await fetch('http://localhost:3000/api/spots', {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+  })
+  const data = await res.json()
+  console.log(data.data)
+  spots.value = data.data
+}
+onMounted(() => {
+  getReservations()
+  getSpots()
+})
+const reservationsWithLocal = computed(() => {
+  return reservations.value.map(reserva => {
+    const spot = spots.value.find(
+      s => s.id_spot === reserva.id_spot
+    )
+
+    return {
+      ...reserva,
+      spot_local: spot?.localizacao ?? 'Unknown'
+    }
+  })
+})
 </script>
 
 <template>
@@ -15,68 +50,29 @@ const selectedSpotId = ref(null)
     <Navbar />
 
     <!-- Tab bar -->
-    <div class="tabs">
-      <button
-        class="tab-btn"
-        :class="{ active: selectedView === 'map' }"
-        @click="selectedView = 'map'"
-      >
+    <div class="mb-6 flex gap-1 border-b border-gray-200 dark:border-slate-700">
+      <button class="px-5 py-2.5 text-sm font-semibold tracking-wide transition-colors border-b-2 -mb-px" :class="selectedView === 'map'
+        ? 'border-teal-500 text-teal-600 dark:text-teal-400 dark:border-teal-400'
+        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+        @click="selectedView = 'map'">
         Spot Map
       </button>
-      <button
-        class="tab-btn"
-        :class="{ active: selectedView === 'Reservations' }"
-        @click="selectedView = 'Reservations'"
-      >
+      <button class="px-5 py-2.5 text-sm font-semibold tracking-wide transition-colors border-b-2 -mb-px" :class="selectedView === 'Reservations'
+        ? 'border-teal-500 text-teal-600 dark:text-teal-400 dark:border-teal-400'
+        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+        @click="selectedView = 'Reservations';getReservations()">
         My Reservations
       </button>
     </div>
 
-    <!-- Map view -->
     <div v-show="selectedView === 'map'">
       <SpotMap @spot-selected="selectedSpotId = $event" />
       <ReservationChart :selectedSpotId="selectedSpotId" />
     </div>
 
-    <!-- Reservations view -->
     <div v-if="selectedView === 'Reservations'">
-      <ReservasList />
+      <ReservasList :reservations="reservationsWithLocal" @updated="getReservations" />
     </div>
 
   </SectionMain>
 </template>
-
-<style scoped>
-.tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e2d9cc;
-  padding-bottom: 0;
-}
-
-.tab-btn {
-  padding: 0.6rem 1.25rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #9a8f80;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.tab-btn:hover {
-  color: #0b2027;
-}
-
-.tab-btn.active {
-  color: #0b2027;
-  border-bottom-color: #0b2027;
-}
-</style>

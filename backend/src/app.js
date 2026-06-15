@@ -75,11 +75,12 @@ app.get('/', (req, res) => {
 })
 
 // Middleware para endpoints não encontrados (404)
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({ message: 'Endpoint não encontrado' })
 })
 
 // Middleware Global de Tratamento de Erros
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err)
 

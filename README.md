@@ -1,181 +1,116 @@
-# [Admin One &mdash; Free Vue 3.x Tailwind 4.x Admin Dashboard with dark mode](https://justboil.me/tailwind-admin-templates/free-vue-dashboard/)
+# Project Spotlight
 
-[![version](https://img.shields.io/github/v/release/justboil/admin-one-vue-tailwind)](https://justboil.me/tailwind-admin-templates/free-vue-dashboard/)  [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://justboil.me/tailwind-admin-templates/free-vue-dashboard/)
+O **SpotLight** é uma aplicação web geográfica concebida para a gestão, acompanhamento e reserva automatizada de locais de atuação (spots) para artistas de rua, garantindo a conformidade com os regulamentos municipais e permitindo a validação de licenças em tempo real.
+---
 
-### Tailwind 4.x Vue 3.x with Vite or Nuxt or Laravel
+## Tecnologias e Stack
 
-[![Free Vue 3 Tailwind 4 admin dashboard with dark mode](https://static.justboil.me/templates/one/repo-tailwind-vue.png?v=4)](https://justboil.github.io/admin-one-vue-tailwind/)
+- **Frontend:** Vue.js 3, Tailwind CSS, Vite, Leaflet.js (Mapas)
+- **Backend:** Node.js, Express, JSON Web Tokens (JWT)
+- **Base de Dados:** MySQL com Sequelize ORM
+- **Garantia de Qualidade:** Selenium (Automação UI) e Testes de API
 
-[![Vue Tailwind white & dark styles](https://static.justboil.me/templates/one/repo-styles.png)](https://justboil.github.io/admin-one-vue-tailwind/)
+---
 
-### Tailwind 4.x Vue 3.x with Vite or Nuxt or Laravel
+## Como Executar o Projeto Localmente
 
-**Admin One** is simple, beautiful and free Vue.js 3.x Tailwind CSS 4.x admin dashboard. Nuxt 3.x or Laravel 12.x integrations available
+### 1. Pré-requisitos
+* [Node.js](https://nodejs.org/) instalado.
+* Instância do [MySQL Server](https://www.mysql.com/) ativa localmente.
+* Ligação ativa à EduVPN / Rede da ESMAD: A base de dados do projeto está alojada num servidor interno (172.22.0.201). É obrigatório estar ligado à VPN da escola para que a aplicação se consiga conectar com sucesso.
 
-* Built with **Vue.js 3**, **Tailwind CSS 4** framework & **Composition API**
-* **Vite** under the hood &mdash; [Info](https://vitejs.dev)
-* **Laravel Inertia Vue** integration available &mdash; [Info](#laravel-12x-integration)
-* **Nuxt 3** integration available &mdash; [Info](#nuxt-3-integration)
-* **SFC** `<script setup>` &mdash; [Info](https://v3.vuejs.org/api/sfc-script-setup.html)
-* **Pinia** state library (official Vuex 5) &mdash; [Info](https://pinia.vuejs.org/)
-* **Dark mode**
-* **Styled** scrollbars
-* SPA with **Router**
-* **Production CSS** is only **&thickapprox;38kb**
-* Reusable components
-* Free under MIT License
-* [Premium version](https://justboil.me/tailwind-admin-templates/vue-dashboard/) available
+---
 
-## Table of Contents
+### 2. Configuração e Execução do Backend
 
-* [React TypeScript version](#looking-for-react-typescript-version)
-* [Responsive layout](#responsive-layout)
-  * [Mobile & tablet](#mobile--tablet)
-  * [Small laptops](#small-laptops-1024px)
-  * [Laptops & desktops](#laptops--desktops)
-* [Demo](#demo)
-  * [Free dashboard demo](#free-dashboard-demo)
-  * [Premium dashboard demo](#premium-dashboard-demo)
-* [Quick Start](#quick-start)
-  * [Get code & install](#get-code--install)
-  * [Vite builds](#vite-builds)
-  * [Linting](#linting)
-  * [Nuxt 3.x integration](#nuxt-3x-integration)
-  * [Laravel 12.x integration](#laravel-12x-integration)
-* [Docs](#docs)
-* [Browser Support](#browser-support)
-* [Reporting Issues](#reporting-issues)
-* [Licensing](#licensing)
-* [Useful Links](#useful-links)
+1. Navegue até à pasta do servidor:
+   ```bash
+   cd backend
 
-## Looking for React TypeScript version?
+2. Configure o ficheiro de ambiente
+Crie um ficheiro .env na raiz da pasta backend/ seguindo o modelo abaixo
 
-This is **Tailwind Vue dashboard** version
+  ```markdown
+  NODE_ENV=development
 
-Looking for **Tailwind React TypeScript**? Check [Admin One - React TypeScript Tailwind dashboard](https://github.com/justboil/admin-one-react-tailwind) version
+  #informação da base de dados do nosso grupo
+  DB_HOST=172.22.0.201
+  DB_USER=g14
+  DB_PASSWORD="jQ8D#}E2{L"
+  DB_DIALECT=mysql
+  DB_NAME=Grupo14
+  DB_PORT=3306
 
-## Responsive layout
-
-### Mobile & tablet
-
-Mobile layout with hidden aside menu and collapsable cards & tables
-
-[![Free Vue 3 Tailwind CSS 4 admin dashboard](https://static.justboil.me/templates/one/one-tailwind-vue-mobile.png)](https://justboil.github.io/admin-one-vue-tailwind/)
-
-### Small laptops 1024px
-
-Small laptop layout with show/hide aside menu option
-
-[![Free Vue 3 Tailwind CSS 4 admin dashboard](https://static.justboil.me/templates/one/one-tailwind-vue-1024.png)](https://justboil.github.io/admin-one-vue-tailwind/)
-
-[![Free Vue 3 Tailwind CSS 4 admin dashboard](https://static.justboil.me/templates/one/one-tailwind-vue-1024-menu-open.png)](https://justboil.github.io/admin-one-vue-tailwind/)
-
-### Laptops & desktops
-
-Classic layout with aside menus on the left
-
-[![Free Vue 3 Tailwind CSS 4 admin dashboard](https://static.justboil.me/templates/one/one-tailwind-vue-widescreen.png)](https://justboil.github.io/admin-one-vue-tailwind/)
-
-## Demo
-
-### Free Dashboard Demo
-
-https://justboil.github.io/admin-one-vue-tailwind/
-
-### Premium Dashboard Demo
-
-https://tailwind-vue.justboil.me/
-
-## Quick Start
-
-Get code & install. Then `dev` or `build` with [Vite](#vite-builds) or integrate with [Nuxt](#nuxt-3x-integration) or [Laravel](#laravel-12x-integration)
-
-* [Get code & install](#get-code--install)
-* [Vite builds](#vite-builds)
-* [Linting](#linting)
-* [Nuxt 3.x integration](#nuxt-3x-integration)
-* [Laravel 12.x integration](#laravel-12x-integration)
-
-### Get code & install
-
-#### Get the repo
-
-* [Create new repo](https://github.com/justboil/admin-one-vue-tailwind/generate) with this template
-* &hellip; or clone this repo on GitHub
-* &hellip; or [download .zip](https://github.com/justboil/admin-one-vue-tailwind/archive/master.zip) from GitHub
-
-#### Install
-
-`cd` to project's dir and run `npm install`
-
-### Vite builds
-
-[Vite](https://vitejs.dev) is next Generation Frontend Tooling featuring unbundled web-development
-
-#### Hot-reloads for development
-
-```
-npm run dev
+  JWT_SECRET="chave_secreta_super_segura_esmad"
+  PORT=3000
 ```
 
-#### Builds and minifies for production
+### 3. Como ligar o Backend
+Com as credenciais configuradas no .env, o servidor Node.js pode ser iniciado para processar os pedidos da API.
 
-```
-npm run build
-```
+1. Garante que estás dentro da pasta do backend
+   ```bash
+   cd backend
 
-#### Serves recently built app
+2. Instala as dependências do servidor
+   ```bash
+   npm install
 
-```
-npm run preview
-```
+3. Inicia o servidor executando o Node diretamente sobre o ficheiro principal da aplicação
+   ```bash
+   node src/app.js
 
-### Linting
+>A documentação API encontra-se na pasta /WebPII_2526 _Grupo_14_Anexos
+### 4. Como ligar o Frontend
+O frontend corre separado na raiz do repositório e comunica com o backend através de um proxy reverso já configurado no Vite.
 
-#### Lint
+1. Abre um novo terminal na raiz do repositório (fora da pasta backend)
 
-```
-npm run lint
-```
+2. Instala as dependências da interface
+   ```bash
+   npm install
 
-### Nuxt 3.x integration
+3. Inicia o servidor de desenvolvimento do ecossistema Vue
+   ```bash
+   npm run dev
 
-This dashboard can be integrated with Nuxt 3.x. [Check guide](https://github.com/justboil/admin-one-vue-tailwind/tree/master/.nuxt-guide) for more information
+### 5. Como Executar os Testes Automatizados
+O repositório inclui uma suite de testes automatizados na pasta test/ para validar fluxos críticos como login de artistas, conflitos de reservas, integridade e acessibilidade (Lighthouse).
 
-### Laravel 12.x integration
+Para testar os pedidos e scripts do repositório, o backend e o frontend têm de estar obrigatoriamente ligados em segundo plano.
 
-This dashboard can be integrated with Laravel 12.x Inertia + Vue.js stack. [Check guide](https://github.com/justboil/admin-one-vue-tailwind/tree/master/.laravel-guide) for more information
+1. Abre um novo terminal na raiz do repositório
 
-## Docs
+2. Executa o Node diretamente sobre o script de teste que pretendes validar. Exemplo:
+   - Testar Fluxo de Reserva de um Spot
+   ```bash
+   node test/fluxo_reserva/test_reserva_spot.js
 
-Customization & info: https://justboil.github.io/docs/
+### 6. Equipa de Desenvolvimento
+- Gonçalo Duarte
+- Lucas Silva
+- Sérgio Gonçalves
 
-## Browser Support
+### 7. Credencias de Diversos Perfils
 
-We try to make sure Dashboard works well in the latest versions of all major browsers
 
-<img src="https://justboil.me/images/browsers-svg/chrome.svg" width="64" height="64" alt="Chrome"> <img src="https://justboil.me/images/browsers-svg/firefox.svg" width="64" height="64" alt="Firefox"> <img src="https://justboil.me/images/browsers-svg/edge.svg" width="64" height="64" alt="Edge"> <img src="https://justboil.me/images/browsers-svg/safari.svg" width="64" height="64" alt="Safari"> <img src="https://justboil.me/images/browsers-svg/opera.svg" width="64" height="64" alt="Opera">
+1. ADMIN
 
-## Reporting Issues
+nome_utilizador: ADMIN
+email: admingoncalo@email.com
+password: admin1
 
-JustBoil's free items are limited to community support on GitHub.
+2. ARTISTA
 
-The issue list is reserved exclusively for bug reports and feature requests. That means we do not accept usage questions. If you open an issue that does not conform to the requirements, it will be closed.
+nome_utilizador: TesteGoncalo
+email: testegoncalo@email.com
+password: teste1
 
-1. Make sure that you are using the latest version of the Dashboard. Issues for outdated versions are irrelevant
-2. Provide steps to reproduce
-3. Provide an expected behavior
-4. Describe what is actually happening
-5. Platform, Browser & version as some issues may be browser specific
+3. UTILIZADOR
 
-## Licensing
+nome_utilizador: Johny20
+email: johny20@email.com
+password: johny1
 
-- Copyright &copy; 2019-2025 JustBoil.me (https://justboil.me)
-- Licensed under MIT
+>Interface administrativa baseada no template fornecido por JustBoil.
 
-## Useful Links
-
-- [JustBoil.me](https://justboil.me/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Vue.js 3](https://v3.vuejs.org/)
-- [Vite](https://vitejs.dev)

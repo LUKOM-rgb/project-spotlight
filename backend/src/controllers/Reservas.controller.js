@@ -268,7 +268,12 @@ export const createReserva = async (req, res, next) => {
         duracao: ['Reserva inválida (30min - 2h)'],
       })
     }
-
+    // faltou meter o check para ver se a hora estava dentro do horário de funcionamento do spot
+    if (start < toMinutes(spot.abertura) || end > toMinutes(spot.fecho)) {
+      throw validationError({
+        horario: ['Reserva fora do horário de funcionamento do spot'],
+      })
+    }
     const reservasExistentes = await Reservas.findAll({
       where: {
         id_spot: id,

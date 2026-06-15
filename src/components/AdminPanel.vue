@@ -5,7 +5,6 @@ import {
   mdiClipboardText,
   mdiFileDocument,
   mdiAccountMusic,
-  mdiEye,
   mdiDelete,
   mdiChevronLeft,
   mdiChevronRight,
