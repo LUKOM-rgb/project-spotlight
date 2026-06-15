@@ -41,7 +41,7 @@ export const register = async (req, res, next) => {
     })
 
     if (existingAccount) {
-      // Vamos ser específicos para ajudar o frontend a mostrar o erro no campo certo
+      // Específico para dps ajudar o frontend a mostrar o erro no campo certo
       if (existingAccount.email === email) {
         throw conflictError('Este email já está registado.')
       }

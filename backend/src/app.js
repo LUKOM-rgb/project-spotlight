@@ -8,7 +8,7 @@ import process from 'process'
 import sequelize from './config/database.js'
 
 // Importar as Rotas da API
-import authRoutes from './routes/auth.routes.js' // CORREÇÃO 1: Importada a rota de auth
+import authRoutes from './routes/auth.routes.js'
 import ocorrencias from './routes/ocorrencia.routes.js'
 import spots from './routes/spot.routes.js'
 import reservas from './routes/reservas.routes.js'
@@ -80,7 +80,6 @@ app.use((req, res) => {
 })
 
 // Middleware Global de Tratamento de Erros
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err)
 

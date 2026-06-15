@@ -84,13 +84,12 @@ const submitRegister = async () => {
       </FormField>
 
       <!-- Campo Telemóvel -->
-      <FormField label="Telemóvel:" label-class="text-teal-400 text-sm font-semibold">
+      <FormField label="Telemóvel (opcional):" label-class="text-teal-400 text-sm font-semibold">
         <FormControl
           v-model="registerForm.numero_telemovel"
           type="tel"
           name="numero_telemovel"
           input-class="rounded border-teal-400 text-teal-600 focus:border-teal-500 focus:ring-teal-500"
-          required
         />
       </FormField>
 
