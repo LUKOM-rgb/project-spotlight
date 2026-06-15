@@ -1,248 +1,255 @@
-import fs from 'fs';
-import path from 'path';
-import http from 'http';
-import { execSync } from 'child_process';
-import { fileURLToPath, pathToFileURL } from 'url';
-import dotenv from 'dotenv';
+import fs from 'fs'
+import path from 'path'
+import http from 'http'
+import { execSync } from 'child_process'
+import { fileURLToPath, pathToFileURL } from 'url'
+import dotenv from 'dotenv'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Standard paths to search for Opera on Windows (preferring Opera GX)
 const OPERA_PATHS = [
-  "C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera GX\\opera.exe",
-  "C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera\\opera.exe",
-  "C:\\Program Files\\Opera GX\\opera.exe",
-  "C:\\Program Files\\Opera\\opera.exe",
-  "C:\\Program Files (x86)\\Opera GX\\opera.exe",
-  "C:\\Program Files (x86)\\Opera\\opera.exe",
-];
+  'C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera GX\\opera.exe',
+  'C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera\\opera.exe',
+  'C:\\Program Files\\Opera GX\\opera.exe',
+  'C:\\Program Files\\Opera\\opera.exe',
+  'C:\\Program Files (x86)\\Opera GX\\opera.exe',
+  'C:\\Program Files (x86)\\Opera\\opera.exe',
+]
 
 // Resolves Opera paths using environment variables and standard paths
 function findOpera() {
-  const localAppData = process.env.LOCALAPPDATA || "";
-  const programFiles = process.env.ProgramFiles || "";
-  const programFilesX86 = process.env["ProgramFiles(x86)"] || "";
-  
-  const dynamicPaths = [];
+  const localAppData = process.env.LOCALAPPDATA || ''
+  const programFiles = process.env.ProgramFiles || ''
+  const programFilesX86 = process.env['ProgramFiles(x86)'] || ''
+
+  const dynamicPaths = []
   if (localAppData) {
-    dynamicPaths.push(path.join(localAppData, "Programs", "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(localAppData, "Programs", "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(localAppData, 'Programs', 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(localAppData, 'Programs', 'Opera', 'opera.exe'))
   }
   if (programFiles) {
-    dynamicPaths.push(path.join(programFiles, "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(programFiles, "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(programFiles, 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(programFiles, 'Opera', 'opera.exe'))
   }
   if (programFilesX86) {
-    dynamicPaths.push(path.join(programFilesX86, "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(programFilesX86, "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(programFilesX86, 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(programFilesX86, 'Opera', 'opera.exe'))
   }
-  
-  const allPaths = [...OPERA_PATHS, ...dynamicPaths];
-  const uniquePaths = [...new Set(allPaths)];
-  
+
+  const allPaths = [...OPERA_PATHS, ...dynamicPaths]
+  const uniquePaths = [...new Set(allPaths)]
+
   for (const p of uniquePaths) {
     if (fs.existsSync(p)) {
-      return p;
+      return p
     }
   }
-  return null;
+  return null
 }
 
 // Checks if the backend server is running on localhost:3000
 function checkServer(url) {
   return new Promise((resolve) => {
     const req = http.get(url, { timeout: 2500 }, (res) => {
-      resolve(true);
-    });
-    req.on('error', () => resolve(false));
+      resolve(true)
+    })
+    req.on('error', () => resolve(false))
     req.on('timeout', () => {
-      req.destroy();
-      resolve(false);
-    });
-  });
+      req.destroy()
+      resolve(false)
+    })
+  })
 }
 
 // Ensures selenium-webdriver is installed
 async function ensureDependencies() {
   try {
-    await import('selenium-webdriver');
+    await import('selenium-webdriver')
   } catch (err) {
-    console.log('[*] selenium-webdriver is not installed. Installing it now...');
+    console.log('[*] selenium-webdriver is not installed. Installing it now...')
     try {
-      execSync('npm install --no-save selenium-webdriver', { stdio: 'inherit' });
-      console.log('[+] selenium-webdriver installed successfully!');
+      execSync('npm install --no-save selenium-webdriver', { stdio: 'inherit' })
+      console.log('[+] selenium-webdriver installed successfully!')
     } catch (installErr) {
-      console.error('[-] Failed to install selenium-webdriver automatically:', installErr);
-      process.exit(1);
+      console.error('[-] Failed to install selenium-webdriver automatically:', installErr)
+      process.exit(1)
     }
   }
 }
 
 async function main() {
-  const backendUrl = "http://localhost:3000";
-  
-  console.log(`[*] Checking if backend server is running at ${backendUrl}...`);
-  const isServerRunning = await checkServer(backendUrl);
+  const backendUrl = 'http://localhost:3000'
+
+  console.log(`[*] Checking if backend server is running at ${backendUrl}...`)
+  const isServerRunning = await checkServer(backendUrl)
   if (!isServerRunning) {
-    console.error(`[-] Error: Backend server not detected at ${backendUrl}.`);
-    console.error("    Please make sure your backend server is running (e.g. npm run dev or equivalent).");
-    process.exit(1);
+    console.error(`[-] Error: Backend server not detected at ${backendUrl}.`)
+    console.error(
+      '    Please make sure your backend server is running (e.g. npm run dev or equivalent).',
+    )
+    process.exit(1)
   }
-  console.log("[+] Backend is active!");
+  console.log('[+] Backend is active!')
 
   // Find Opera GX
-  const operaPath = findOpera();
+  const operaPath = findOpera()
   if (!operaPath) {
-    console.error("[-] Error: Could not locate Opera or Opera GX executable automatically.");
-    process.exit(1);
+    console.error('[-] Error: Could not locate Opera or Opera GX executable automatically.')
+    process.exit(1)
   }
-  console.log(`[+] Found Opera executable at: ${operaPath}`);
+  console.log(`[+] Found Opera executable at: ${operaPath}`)
 
   // Dynamic import of Selenium after ensuring it's installed
-  await ensureDependencies();
-  const { Builder } = await import('selenium-webdriver');
-  const chrome = await import('selenium-webdriver/chrome.js');
+  await ensureDependencies()
+  const { Builder } = await import('selenium-webdriver')
+  const chrome = await import('selenium-webdriver/chrome.js')
 
-  dotenv.config({ path: './backend/src/.env' });
-  const db = (await import('../../backend/src/Models/db.js')).default;
-  const { sequelize, Utilizador } = db;
+  dotenv.config({ path: './backend/src/.env' })
+  const db = (await import('../../backend/src/Models/db.js')).default
+  const { sequelize, Utilizador } = db
 
-  const testResults = [];
-  let testUserId = null;
-  let tempAdminUser = null;
-  let adminToken = null;
-  let executionFailed = false;
+  const testResults = []
+  let testUserId = null
+  let tempAdminUser = null
+  let adminToken = null
+  let executionFailed = false
 
-  const tempPasswordPlain = "password123";
-  const tempPasswordHashed = "$2b$10$IHEcl.nGMkLLhqDfczC6wOJ1G/nRjgGSxx3sxlel30Uhi5ur3C1pK"; // bcrypt hash of password123
+  const tempPasswordPlain = 'password123'
+  const tempPasswordHashed = '$2b$10$IHEcl.nGMkLLhqDfczC6wOJ1G/nRjgGSxx3sxlel30Uhi5ur3C1pK' // bcrypt hash of password123
 
   // 1. Get Categories to find a valid one
-  let categoryId = 1;
+  let categoryId = 1
   try {
-    const res = await fetch(`${backendUrl}/api/categorias`);
+    const res = await fetch(`${backendUrl}/api/categorias`)
     if (res.ok) {
-      const data = await res.json();
+      const data = await res.json()
       if (Array.isArray(data) && data.length > 0) {
-        categoryId = data[0].categoria_id || 1;
-        console.log(`[+] Selected Category ID for testing: ${categoryId}`);
+        categoryId = data[0].categoria_id || 1
+        console.log(`[+] Selected Category ID for testing: ${categoryId}`)
       }
     }
   } catch (e) {
-    console.log(`[!] Warning: Failed to fetch categories, defaulting to Category ID 1: ${e.message}`);
+    console.log(
+      `[!] Warning: Failed to fetch categories, defaulting to Category ID 1: ${e.message}`,
+    )
   }
 
   try {
     // 1.5 Create a temporary admin user to authorize the role change API
-    console.log("[*] Creating temporary admin user...");
+    console.log('[*] Creating temporary admin user...')
     tempAdminUser = await Utilizador.create({
       email: `admin_lic_${Date.now()}@example.com`,
       password: tempPasswordHashed,
       tipo: 'admin',
       data_registo: new Date(),
-      nome_utilizador: `admin_lic_${Date.now()}`
-    });
+      nome_utilizador: `admin_lic_${Date.now()}`,
+    })
 
-    console.log("[*] Logging in as admin to obtain authentication token...");
+    console.log('[*] Logging in as admin to obtain authentication token...')
     const loginRes = await fetch(`${backendUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: tempAdminUser.email, password: tempPasswordPlain })
-    });
-    const loginData = await loginRes.json();
-    adminToken = loginData.token;
-    console.log("[+] Admin token successfully retrieved.");
+      body: JSON.stringify({ email: tempAdminUser.email, password: tempPasswordPlain }),
+    })
+    const loginData = await loginRes.json()
+    adminToken = loginData.token
+    console.log('[+] Admin token successfully retrieved.')
 
     // 2. Register a temporary user for the tests
-    const tempEmail = `test_user_${Date.now()}@example.com`;
-    console.log(`[*] Registering temporary test user with email: ${tempEmail}...`);
+    const tempEmail = `test_user_${Date.now()}@example.com`
+    console.log(`[*] Registering temporary test user with email: ${tempEmail}...`)
     const regRes = await fetch(`${backendUrl}/api/utilizadores`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: tempEmail,
-        password: "password123",
-        nome_utilizador: "Test User Data Validade",
-        numero_telemovel: 912345678
-      })
-    });
-    const regData = await regRes.json();
+        password: 'password123',
+        nome_utilizador: 'Test User Data Validade',
+        numero_telemovel: 912345678,
+      }),
+    })
+    const regData = await regRes.json()
     if (regRes.ok && regData.data && regData.data.id_utilizador) {
-      testUserId = regData.data.id_utilizador;
-      console.log(`[+] Temporary user registered successfully with ID: ${testUserId}`);
+      testUserId = regData.data.id_utilizador
+      console.log(`[+] Temporary user registered successfully with ID: ${testUserId}`)
     } else {
-      throw new Error(`Failed to register temporary user: ${JSON.stringify(regData)}`);
+      throw new Error(`Failed to register temporary user: ${JSON.stringify(regData)}`)
     }
 
     // Define our API Test Cases
     const cases = [
       {
-        name: "Validação 1: Data de Validade em Falta",
-        method: "PATCH",
+        name: 'Validação 1: Data de Validade em Falta',
+        method: 'PATCH',
         url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
         body: {
-          tipo: "artista",
+          tipo: 'artista',
           numero_licenca: `LIC-${Date.now()}`,
-          categoria_id: categoryId
+          categoria_id: categoryId,
         },
         expectedStatus: 400,
         assertion: (status, body) => {
-          return status === 400 && (body.error || body.details || JSON.stringify(body).toLowerCase().includes("obrigat"));
-        }
+          return (
+            status === 400 &&
+            (body.error || body.details || JSON.stringify(body).toLowerCase().includes('obrigat'))
+          )
+        },
       },
       {
-        name: "Validação 2: Formato de Data Inválido",
-        method: "PATCH",
+        name: 'Validação 2: Formato de Data Inválido',
+        method: 'PATCH',
         url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
         body: {
-          tipo: "artista",
+          tipo: 'artista',
           numero_licenca: `LIC-${Date.now()}`,
-          validade_licenca: "data-invalida",
-          categoria_id: categoryId
+          validade_licenca: 'data-invalida',
+          categoria_id: categoryId,
         },
         expectedStatus: 400,
         assertion: (status, body) => {
-          const bodyStr = JSON.stringify(body);
-          return status === 400 && bodyStr.includes("formato de data inválido");
-        }
+          const bodyStr = JSON.stringify(body)
+          return status === 400 && bodyStr.includes('formato de data inválido')
+        },
       },
       {
-        name: "Validação 3: Formato de Data Correto (Sucesso)",
-        method: "PATCH",
+        name: 'Validação 3: Formato de Data Correto (Sucesso)',
+        method: 'PATCH',
         url: `${backendUrl}/api/utilizadores/${testUserId}/role`,
         body: {
-          tipo: "artista",
+          tipo: 'artista',
           numero_licenca: `LIC-${Date.now()}`,
-          validade_licenca: "2030-12-31",
-          categoria_id: categoryId
+          validade_licenca: '2030-12-31',
+          categoria_id: categoryId,
         },
         expectedStatus: 200,
         assertion: (status, body) => {
-          return status === 200 || status === 201;
-        }
-      }
-    ];
+          return status === 200 || status === 201
+        },
+      },
+    ]
 
     // 3. Run the Test Cases
-    console.log("[*] Running API tests for license date validation...");
+    console.log('[*] Running API tests for license date validation...')
     for (const tc of cases) {
-      console.log(`\n[*] Running: ${tc.name}`);
+      console.log(`\n[*] Running: ${tc.name}`)
       try {
         const res = await fetch(tc.url, {
           method: tc.method,
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${adminToken}`
+            Authorization: `Bearer ${adminToken}`,
           },
-          body: JSON.stringify(tc.body)
-        });
-        
-        const status = res.status;
-        const responseBody = await res.json();
-        
-        const passed = tc.assertion(status, responseBody);
-        console.log(passed ? `[+] PASSED (Status: ${status})` : `[-] FAILED (Status: ${status})`);
-        
+          body: JSON.stringify(tc.body),
+        })
+
+        const status = res.status
+        const responseBody = await res.json()
+
+        const passed = tc.assertion(status, responseBody)
+        console.log(passed ? `[+] PASSED (Status: ${status})` : `[-] FAILED (Status: ${status})`)
+
         testResults.push({
           name: tc.name,
           method: tc.method,
@@ -250,59 +257,58 @@ async function main() {
           requestBody: tc.body,
           status: status,
           response: responseBody,
-          passed: passed
-        });
+          passed: passed,
+        })
       } catch (e) {
-        console.error(`[-] Test failed with network/code error:`, e.message);
+        console.error(`[-] Test failed with network/code error:`, e.message)
         testResults.push({
           name: tc.name,
           method: tc.method,
           url: tc.url,
           requestBody: tc.body,
-          status: "Error",
+          status: 'Error',
           response: { error: e.message },
-          passed: false
-        });
+          passed: false,
+        })
       }
     }
 
     // 4. Cleanup/Restore User Role to "utilizador"
-    console.log("\n[*] Cleaning up: Downgrading test user back to 'utilizador'...");
+    console.log("\n[*] Cleaning up: Downgrading test user back to 'utilizador'...")
     try {
       await fetch(`${backendUrl}/api/utilizadores/${testUserId}/role`, {
         method: 'PATCH',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`
+          Authorization: `Bearer ${adminToken}`,
         },
-        body: JSON.stringify({ tipo: "utilizador" })
-      });
-      console.log("[+] Cleanup completed successfully.");
+        body: JSON.stringify({ tipo: 'utilizador' }),
+      })
+      console.log('[+] Cleanup completed successfully.')
     } catch (e) {
-      console.log(`[!] Cleanup warning: ${e.message}`);
+      console.log(`[!] Cleanup warning: ${e.message}`)
     }
-
   } catch (e) {
-    console.error("[-] Test execution encountered an error:", e);
-    executionFailed = true;
+    console.error('[-] Test execution encountered an error:', e)
+    executionFailed = true
   } finally {
     // Database cleanup
-    console.log("[*] Cleaning up database fixtures...");
+    console.log('[*] Cleaning up database fixtures...')
     if (testUserId) {
-      await Utilizador.destroy({ where: { id_utilizador: testUserId } }).catch(() => {});
+      await Utilizador.destroy({ where: { id_utilizador: testUserId } }).catch(() => {})
     }
     if (tempAdminUser) {
-      await tempAdminUser.destroy().catch(() => {});
+      await tempAdminUser.destroy().catch(() => {})
     }
-    console.log("[+] Database clean.");
+    console.log('[+] Database clean.')
   }
 
   // 5. Generate beautiful HTML report
-  const reportHtmlPath = path.join(__dirname, "api_test_report.html");
-  const screenshotPath = path.join(__dirname, "api_test_report_screenshot.png");
-  
-  const passedCount = testResults.filter(r => r.passed).length;
-  const failedCount = testResults.length - passedCount;
+  const reportHtmlPath = path.join(__dirname, 'api_test_report.html')
+  const screenshotPath = path.join(__dirname, 'api_test_report_screenshot.png')
+
+  const passedCount = testResults.filter((r) => r.passed).length
+  const failedCount = testResults.length - passedCount
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -323,7 +329,7 @@ async function main() {
       --primary: #8b5cf6;
       --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -521,7 +527,9 @@ async function main() {
     </div>
 
     <div class="results-container">
-      ${testResults.map((r, i) => `
+      ${testResults
+        .map(
+          (r, i) => `
         <div class="test-card ${r.passed ? 'passed' : 'failed'}">
           <div class="test-header">
             <div class="test-title">${r.name}</div>
@@ -530,51 +538,54 @@ async function main() {
           <div class="test-details">
             <span>${r.method}</span> ${r.url} &bull; HTTP Status: <strong>${r.status}</strong>
           </div>
-          
+
           <div class="code-block-title">Request Body</div>
           <pre>${JSON.stringify(r.requestBody, null, 2)}</pre>
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>${JSON.stringify(r.response, null, 2)}</pre>
         </div>
-      `).join('')}
+      `,
+        )
+        .join('')}
     </div>
   </div>
 </body>
 </html>
-  `;
+  `
 
-  fs.writeFileSync(reportHtmlPath, htmlContent, 'utf-8');
-  console.log(`[+] HTML test report generated at: ${reportHtmlPath}`);
+  fs.writeFileSync(reportHtmlPath, htmlContent, 'utf-8')
+  console.log(`[+] HTML test report generated at: ${reportHtmlPath}`)
 
   // 6. Selenium Screenshot
-  console.log("[*] Launching Selenium (Opera GX) in headless mode to capture screenshot...");
-  
-  let options = new chrome.Options();
-  options.setChromeBinaryPath(operaPath);
-  options.addArguments('--headless');
-  options.addArguments('--disable-gpu');
-  options.windowSize({ width: 1000, height: 1350 }); // Higher height to capture all 3 cases nicely
+  console.log('[*] Launching Selenium (Opera GX) in headless mode to capture screenshot...')
+
+  let options = new chrome.Options()
+  options.setChromeBinaryPath(operaPath)
+  options.addArguments('--headless')
+  options.addArguments('--disable-gpu')
+  options.addArguments('--allow-file-access-from-files')
+  options.addArguments('--remote-allow-origins=*')
+  options.windowSize({ width: 1920, height: 1600 }) // Higher height to capture all 3 cases nicely
 
   // Create Service to bypass version mismatch checks between Opera and ChromeDriver
-  const service = new chrome.ServiceBuilder()
-    .addArguments('--disable-build-check');
+  const service = new chrome.ServiceBuilder().addArguments('--disable-build-check')
 
-  let driver;
+  let driver
   try {
     driver = await new Builder()
       .forBrowser('chrome')
       .setChromeOptions(options)
       .setChromeService(service)
-      .build();
+      .build()
 
-    const fileUrl = pathToFileURL(reportHtmlPath).toString();
-    console.log(`[*] Loading report URL: ${fileUrl}`);
-    await driver.get(fileUrl);
+    const fileUrl = pathToFileURL(reportHtmlPath).toString()
+    console.log(`[*] Loading report URL: ${fileUrl}`)
+    await driver.get(fileUrl)
 
     // Wait for page load
-    console.log("[*] Waiting for report to render...");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    console.log('[*] Waiting for report to render...')
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     // Get the full height of the page dynamically to avoid truncation
     const scrollHeight = await driver.executeScript(() => {
@@ -583,36 +594,35 @@ async function main() {
         document.documentElement.scrollHeight,
         document.body.offsetHeight,
         document.documentElement.offsetHeight,
-        document.documentElement.clientHeight
-      );
-    });
-    console.log(`[*] Adjusting browser window size to: 1000x${scrollHeight}`);
-    await driver.manage().window().setSize({ width: 1000, height: scrollHeight });
-    await new Promise((resolve) => setTimeout(resolve, 500));
+        document.documentElement.clientHeight,
+      )
+    })
+    console.log(`[*] Adjusting browser window size to: 1920x${scrollHeight}`)
+    await driver.manage().window().setSize({ width: 1920, height: scrollHeight })
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     // Capture screenshot
-    const screenshot = await driver.takeScreenshot();
-    fs.writeFileSync(screenshotPath, screenshot, 'base64');
-    console.log(`[+] Screenshot successfully saved to: ${screenshotPath}`);
-
+    const screenshot = await driver.takeScreenshot()
+    fs.writeFileSync(screenshotPath, screenshot, 'base64')
+    console.log(`[+] Screenshot successfully saved to: ${screenshotPath}`)
   } catch (err) {
-    console.error("[-] Selenium execution failed:", err);
+    console.error('[-] Selenium execution failed:', err)
   } finally {
     if (driver) {
-      await driver.quit();
-      console.log("[*] Browser closed.");
+      await driver.quit()
+      console.log('[*] Browser closed.')
     }
     if (sequelize) {
-      await sequelize.close().catch(() => {});
-      console.log("[*] Database connection closed.");
+      await sequelize.close().catch(() => {})
+      console.log('[*] Database connection closed.')
     }
   }
 
   if (executionFailed || failedCount > 0) {
-    process.exit(1);
+    process.exit(1)
   } else {
-    process.exit(0);
+    process.exit(0)
   }
 }
 
-main();
+main()
