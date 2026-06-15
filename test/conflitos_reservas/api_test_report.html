@@ -17,7 +17,7 @@
       --primary: #8b5cf6;
       --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -223,29 +223,29 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>POST</span> http://localhost:3000/api/reservas/42/ &bull; HTTP Status: <strong>201</strong>
+            <span>POST</span> http://localhost:3000/api/reservas/46/ &bull; HTTP Status: <strong>201</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "data_evento": "2026-06-16",
+  "data_evento": "2026-06-18",
   "hora_inicio": "14:00",
   "hora_fim": "15:30"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "message": "Reserva criada com sucesso!",
   "data": {
-    "id_reserva": 35,
-    "data_evento": "2026-06-16",
+    "id_reserva": 41,
+    "data_evento": "2026-06-18",
     "hora_inicio": "14:00",
     "hora_fim": "15:30",
-    "data_emissao": "2026-06-11",
-    "id_spot": "42",
-    "id_artista": 59
+    "data_emissao": "2026-06-13",
+    "id_spot": "46",
+    "id_artista": 68
   }
 }</pre>
         </div>
@@ -256,18 +256,18 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>POST</span> http://localhost:3000/api/reservas/42/ &bull; HTTP Status: <strong>400</strong>
+            <span>POST</span> http://localhost:3000/api/reservas/46/ &bull; HTTP Status: <strong>400</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "data_evento": "2026-06-16",
+  "data_evento": "2026-06-18",
   "hora_inicio": "16:00",
   "hora_fim": "15:00"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Validation failed",
@@ -286,18 +286,18 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>POST</span> http://localhost:3000/api/reservas/42/ &bull; HTTP Status: <strong>400</strong>
+            <span>POST</span> http://localhost:3000/api/reservas/46/ &bull; HTTP Status: <strong>400</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "data_evento": "2026-06-16",
+  "data_evento": "2026-06-18",
   "hora_inicio": "14:00",
   "hora_fim": "14:20"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Validation failed",
@@ -316,18 +316,18 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>POST</span> http://localhost:3000/api/reservas/42/ &bull; HTTP Status: <strong>400</strong>
+            <span>POST</span> http://localhost:3000/api/reservas/46/ &bull; HTTP Status: <strong>400</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "data_evento": "2026-06-16",
+  "data_evento": "2026-06-18",
   "hora_inicio": "14:00",
   "hora_fim": "17:00"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Validation failed",
@@ -346,18 +346,18 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>POST</span> http://localhost:3000/api/reservas/42/ &bull; HTTP Status: <strong>409</strong>
+            <span>POST</span> http://localhost:3000/api/reservas/46/ &bull; HTTP Status: <strong>409</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "data_evento": "2026-06-11",
+  "data_evento": "2026-06-13",
   "hora_inicio": "14:00",
   "hora_fim": "15:30"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Conflict error",
@@ -376,18 +376,18 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>POST</span> http://localhost:3000/api/reservas/42/ &bull; HTTP Status: <strong>409</strong>
+            <span>POST</span> http://localhost:3000/api/reservas/46/ &bull; HTTP Status: <strong>409</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "data_evento": "2026-06-16",
+  "data_evento": "2026-06-18",
   "hora_inicio": "15:00",
   "hora_fim": "16:00"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Conflict error",
@@ -406,9 +406,9 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>PATCH</span> http://localhost:3000/api/reservas/36 &bull; HTTP Status: <strong>409</strong>
+            <span>PATCH</span> http://localhost:3000/api/reservas/42 &bull; HTTP Status: <strong>409</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
@@ -416,7 +416,7 @@
   "hora_fim": "16:00"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Conflict error",

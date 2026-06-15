@@ -17,7 +17,7 @@
       --primary: #06b6d4;
       --primary-gradient: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -225,24 +225,24 @@
           <div class="test-details">
             <span>POST</span> http://localhost:3000/api/utilizadores &bull; HTTP Status: <strong>201</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "email": "crud_user_1781194187680@example.com",
+  "email": "crud_user_1781348253710@example.com",
   "password": "password123",
-  "nome_utilizador": "crud_user_1781194187680",
-  "numero_telemovel": "977418416"
+  "nome_utilizador": "crud_user_1781348253710",
+  "numero_telemovel": "914973448"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "message": "Utilizador registado com sucesso!",
   "data": {
-    "id_utilizador": 82,
-    "nome_utilizador": "crud_user_1781194187680",
-    "email": "crud_user_1781194187680@example.com"
+    "id_utilizador": 96,
+    "nome_utilizador": "crud_user_1781348253710",
+    "email": "crud_user_1781348253710@example.com"
   }
 }</pre>
         </div>
@@ -255,18 +255,18 @@
           <div class="test-details">
             <span>GET</span> http://localhost:3000/api/utilizadores/me &bull; HTTP Status: <strong>200</strong>
           </div>
+
           
-          
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "data": {
-    "id_utilizador": 82,
-    "email": "crud_user_1781194187680@example.com",
+    "id_utilizador": 96,
+    "email": "crud_user_1781348253710@example.com",
     "tipo": "utilizador",
-    "data_registo": "2026-06-11T16:09:47.000Z",
-    "nome_utilizador": "crud_user_1781194187680",
-    "numero_telemovel": "977418416",
+    "data_registo": "2026-06-13T10:57:33.000Z",
+    "nome_utilizador": "crud_user_1781348253710",
+    "numero_telemovel": "914973448",
     "id_artista": null,
     "Artistum": null
   }
@@ -281,22 +281,22 @@
           <div class="test-details">
             <span>PATCH</span> http://localhost:3000/api/utilizadores/me &bull; HTTP Status: <strong>200</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "nome_utilizador": "crud_user_upd_1781194187680",
+  "nome_utilizador": "crud_user_upd_1781348253710",
   "numero_telemovel": "919999999"
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "message": "Perfil atualizado com sucesso!",
   "data": {
-    "id_utilizador": 82,
-    "email": "crud_user_1781194187680@example.com",
-    "nome_utilizador": "crud_user_upd_1781194187680",
+    "id_utilizador": 96,
+    "email": "crud_user_1781348253710@example.com",
+    "nome_utilizador": "crud_user_upd_1781348253710",
     "numero_telemovel": "919999999"
   }
 }</pre>
@@ -308,19 +308,19 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>GET</span> http://localhost:3000/api/utilizadores/82 &bull; HTTP Status: <strong>200</strong>
+            <span>GET</span> http://localhost:3000/api/utilizadores/96 &bull; HTTP Status: <strong>200</strong>
           </div>
+
           
-          
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "data": {
-    "id_utilizador": 82,
-    "email": "crud_user_1781194187680@example.com",
+    "id_utilizador": 96,
+    "email": "crud_user_1781348253710@example.com",
     "tipo": "utilizador",
-    "data_registo": "2026-06-11T16:09:47.000Z",
-    "nome_utilizador": "crud_user_upd_1781194187680",
+    "data_registo": "2026-06-13T10:57:33.000Z",
+    "nome_utilizador": "crud_user_upd_1781348253710",
     "numero_telemovel": "919999999",
     "id_artista": null,
     "Artistum": null
@@ -334,14 +334,14 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>DELETE</span> http://localhost:3000/api/utilizadores/82 &bull; HTTP Status: <strong>200</strong>
+            <span>DELETE</span> http://localhost:3000/api/utilizadores/96 &bull; HTTP Status: <strong>200</strong>
           </div>
+
           
-          
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
-  "message": "Conta crud_user_1781194187680@example.com removida com sucesso!"
+  "message": "Conta crud_user_1781348253710@example.com removida com sucesso!"
 }</pre>
         </div>
       
@@ -351,18 +351,18 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>GET</span> http://localhost:3000/api/utilizadores/82 &bull; HTTP Status: <strong>404</strong>
+            <span>GET</span> http://localhost:3000/api/utilizadores/96 &bull; HTTP Status: <strong>404</strong>
           </div>
+
           
-          
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Resource not found",
   "message": "Resource not found",
   "details": {
     "utilizador": [
-      "O recurso Utilizador com o ID 82 não foi encontrado."
+      "O recurso Utilizador com o ID 96 não foi encontrado."
     ]
   }
 }</pre>

@@ -1,164 +1,168 @@
-import fs from 'fs';
-import path from 'path';
-import http from 'http';
-import { execSync } from 'child_process';
-import { fileURLToPath, pathToFileURL } from 'url';
-import process from 'process';
+import fs from 'fs'
+import path from 'path'
+import http from 'http'
+import { execSync } from 'child_process'
+import { fileURLToPath, pathToFileURL } from 'url'
+import process from 'process'
 
 // Load environmental variables before importing Sequelize models
-import dotenv from 'dotenv';
-dotenv.config({ path: './backend/src/.env' });
+import dotenv from 'dotenv'
+dotenv.config({ path: './backend/src/.env' })
 
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Standard paths to search for Brave on Windows
 const BRAVE_PATHS = [
-  "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
-  "C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
-];
+  'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+  'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+]
 
 // Standard paths to search for Opera on Windows (preferring Opera GX)
 const OPERA_PATHS = [
-  "C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera GX\\opera.exe",
-  "C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera\\opera.exe",
-  "C:\\Program Files\\Opera GX\\opera.exe",
-  "C:\\Program Files\\Opera\\opera.exe",
-  "C:\\Program Files (x86)\\Opera GX\\opera.exe",
-  "C:\\Program Files (x86)\\Opera\\opera.exe",
-];
+  'C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera GX\\opera.exe',
+  'C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera\\opera.exe',
+  'C:\\Program Files\\Opera GX\\opera.exe',
+  'C:\\Program Files\\Opera\\opera.exe',
+  'C:\\Program Files (x86)\\Opera GX\\opera.exe',
+  'C:\\Program Files (x86)\\Opera\\opera.exe',
+]
 
 // Resolves Brave paths using environment variables and standard paths
 function findBrave() {
-  const localAppData = process.env.LOCALAPPDATA || "";
-  const programFiles = process.env.ProgramFiles || "";
-  const programFilesX86 = process.env["ProgramFiles(x86)"] || "";
-  
-  const dynamicPaths = [];
+  const localAppData = process.env.LOCALAPPDATA || ''
+  const programFiles = process.env.ProgramFiles || ''
+  const programFilesX86 = process.env['ProgramFiles(x86)'] || ''
+
+  const dynamicPaths = []
   if (localAppData) {
-    dynamicPaths.push(path.join(localAppData, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+    dynamicPaths.push(
+      path.join(localAppData, 'BraveSoftware', 'Brave-Browser', 'Application', 'brave.exe'),
+    )
   }
   if (programFiles) {
-    dynamicPaths.push(path.join(programFiles, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+    dynamicPaths.push(
+      path.join(programFiles, 'BraveSoftware', 'Brave-Browser', 'Application', 'brave.exe'),
+    )
   }
   if (programFilesX86) {
-    dynamicPaths.push(path.join(programFilesX86, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+    dynamicPaths.push(
+      path.join(programFilesX86, 'BraveSoftware', 'Brave-Browser', 'Application', 'brave.exe'),
+    )
   }
-  
-  const allPaths = [...BRAVE_PATHS, ...dynamicPaths];
-  const uniquePaths = [...new Set(allPaths)];
-  
+
+  const allPaths = [...BRAVE_PATHS, ...dynamicPaths]
+  const uniquePaths = [...new Set(allPaths)]
+
   for (const p of uniquePaths) {
     if (fs.existsSync(p)) {
-      return p;
+      return p
     }
   }
-  return null;
+  return null
 }
 
 // Resolves Opera paths using environment variables and standard paths
 function findOpera() {
-  const localAppData = process.env.LOCALAPPDATA || "";
-  const programFiles = process.env.ProgramFiles || "";
-  const programFilesX86 = process.env["ProgramFiles(x86)"] || "";
-  
-  const dynamicPaths = [];
+  const localAppData = process.env.LOCALAPPDATA || ''
+  const programFiles = process.env.ProgramFiles || ''
+  const programFilesX86 = process.env['ProgramFiles(x86)'] || ''
+
+  const dynamicPaths = []
   if (localAppData) {
-    dynamicPaths.push(path.join(localAppData, "Programs", "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(localAppData, "Programs", "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(localAppData, 'Programs', 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(localAppData, 'Programs', 'Opera', 'opera.exe'))
   }
   if (programFiles) {
-    dynamicPaths.push(path.join(programFiles, "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(programFiles, "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(programFiles, 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(programFiles, 'Opera', 'opera.exe'))
   }
   if (programFilesX86) {
-    dynamicPaths.push(path.join(programFilesX86, "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(programFilesX86, "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(programFilesX86, 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(programFilesX86, 'Opera', 'opera.exe'))
   }
-  
-  const allPaths = [...OPERA_PATHS, ...dynamicPaths];
-  const uniquePaths = [...new Set(allPaths)];
-  
+
+  const allPaths = [...OPERA_PATHS, ...dynamicPaths]
+  const uniquePaths = [...new Set(allPaths)]
+
   for (const p of uniquePaths) {
     if (fs.existsSync(p)) {
-      return p;
+      return p
     }
   }
-  return null;
+  return null
 }
 
 // Checks if the backend server is running on localhost:3000
 function checkServer(url) {
   return new Promise((resolve) => {
     const req = http.get(url, { timeout: 2500 }, (res) => {
-      resolve(true);
-    });
-    req.on('error', () => resolve(false));
+      resolve(true)
+    })
+    req.on('error', () => resolve(false))
     req.on('timeout', () => {
-      req.destroy();
-      resolve(false);
-    });
-  });
+      req.destroy()
+      resolve(false)
+    })
+  })
 }
 
 // Ensures selenium-webdriver is installed
 async function ensureDependencies() {
   try {
-    await import('selenium-webdriver');
+    await import('selenium-webdriver')
   } catch (err) {
-    console.log('[*] selenium-webdriver is not installed. Installing it now...');
+    console.log('[*] selenium-webdriver is not installed. Installing it now...')
     try {
-      execSync('npm install --no-save selenium-webdriver', { stdio: 'inherit' });
-      console.log('[+] selenium-webdriver installed successfully!');
+      execSync('npm install --no-save selenium-webdriver', { stdio: 'inherit' })
+      console.log('[+] selenium-webdriver installed successfully!')
     } catch (installErr) {
-      console.error('[-] Failed to install selenium-webdriver automatically:', installErr);
-      process.exit(1);
+      console.error('[-] Failed to install selenium-webdriver automatically:', installErr)
+      process.exit(1)
     }
   }
 }
 
 async function main() {
-  const db = (await import('../../backend/src/Models/db.js')).default;
-  const { sequelize, Utilizador } = db;
+  const db = (await import('../../backend/src/Models/db.js')).default
+  const { sequelize, Utilizador } = db
 
-  const backendUrl = "http://localhost:3000";
-  
-  console.log(`[*] Checking if backend server is running at ${backendUrl}...`);
-  const isServerRunning = await checkServer(backendUrl);
+  const backendUrl = 'http://localhost:3000'
+
+  console.log(`[*] Checking if backend server is running at ${backendUrl}...`)
+  const isServerRunning = await checkServer(backendUrl)
   if (!isServerRunning) {
-    console.error(`[-] Error: Backend server not detected at ${backendUrl}.`);
-    process.exit(1);
+    console.error(`[-] Error: Backend server not detected at ${backendUrl}.`)
+    process.exit(1)
   }
-  console.log("[+] Backend is active!");
+  console.log('[+] Backend is active!')
 
   // Find Brave first, fallback to Opera
-  const bravePath = findBrave();
-  const operaPath = findOpera();
-  const browserPath = bravePath || operaPath;
+  const bravePath = findBrave()
+  const operaPath = findOpera()
+  const browserPath = bravePath || operaPath
   if (!browserPath) {
-    console.error("[-] Error: Could not locate Brave, Opera or Opera GX executable automatically.");
-    process.exit(1);
+    console.error('[-] Error: Could not locate Brave, Opera or Opera GX executable automatically.')
+    process.exit(1)
   }
-  console.log(`[+] Found browser executable at: ${browserPath}`);
+  console.log(`[+] Found browser executable at: ${browserPath}`)
 
   // Dynamic import of Selenium after ensuring it's installed
-  await ensureDependencies();
-  const { Builder } = await import('selenium-webdriver');
-  const chrome = await import('selenium-webdriver/chrome.js');
+  await ensureDependencies()
+  const { Builder } = await import('selenium-webdriver')
+  const chrome = await import('selenium-webdriver/chrome.js')
 
-  const testResults = [];
+  const testResults = []
 
   // Temporary accounts variables
-  let tempAdminUser, createdUserId;
-  let userToken, adminToken;
+  let tempAdminUser, createdUserId
+  let userToken, adminToken
 
-  const tempPasswordPlain = "password123";
-  const tempPasswordHashed = "$2b$10$IHEcl.nGMkLLhqDfczC6wOJ1G/nRjgGSxx3sxlel30Uhi5ur3C1pK"; // bcrypt hash of password123
+  const tempPasswordPlain = 'password123'
+  const tempPasswordHashed = '$2b$10$IHEcl.nGMkLLhqDfczC6wOJ1G/nRjgGSxx3sxlel30Uhi5ur3C1pK' // bcrypt hash of password123
 
   try {
-    console.log("[*] Setting up admin account in the database...");
+    console.log('[*] Setting up admin account in the database...')
 
     // Create a temporary admin account
     tempAdminUser = await Utilizador.create({
@@ -166,151 +170,159 @@ async function main() {
       password: tempPasswordHashed,
       tipo: 'admin',
       data_registo: new Date(),
-      nome_utilizador: `admin_crud_${Date.now()}`
-    });
+      nome_utilizador: `admin_crud_${Date.now()}`,
+    })
 
-    console.log("[+] Admin account created.");
+    console.log('[+] Admin account created.')
 
     // Login as admin to get admin token
-    console.log("[*] Fetching admin token...");
+    console.log('[*] Fetching admin token...')
     let loginRes = await fetch(`${backendUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: tempAdminUser.email, password: tempPasswordPlain })
-    });
-    let loginData = await loginRes.json();
-    adminToken = loginData.token;
+      body: JSON.stringify({ email: tempAdminUser.email, password: tempPasswordPlain }),
+    })
+    let loginData = await loginRes.json()
+    adminToken = loginData.token
 
-    const timestamp = Date.now();
-    const tempEmail = `crud_user_${timestamp}@example.com`;
-    const tempUsername = `crud_user_${timestamp}`;
-    const tempPhone = "9" + String(Math.floor(10000000 + Math.random() * 90000000));
+    const timestamp = Date.now()
+    const tempEmail = `crud_user_${timestamp}@example.com`
+    const tempUsername = `crud_user_${timestamp}`
+    const tempPhone = '9' + String(Math.floor(10000000 + Math.random() * 90000000))
 
     // Define CRUD Test Cases
     const testCases = [
       {
-        name: "Caso 1: Criar Conta (CREATE)",
-        method: "POST",
+        name: 'Caso 1: Criar Conta (CREATE)',
+        method: 'POST',
         url: () => `${backendUrl}/api/utilizadores`,
         headers: () => ({ 'Content-Type': 'application/json' }),
         body: {
           email: tempEmail,
           password: tempPasswordPlain,
           nome_utilizador: tempUsername,
-          numero_telemovel: tempPhone
+          numero_telemovel: tempPhone,
         },
         expectedStatus: 201,
         assertion: (status, body) => {
           if (status === 201 && body.data && body.data.id_utilizador) {
-            createdUserId = body.data.id_utilizador;
-            return true;
+            createdUserId = body.data.id_utilizador
+            return true
           }
-          return false;
-        }
+          return false
+        },
       },
       {
-        name: "Login intermédio com a conta criada",
+        name: 'Login intermédio com a conta criada',
         isMeta: true,
         action: async () => {
-          console.log("[*] Performing login for user token...");
+          console.log('[*] Performing login for user token...')
           const res = await fetch(`${backendUrl}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: tempEmail, password: tempPasswordPlain })
-          });
-          const data = await res.json();
-          userToken = data.token;
-        }
+            body: JSON.stringify({ email: tempEmail, password: tempPasswordPlain }),
+          })
+          const data = await res.json()
+          userToken = data.token
+        },
       },
       {
-        name: "Caso 2: Ler dados do próprio Perfil (READ - /me)",
-        method: "GET",
+        name: 'Caso 2: Ler dados do próprio Perfil (READ - /me)',
+        method: 'GET',
         url: () => `${backendUrl}/api/utilizadores/me`,
-        headers: () => ({ 'Authorization': `Bearer ${userToken}` }),
+        headers: () => ({ Authorization: `Bearer ${userToken}` }),
         body: null,
         expectedStatus: 200,
         assertion: (status, body) => {
-          return status === 200 && body.data && body.data.email === tempEmail;
-        }
+          return status === 200 && body.data && body.data.email === tempEmail
+        },
       },
       {
-        name: "Caso 3: Atualizar dados da Conta (UPDATE)",
-        method: "PATCH",
+        name: 'Caso 3: Atualizar dados da Conta (UPDATE)',
+        method: 'PATCH',
         url: () => `${backendUrl}/api/utilizadores/me`,
-        headers: () => ({ 
+        headers: () => ({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
+          Authorization: `Bearer ${userToken}`,
         }),
         body: {
           nome_utilizador: `crud_user_upd_${timestamp}`,
-          numero_telemovel: "919999999"
+          numero_telemovel: '919999999',
         },
         expectedStatus: 200,
         assertion: (status, body) => {
-          return status === 200 && body.data && body.data.nome_utilizador === `crud_user_upd_${timestamp}`;
-        }
+          return (
+            status === 200 &&
+            body.data &&
+            body.data.nome_utilizador === `crud_user_upd_${timestamp}`
+          )
+        },
       },
       {
-        name: "Caso 4: Admin lê dados da conta por ID (READ - /:id)",
-        method: "GET",
+        name: 'Caso 4: Admin lê dados da conta por ID (READ - /:id)',
+        method: 'GET',
         url: () => `${backendUrl}/api/utilizadores/${createdUserId}`,
-        headers: () => ({ 'Authorization': `Bearer ${adminToken}` }),
+        headers: () => ({ Authorization: `Bearer ${adminToken}` }),
         body: null,
         expectedStatus: 200,
         assertion: (status, body) => {
-          return status === 200 && body.data && body.data.id_utilizador === createdUserId;
-        }
+          return status === 200 && body.data && body.data.id_utilizador === createdUserId
+        },
       },
       {
-        name: "Caso 5: Admin elimina a Conta (DELETE)",
-        method: "DELETE",
+        name: 'Caso 5: Admin elimina a Conta (DELETE)',
+        method: 'DELETE',
         url: () => `${backendUrl}/api/utilizadores/${createdUserId}`,
-        headers: () => ({ 'Authorization': `Bearer ${adminToken}` }),
+        headers: () => ({ Authorization: `Bearer ${adminToken}` }),
         body: null,
         expectedStatus: 200,
         assertion: (status, body) => {
-          return status === 200 && body.message && body.message.toLowerCase().includes("removida com sucesso");
-        }
+          return (
+            status === 200 &&
+            body.message &&
+            body.message.toLowerCase().includes('removida com sucesso')
+          )
+        },
       },
       {
-        name: "Caso 6: Confirmar que a conta foi apagada do sistema",
-        method: "GET",
+        name: 'Caso 6: Confirmar que a conta foi apagada do sistema',
+        method: 'GET',
         url: () => `${backendUrl}/api/utilizadores/${createdUserId}`,
-        headers: () => ({ 'Authorization': `Bearer ${adminToken}` }),
+        headers: () => ({ Authorization: `Bearer ${adminToken}` }),
         body: null,
         expectedStatus: 404,
         assertion: (status, body) => {
-          return status === 404 && JSON.stringify(body).toLowerCase().includes("não foi encontrado");
-        }
-      }
-    ];
+          return status === 404 && JSON.stringify(body).toLowerCase().includes('não foi encontrado')
+        },
+      },
+    ]
 
-    console.log("[*] Running API CRUD tests...");
+    console.log('[*] Running API CRUD tests...')
     for (const tc of testCases) {
       if (tc.isMeta) {
-        await tc.action();
-        continue;
+        await tc.action()
+        continue
       }
-      
-      console.log(`\n[*] Running: ${tc.name}`);
-      const targetUrl = typeof tc.url === 'function' ? tc.url() : tc.url;
-      const targetHeaders = typeof tc.headers === 'function' ? tc.headers() : (tc.headers || {});
+
+      console.log(`\n[*] Running: ${tc.name}`)
+      const targetUrl = typeof tc.url === 'function' ? tc.url() : tc.url
+      const targetHeaders = typeof tc.headers === 'function' ? tc.headers() : tc.headers || {}
       try {
         const fetchOptions = {
           method: tc.method,
-          headers: targetHeaders
-        };
-        if (tc.body) {
-          fetchOptions.body = JSON.stringify(tc.body);
+          headers: targetHeaders,
         }
-        
-        const res = await fetch(targetUrl, fetchOptions);
-        const status = res.status;
-        const responseBody = await res.json();
-        
-        const passed = tc.assertion(status, responseBody);
-        console.log(passed ? `[+] PASSED (Status: ${status})` : `[-] FAILED (Status: ${status})`);
-        
+        if (tc.body) {
+          fetchOptions.body = JSON.stringify(tc.body)
+        }
+
+        const res = await fetch(targetUrl, fetchOptions)
+        const status = res.status
+        const responseBody = await res.json()
+
+        const passed = tc.assertion(status, responseBody)
+        console.log(passed ? `[+] PASSED (Status: ${status})` : `[-] FAILED (Status: ${status})`)
+
         testResults.push({
           name: tc.name,
           method: tc.method,
@@ -318,44 +330,43 @@ async function main() {
           requestBody: tc.body,
           status: status,
           response: responseBody,
-          passed: passed
-        });
+          passed: passed,
+        })
       } catch (e) {
-        console.error(`[-] Test failed with error:`, e.message);
+        console.error(`[-] Test failed with error:`, e.message)
         testResults.push({
           name: tc.name,
           method: tc.method,
           url: targetUrl,
           requestBody: tc.body,
-          status: "Error",
+          status: 'Error',
           response: { error: e.message },
-          passed: false
-        });
+          passed: false,
+        })
       }
     }
 
     // Cleanup admin account
-    console.log("\n[*] Cleaning up admin fixtures...");
-    await tempAdminUser.destroy().catch(() => {});
+    console.log('\n[*] Cleaning up admin fixtures...')
+    await tempAdminUser.destroy().catch(() => {})
     // Cleanup the user if it failed to delete during CRUD
     if (createdUserId) {
-      await Utilizador.destroy({ where: { id_utilizador: createdUserId } }).catch(() => {});
+      await Utilizador.destroy({ where: { id_utilizador: createdUserId } }).catch(() => {})
     }
-    console.log("[+] Database clean.");
-
+    console.log('[+] Database clean.')
   } catch (err) {
-    console.error("[-] Error during test setup/teardown:", err);
+    console.error('[-] Error during test setup/teardown:', err)
   } finally {
     // Close the database connection
-    await sequelize.close();
+    await sequelize.close()
   }
 
   // Generate beautiful HTML report
-  const reportHtmlPath = path.join(__dirname, "api_test_report.html");
-  const screenshotPath = path.join(__dirname, "api_test_report_screenshot.png");
-  
-  const passedCount = testResults.filter(r => r.passed).length;
-  const failedCount = testResults.length - passedCount;
+  const reportHtmlPath = path.join(__dirname, 'api_test_report.html')
+  const screenshotPath = path.join(__dirname, 'api_test_report_screenshot.png')
+
+  const passedCount = testResults.filter((r) => r.passed).length
+  const failedCount = testResults.length - passedCount
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -376,7 +387,7 @@ async function main() {
       --primary: #06b6d4;
       --primary-gradient: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -575,7 +586,9 @@ async function main() {
     </div>
 
     <div class="results-container">
-      ${testResults.map((r, i) => `
+      ${testResults
+        .map(
+          (r, i) => `
         <div class="test-card ${r.passed ? 'passed' : 'failed'}">
           <div class="test-header">
             <div class="test-title">${r.name}</div>
@@ -584,50 +597,58 @@ async function main() {
           <div class="test-details">
             <span>${r.method}</span> ${r.url} &bull; HTTP Status: <strong>${r.status}</strong>
           </div>
-          
-          ${r.requestBody ? `
+
+          ${
+            r.requestBody
+              ? `
             <div class="code-block-title">Request Body</div>
             <pre>${JSON.stringify(r.requestBody, null, 2)}</pre>
-          ` : ''}
-          
+          `
+              : ''
+          }
+
           <div class="code-block-title">Response JSON</div>
           <pre>${JSON.stringify(r.response, null, 2)}</pre>
         </div>
-      `).join('')}
+      `,
+        )
+        .join('')}
     </div>
   </div>
 </body>
 </html>
-  `;
+  `
 
-  fs.writeFileSync(reportHtmlPath, htmlContent, 'utf-8');
-  console.log(`[+] HTML test report generated at: ${reportHtmlPath}`);
+  fs.writeFileSync(reportHtmlPath, htmlContent, 'utf-8')
+  console.log(`[+] HTML test report generated at: ${reportHtmlPath}`)
 
   // Headless Browser Screenshot
-  console.log("[*] Launching Selenium in headless mode to capture screenshot...");
-  
-  let options = new chrome.Options();
-  options.setChromeBinaryPath(browserPath);
-  options.addArguments('--headless');
-  options.addArguments('--disable-gpu');
-  options.windowSize({ width: 1000, height: 1400 });
+  console.log('[*] Launching Selenium in headless mode to capture screenshot...')
 
-  const service = new chrome.ServiceBuilder().addArguments('--disable-build-check');
+  let options = new chrome.Options()
+  options.setChromeBinaryPath(browserPath)
+  options.addArguments('--headless')
+  options.addArguments('--disable-gpu')
+  options.addArguments('--allow-file-access-from-files')
+  options.addArguments('--remote-allow-origins=*')
+  options.windowSize({ width: 1920, height: 1600 })
 
-  let driver;
+  const service = new chrome.ServiceBuilder().addArguments('--disable-build-check')
+
+  let driver
   try {
     driver = await new Builder()
       .forBrowser('chrome')
       .setChromeOptions(options)
       .setChromeService(service)
-      .build();
+      .build()
 
-    const fileUrl = pathToFileURL(reportHtmlPath).toString();
-    console.log(`[*] Loading report URL: ${fileUrl}`);
-    await driver.get(fileUrl);
+    const fileUrl = pathToFileURL(reportHtmlPath).toString()
+    console.log(`[*] Loading report URL: ${fileUrl}`)
+    await driver.get(fileUrl)
 
-    console.log("[*] Waiting for report to render...");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    console.log('[*] Waiting for report to render...')
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     // Get page height dynamically
     const scrollHeight = await driver.executeScript(() => {
@@ -636,26 +657,25 @@ async function main() {
         document.documentElement.scrollHeight,
         document.body.offsetHeight,
         document.documentElement.offsetHeight,
-        document.documentElement.clientHeight
-      );
-    });
-    console.log(`[*] Adjusting browser window size to: 1000x${scrollHeight}`);
-    await driver.manage().window().setSize({ width: 1000, height: scrollHeight });
-    await new Promise((resolve) => setTimeout(resolve, 500));
+        document.documentElement.clientHeight,
+      )
+    })
+    console.log(`[*] Adjusting browser window size to: 1920x${scrollHeight}`)
+    await driver.manage().window().setSize({ width: 1920, height: scrollHeight })
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     // Capture screenshot
-    const screenshot = await driver.takeScreenshot();
-    fs.writeFileSync(screenshotPath, screenshot, 'base64');
-    console.log(`[+] Screenshot successfully saved to: ${screenshotPath}`);
-
+    const screenshot = await driver.takeScreenshot()
+    fs.writeFileSync(screenshotPath, screenshot, 'base64')
+    console.log(`[+] Screenshot successfully saved to: ${screenshotPath}`)
   } catch (err) {
-    console.error("[-] Selenium execution failed:", err);
+    console.error('[-] Selenium execution failed:', err)
   } finally {
     if (driver) {
-      await driver.quit();
-      console.log("[*] Browser closed.");
+      await driver.quit()
+      console.log('[*] Browser closed.')
     }
   }
 }
 
-main();
+main()

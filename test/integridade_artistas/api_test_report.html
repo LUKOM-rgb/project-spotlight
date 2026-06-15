@@ -17,7 +17,7 @@
       --primary: #f59e0b;
       --primary-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -225,15 +225,15 @@
           <div class="test-details">
             <span>POST</span> http://localhost:3000/api/seguidores &bull; HTTP Status: <strong>201</strong>
           </div>
-          
+
           
             <div class="code-block-title">Request Body</div>
             <pre>{
-  "id_utilizador": 79,
-  "id_artista": 58
+  "id_utilizador": 93,
+  "id_artista": 67
 }</pre>
           
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "message": "Passaste a seguir o artista com sucesso!"
@@ -246,21 +246,21 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>GET</span> http://localhost:3000/api/seguidores?id_artista=58 &bull; HTTP Status: <strong>200</strong>
+            <span>GET</span> http://localhost:3000/api/seguidores?id_artista=67 &bull; HTTP Status: <strong>200</strong>
           </div>
+
           
-          
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "total_seguidores": 1,
   "data": [
     {
-      "id_utilizador": 79,
-      "email": "follower_integ_1781194182198@example.com",
+      "id_utilizador": 93,
+      "email": "follower_integ_1781348247517@example.com",
       "tipo": "utilizador",
-      "data_registo": "2026-06-11T16:09:42.000Z",
-      "nome_utilizador": "follower_integ_1781194182198",
+      "data_registo": "2026-06-13T10:57:27.000Z",
+      "nome_utilizador": "follower_integ_1781348247517",
       "numero_telemovel": null,
       "id_artista": null
     }
@@ -274,14 +274,14 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>DELETE</span> http://localhost:3000/api/artistas/58 &bull; HTTP Status: <strong>200</strong>
+            <span>DELETE</span> http://localhost:3000/api/artistas/67 &bull; HTTP Status: <strong>200</strong>
           </div>
+
           
-          
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
-  "message": "Artista artist_integ_1781194182168 removido com sucesso!"
+  "message": "Artista artist_integ_1781348247485 removido com sucesso!"
 }</pre>
         </div>
       
@@ -291,18 +291,18 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>GET</span> http://localhost:3000/api/artistas/58 &bull; HTTP Status: <strong>404</strong>
+            <span>GET</span> http://localhost:3000/api/artistas/67 &bull; HTTP Status: <strong>404</strong>
           </div>
+
           
-          
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Resource not found",
   "message": "Resource not found",
   "details": {
     "artista": [
-      "O recurso Artista com o ID 58 não foi encontrado."
+      "O recurso Artista com o ID 67 não foi encontrado."
     ]
   }
 }</pre>
@@ -314,18 +314,18 @@
             <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>GET</span> http://localhost:3000/api/seguidores?id_artista=58 &bull; HTTP Status: <strong>404</strong>
+            <span>GET</span> http://localhost:3000/api/seguidores?id_artista=67 &bull; HTTP Status: <strong>404</strong>
           </div>
+
           
-          
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
   "error": "Resource not found",
   "message": "Resource not found",
   "details": {
     "artista": [
-      "O recurso Artista com o ID 58 não foi encontrado."
+      "O recurso Artista com o ID 67 não foi encontrado."
     ]
   }
 }</pre>

@@ -17,7 +17,7 @@
       --primary: #8b5cf6;
       --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -206,98 +206,102 @@
       </div>
       <div class="summary-card passed">
         <h3>Passaram</h3>
-        <p>0</p>
+        <p>3</p>
       </div>
       <div class="summary-card failed">
         <h3>Falharam</h3>
-        <p>3</p>
+        <p>0</p>
       </div>
     </div>
 
     <div class="results-container">
       
-        <div class="test-card failed">
+        <div class="test-card passed">
           <div class="test-header">
             <div class="test-title">Validação 1: Data de Validade em Falta</div>
-            <div class="badge failed">Falhou</div>
+            <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>PATCH</span> http://localhost:3000/api/utilizadores/76/role &bull; HTTP Status: <strong>401</strong>
+            <span>PATCH</span> http://localhost:3000/api/utilizadores/103/role &bull; HTTP Status: <strong>400</strong>
           </div>
-          
+
           <div class="code-block-title">Request Body</div>
           <pre>{
   "tipo": "artista",
-  "numero_licenca": "LIC-1781193897851",
+  "numero_licenca": "LIC-1781348344011",
   "categoria_id": 1
 }</pre>
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
-  "error": "Token inválido.",
-  "message": "Token inválido.",
+  "error": "Validation failed",
+  "message": "Validation failed",
   "details": {
-    "authentication": [
-      "Acesso negado. Credenciais inválidas"
+    "licenca": [
+      "Os campos numero_licenca, validade_licenca e categoria_id são obrigatórios para atualizar para Artista."
     ]
   }
 }</pre>
         </div>
       
-        <div class="test-card failed">
+        <div class="test-card passed">
           <div class="test-header">
             <div class="test-title">Validação 2: Formato de Data Inválido</div>
-            <div class="badge failed">Falhou</div>
+            <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>PATCH</span> http://localhost:3000/api/utilizadores/76/role &bull; HTTP Status: <strong>401</strong>
+            <span>PATCH</span> http://localhost:3000/api/utilizadores/103/role &bull; HTTP Status: <strong>400</strong>
           </div>
-          
+
           <div class="code-block-title">Request Body</div>
           <pre>{
   "tipo": "artista",
-  "numero_licenca": "LIC-1781193897851",
+  "numero_licenca": "LIC-1781348344011",
   "validade_licenca": "data-invalida",
   "categoria_id": 1
 }</pre>
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
-  "error": "Token inválido.",
-  "message": "Token inválido.",
+  "error": "Validation failed",
+  "message": "Validation failed",
   "details": {
-    "authentication": [
-      "Acesso negado. Credenciais inválidas"
+    "validade_licenca": [
+      "A validade_licenca tem um formato de data inválido."
     ]
   }
 }</pre>
         </div>
       
-        <div class="test-card failed">
+        <div class="test-card passed">
           <div class="test-header">
             <div class="test-title">Validação 3: Formato de Data Correto (Sucesso)</div>
-            <div class="badge failed">Falhou</div>
+            <div class="badge passed">Passou</div>
           </div>
           <div class="test-details">
-            <span>PATCH</span> http://localhost:3000/api/utilizadores/76/role &bull; HTTP Status: <strong>401</strong>
+            <span>PATCH</span> http://localhost:3000/api/utilizadores/103/role &bull; HTTP Status: <strong>200</strong>
           </div>
-          
+
           <div class="code-block-title">Request Body</div>
           <pre>{
   "tipo": "artista",
-  "numero_licenca": "LIC-1781193897851",
+  "numero_licenca": "LIC-1781348344011",
   "validade_licenca": "2030-12-31",
   "categoria_id": 1
 }</pre>
-          
+
           <div class="code-block-title">Response JSON</div>
           <pre>{
-  "error": "Token inválido.",
-  "message": "Token inválido.",
-  "details": {
-    "authentication": [
-      "Acesso negado. Credenciais inválidas"
-    ]
+  "message": "Conta promovida a Artista com sucesso!",
+  "data": {
+    "id_utilizador": 103,
+    "email": "test_user_1781348343905@example.com",
+    "password": "$2b$10$7zO8PoFH7nGN5HuhvtIVROtY4lOHnaVRzk0NFRQs4.qAN4BrJ9P6m",
+    "tipo": "artista",
+    "data_registo": "2026-06-13T10:59:03.000Z",
+    "nome_utilizador": "Test User Data Validade",
+    "numero_telemovel": "912345678",
+    "id_artista": 73
   }
 }</pre>
         </div>

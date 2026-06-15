@@ -1,185 +1,189 @@
-import fs from 'fs';
-import path from 'path';
-import http from 'http';
-import { execSync } from 'child_process';
-import { fileURLToPath, pathToFileURL } from 'url';
-import process from 'process';
+import fs from 'fs'
+import path from 'path'
+import http from 'http'
+import { execSync } from 'child_process'
+import { fileURLToPath, pathToFileURL } from 'url'
+import process from 'process'
 
 // Load environmental variables before importing Sequelize models
-import dotenv from 'dotenv';
-dotenv.config({ path: './backend/src/.env' });
+import dotenv from 'dotenv'
+dotenv.config({ path: './backend/src/.env' })
 
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Standard paths to search for Brave on Windows
 const BRAVE_PATHS = [
-  "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
-  "C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
-];
+  'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+  'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+]
 
 // Standard paths to search for Opera on Windows (preferring Opera GX)
 const OPERA_PATHS = [
-  "C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera GX\\opera.exe",
-  "C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera\\opera.exe",
-  "C:\\Program Files\\Opera GX\\opera.exe",
-  "C:\\Program Files\\Opera\\opera.exe",
-  "C:\\Program Files (x86)\\Opera GX\\opera.exe",
-  "C:\\Program Files (x86)\\Opera\\opera.exe",
-];
+  'C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera GX\\opera.exe',
+  'C:\\Users\\Utilizador\\AppData\\Local\\Programs\\Opera\\opera.exe',
+  'C:\\Program Files\\Opera GX\\opera.exe',
+  'C:\\Program Files\\Opera\\opera.exe',
+  'C:\\Program Files (x86)\\Opera GX\\opera.exe',
+  'C:\\Program Files (x86)\\Opera\\opera.exe',
+]
 
 // Resolves Brave paths using environment variables and standard paths
 function findBrave() {
-  const localAppData = process.env.LOCALAPPDATA || "";
-  const programFiles = process.env.ProgramFiles || "";
-  const programFilesX86 = process.env["ProgramFiles(x86)"] || "";
-  
-  const dynamicPaths = [];
+  const localAppData = process.env.LOCALAPPDATA || ''
+  const programFiles = process.env.ProgramFiles || ''
+  const programFilesX86 = process.env['ProgramFiles(x86)'] || ''
+
+  const dynamicPaths = []
   if (localAppData) {
-    dynamicPaths.push(path.join(localAppData, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+    dynamicPaths.push(
+      path.join(localAppData, 'BraveSoftware', 'Brave-Browser', 'Application', 'brave.exe'),
+    )
   }
   if (programFiles) {
-    dynamicPaths.push(path.join(programFiles, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+    dynamicPaths.push(
+      path.join(programFiles, 'BraveSoftware', 'Brave-Browser', 'Application', 'brave.exe'),
+    )
   }
   if (programFilesX86) {
-    dynamicPaths.push(path.join(programFilesX86, "BraveSoftware", "Brave-Browser", "Application", "brave.exe"));
+    dynamicPaths.push(
+      path.join(programFilesX86, 'BraveSoftware', 'Brave-Browser', 'Application', 'brave.exe'),
+    )
   }
-  
-  const allPaths = [...BRAVE_PATHS, ...dynamicPaths];
-  const uniquePaths = [...new Set(allPaths)];
-  
+
+  const allPaths = [...BRAVE_PATHS, ...dynamicPaths]
+  const uniquePaths = [...new Set(allPaths)]
+
   for (const p of uniquePaths) {
     if (fs.existsSync(p)) {
-      return p;
+      return p
     }
   }
-  return null;
+  return null
 }
 
 // Resolves Opera paths using environment variables and standard paths
 function findOpera() {
-  const localAppData = process.env.LOCALAPPDATA || "";
-  const programFiles = process.env.ProgramFiles || "";
-  const programFilesX86 = process.env["ProgramFiles(x86)"] || "";
-  
-  const dynamicPaths = [];
+  const localAppData = process.env.LOCALAPPDATA || ''
+  const programFiles = process.env.ProgramFiles || ''
+  const programFilesX86 = process.env['ProgramFiles(x86)'] || ''
+
+  const dynamicPaths = []
   if (localAppData) {
-    dynamicPaths.push(path.join(localAppData, "Programs", "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(localAppData, "Programs", "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(localAppData, 'Programs', 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(localAppData, 'Programs', 'Opera', 'opera.exe'))
   }
   if (programFiles) {
-    dynamicPaths.push(path.join(programFiles, "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(programFiles, "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(programFiles, 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(programFiles, 'Opera', 'opera.exe'))
   }
   if (programFilesX86) {
-    dynamicPaths.push(path.join(programFilesX86, "Opera GX", "opera.exe"));
-    dynamicPaths.push(path.join(programFilesX86, "Opera", "opera.exe"));
+    dynamicPaths.push(path.join(programFilesX86, 'Opera GX', 'opera.exe'))
+    dynamicPaths.push(path.join(programFilesX86, 'Opera', 'opera.exe'))
   }
-  
-  const allPaths = [...OPERA_PATHS, ...dynamicPaths];
-  const uniquePaths = [...new Set(allPaths)];
-  
+
+  const allPaths = [...OPERA_PATHS, ...dynamicPaths]
+  const uniquePaths = [...new Set(allPaths)]
+
   for (const p of uniquePaths) {
     if (fs.existsSync(p)) {
-      return p;
+      return p
     }
   }
-  return null;
+  return null
 }
 
 // Checks if the backend server is running on localhost:3000
 function checkServer(url) {
   return new Promise((resolve) => {
     const req = http.get(url, { timeout: 2500 }, (res) => {
-      resolve(true);
-    });
-    req.on('error', () => resolve(false));
+      resolve(true)
+    })
+    req.on('error', () => resolve(false))
     req.on('timeout', () => {
-      req.destroy();
-      resolve(false);
-    });
-  });
+      req.destroy()
+      resolve(false)
+    })
+  })
 }
 
 // Ensures selenium-webdriver is installed
 async function ensureDependencies() {
   try {
-    await import('selenium-webdriver');
+    await import('selenium-webdriver')
   } catch (err) {
-    console.log('[*] selenium-webdriver is not installed. Installing it now...');
+    console.log('[*] selenium-webdriver is not installed. Installing it now...')
     try {
-      execSync('npm install --no-save selenium-webdriver', { stdio: 'inherit' });
-      console.log('[+] selenium-webdriver installed successfully!');
+      execSync('npm install --no-save selenium-webdriver', { stdio: 'inherit' })
+      console.log('[+] selenium-webdriver installed successfully!')
     } catch (installErr) {
-      console.error('[-] Failed to install selenium-webdriver automatically:', installErr);
-      process.exit(1);
+      console.error('[-] Failed to install selenium-webdriver automatically:', installErr)
+      process.exit(1)
     }
   }
 }
 
 async function main() {
-  dotenv.config({ path: './backend/src/.env' });
-  const db = (await import('../../backend/src/Models/db.js')).default;
-  const { sequelize, Artista, Utilizador, Categoria, Spot, Reserva } = db;
+  dotenv.config({ path: './backend/src/.env' })
+  const db = (await import('../../backend/src/Models/db.js')).default
+  const { sequelize, Artista, Utilizador, Categoria, Spot, Reserva } = db
 
-  const backendUrl = "http://localhost:3000";
-  
-  console.log(`[*] Checking if backend server is running at ${backendUrl}...`);
-  const isServerRunning = await checkServer(backendUrl);
+  const backendUrl = 'http://localhost:3000'
+
+  console.log(`[*] Checking if backend server is running at ${backendUrl}...`)
+  const isServerRunning = await checkServer(backendUrl)
   if (!isServerRunning) {
-    console.error(`[-] Error: Backend server not detected at ${backendUrl}.`);
-    process.exit(1);
+    console.error(`[-] Error: Backend server not detected at ${backendUrl}.`)
+    process.exit(1)
   }
-  console.log("[+] Backend is active!");
+  console.log('[+] Backend is active!')
 
   // Find Brave first, fallback to Opera
-  const bravePath = findBrave();
-  const operaPath = findOpera();
-  const browserPath = bravePath || operaPath;
+  const bravePath = findBrave()
+  const operaPath = findOpera()
+  const browserPath = bravePath || operaPath
   if (!browserPath) {
-    console.error("[-] Error: Could not locate Brave, Opera or Opera GX executable automatically.");
-    process.exit(1);
+    console.error('[-] Error: Could not locate Brave, Opera or Opera GX executable automatically.')
+    process.exit(1)
   }
-  console.log(`[+] Found browser executable at: ${browserPath}`);
+  console.log(`[+] Found browser executable at: ${browserPath}`)
 
   // Dynamic import of Selenium after ensuring it's installed
-  await ensureDependencies();
-  const { Builder } = await import('selenium-webdriver');
-  const chrome = await import('selenium-webdriver/chrome.js');
+  await ensureDependencies()
+  const { Builder } = await import('selenium-webdriver')
+  const chrome = await import('selenium-webdriver/chrome.js')
 
-  const testResults = [];
+  const testResults = []
 
   // Variables for holding temporary records
-  let tempCategory, tempArtist, tempArtistUser, tempSpot;
-  let artistToken;
-  let firstReservaId, secondReservaId;
+  let tempCategory, tempArtist, tempArtistUser, tempSpot
+  let artistToken
+  let firstReservaId, secondReservaId
 
-  const tempPasswordPlain = "password123";
-  const tempPasswordHashed = "$2b$10$IHEcl.nGMkLLhqDfczC6wOJ1G/nRjgGSxx3sxlel30Uhi5ur3C1pK"; // bcrypt hash of password123
+  const tempPasswordPlain = 'password123'
+  const tempPasswordHashed = '$2b$10$IHEcl.nGMkLLhqDfczC6wOJ1G/nRjgGSxx3sxlel30Uhi5ur3C1pK' // bcrypt hash of password123
 
   // Dynamic Date calculation to bypass the 24 hours limitation
-  const todayStr = new Date().toISOString().split('T')[0];
-  const futureDateObj = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
-  const futureDateStr = futureDateObj.toISOString().split('T')[0];
+  const todayStr = new Date().toISOString().split('T')[0]
+  const futureDateObj = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
+  const futureDateStr = futureDateObj.toISOString().split('T')[0]
 
   try {
-    console.log("[*] Setting up database fixtures for reservation tests...");
+    console.log('[*] Setting up database fixtures for reservation tests...')
 
     // 1. Create temporary category
     tempCategory = await Categoria.create({
-      nome_categoria: `Cat_Res_Test_${Date.now()}`
-    });
+      nome_categoria: `Cat_Res_Test_${Date.now()}`,
+    })
 
     // 2. Create temporary artist
-    const validityDate = new Date();
-    validityDate.setFullYear(validityDate.getFullYear() + 2);
+    const validityDate = new Date()
+    validityDate.setFullYear(validityDate.getFullYear() + 2)
     tempArtist = await Artista.create({
       numero_licenca: `LIC-RES-${Date.now()}`,
       validade_licenca: validityDate,
-      categoria_id: tempCategory.categoria_id
-    });
+      categoria_id: tempCategory.categoria_id,
+    })
 
     // 3. Create temporary artist user
     tempArtistUser = await Utilizador.create({
@@ -188,217 +192,220 @@ async function main() {
       tipo: 'artista',
       data_registo: new Date(),
       nome_utilizador: `artist_res_${Date.now()}`,
-      id_artista: tempArtist.id_artista
-    });
+      id_artista: tempArtist.id_artista,
+    })
 
     // 4. Create temporary spot
     tempSpot = await Spot.create({
       localizacao: `Spot_Res_Test_${Date.now()}`,
       longitude: -9.1393,
       latitude: 38.7223,
-      abertura: "08:00:00",
-      fecho: "22:00:00"
-    });
+      abertura: '08:00:00',
+      fecho: '22:00:00',
+    })
 
-    console.log("[+] Database fixtures created successfully.");
+    console.log('[+] Database fixtures created successfully.')
 
     // Login as artist to get token
-    console.log("[*] Fetching artist token via API...");
+    console.log('[*] Fetching artist token via API...')
     let loginRes = await fetch(`${backendUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: tempArtistUser.email, password: tempPasswordPlain })
-    });
-    let loginData = await loginRes.json();
-    artistToken = loginData.token;
+      body: JSON.stringify({ email: tempArtistUser.email, password: tempPasswordPlain }),
+    })
+    let loginData = await loginRes.json()
+    artistToken = loginData.token
 
     // Run the API Test Cases
     const testCases = [
       {
-        name: "Caso 1: Criar uma reserva válida (Sucesso)",
-        method: "POST",
+        name: 'Caso 1: Criar uma reserva válida (Sucesso)',
+        method: 'POST',
         url: () => `${backendUrl}/api/reservas/${tempSpot.id_spot}/`,
-        headers: () => ({ 
+        headers: () => ({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${artistToken}`
+          Authorization: `Bearer ${artistToken}`,
         }),
         body: () => ({
           data_evento: futureDateStr,
-          hora_inicio: "14:00",
-          hora_fim: "15:30"
+          hora_inicio: '14:00',
+          hora_fim: '15:30',
         }),
         expectedStatus: 201,
         assertion: (status, body) => {
           if (status === 201 && body.data && body.data.id_reserva) {
-            firstReservaId = body.data.id_reserva;
-            return true;
+            firstReservaId = body.data.id_reserva
+            return true
           }
-          return false;
-        }
+          return false
+        },
       },
       {
-        name: "Caso 2: Tentar criar uma reserva com início após fim (Erro)",
-        method: "POST",
+        name: 'Caso 2: Tentar criar uma reserva com início após fim (Erro)',
+        method: 'POST',
         url: () => `${backendUrl}/api/reservas/${tempSpot.id_spot}/`,
-        headers: () => ({ 
+        headers: () => ({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${artistToken}`
+          Authorization: `Bearer ${artistToken}`,
         }),
         body: () => ({
           data_evento: futureDateStr,
-          hora_inicio: "16:00",
-          hora_fim: "15:00"
+          hora_inicio: '16:00',
+          hora_fim: '15:00',
         }),
         expectedStatus: 400,
         assertion: (status, body) => {
-          return status === 400 && JSON.stringify(body).toLowerCase().includes("antes de hora_fim");
-        }
+          return status === 400 && JSON.stringify(body).toLowerCase().includes('antes de hora_fim')
+        },
       },
       {
-        name: "Caso 3: Tentar criar uma reserva com duração inferior a 30 minutos (Erro)",
-        method: "POST",
+        name: 'Caso 3: Tentar criar uma reserva com duração inferior a 30 minutos (Erro)',
+        method: 'POST',
         url: () => `${backendUrl}/api/reservas/${tempSpot.id_spot}/`,
-        headers: () => ({ 
+        headers: () => ({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${artistToken}`
+          Authorization: `Bearer ${artistToken}`,
         }),
         body: () => ({
           data_evento: futureDateStr,
-          hora_inicio: "14:00",
-          hora_fim: "14:20"
+          hora_inicio: '14:00',
+          hora_fim: '14:20',
         }),
         expectedStatus: 400,
         assertion: (status, body) => {
-          return status === 400 && JSON.stringify(body).toLowerCase().includes("reserva inválida");
-        }
+          return status === 400 && JSON.stringify(body).toLowerCase().includes('reserva inválida')
+        },
       },
       {
-        name: "Caso 4: Tentar criar uma reserva com duração superior a 2 horas (Erro)",
-        method: "POST",
+        name: 'Caso 4: Tentar criar uma reserva com duração superior a 2 horas (Erro)',
+        method: 'POST',
         url: () => `${backendUrl}/api/reservas/${tempSpot.id_spot}/`,
-        headers: () => ({ 
+        headers: () => ({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${artistToken}`
+          Authorization: `Bearer ${artistToken}`,
         }),
         body: () => ({
           data_evento: futureDateStr,
-          hora_inicio: "14:00",
-          hora_fim: "17:00"
+          hora_inicio: '14:00',
+          hora_fim: '17:00',
         }),
         expectedStatus: 400,
         assertion: (status, body) => {
-          return status === 400 && JSON.stringify(body).toLowerCase().includes("reserva inválida");
-        }
+          return status === 400 && JSON.stringify(body).toLowerCase().includes('reserva inválida')
+        },
       },
       {
-        name: "Caso 5: Tentar criar uma reserva com menos de 24h de antecedência (Erro)",
-        method: "POST",
+        name: 'Caso 5: Tentar criar uma reserva com menos de 24h de antecedência (Erro)',
+        method: 'POST',
         url: () => `${backendUrl}/api/reservas/${tempSpot.id_spot}/`,
-        headers: () => ({ 
+        headers: () => ({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${artistToken}`
+          Authorization: `Bearer ${artistToken}`,
         }),
         body: () => ({
           data_evento: todayStr,
-          hora_inicio: "14:00",
-          hora_fim: "15:30"
+          hora_inicio: '14:00',
+          hora_fim: '15:30',
         }),
         expectedStatus: 409,
         assertion: (status, body) => {
-          return status === 409 && JSON.stringify(body).toLowerCase().includes("menos de 24 horas");
-        }
+          return status === 409 && JSON.stringify(body).toLowerCase().includes('menos de 24 horas')
+        },
       },
       {
-        name: "Caso 6: Tentar criar uma reserva sobreposta no mesmo dia/hora/spot (Erro)",
-        method: "POST",
+        name: 'Caso 6: Tentar criar uma reserva sobreposta no mesmo dia/hora/spot (Erro)',
+        method: 'POST',
         url: () => `${backendUrl}/api/reservas/${tempSpot.id_spot}/`,
-        headers: () => ({ 
+        headers: () => ({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${artistToken}`
+          Authorization: `Bearer ${artistToken}`,
         }),
         body: () => ({
           data_evento: futureDateStr,
-          hora_inicio: "15:00",
-          hora_fim: "16:00" // Overlaps with 14:00-15:30
+          hora_inicio: '15:00',
+          hora_fim: '16:00', // Overlaps with 14:00-15:30
         }),
         expectedStatus: 409,
         assertion: (status, body) => {
-          return status === 409 && JSON.stringify(body).toLowerCase().includes("já está reservado");
-        }
+          return status === 409 && JSON.stringify(body).toLowerCase().includes('já está reservado')
+        },
       },
       {
-        name: "Criação intermédia de uma segunda reserva não sobreposta",
+        name: 'Criação intermédia de uma segunda reserva não sobreposta',
         isMeta: true,
         action: async () => {
-          console.log("[*] Creating second reservation...");
+          console.log('[*] Creating second reservation...')
           const res = await fetch(`${backendUrl}/api/reservas/${tempSpot.id_spot}/`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${artistToken}`
+              Authorization: `Bearer ${artistToken}`,
             },
             body: JSON.stringify({
               data_evento: futureDateStr,
-              hora_inicio: "16:00",
-              hora_fim: "17:30"
-            })
-          });
-          const data = await res.json();
+              hora_inicio: '16:00',
+              hora_fim: '17:30',
+            }),
+          })
+          const data = await res.json()
           if (res.status === 201) {
-            secondReservaId = data.data.id_reserva;
-            console.log(`[+] Second reservation created with ID: ${secondReservaId}`);
+            secondReservaId = data.data.id_reserva
+            console.log(`[+] Second reservation created with ID: ${secondReservaId}`)
           } else {
-            console.error("[-] Failed to create second reservation:", data);
+            console.error('[-] Failed to create second reservation:', data)
           }
-        }
+        },
       },
       {
-        name: "Caso 7: Atualizar reserva para horário sobreposto (Erro)",
-        method: "PATCH",
+        name: 'Caso 7: Atualizar reserva para horário sobreposto (Erro)',
+        method: 'PATCH',
         url: () => `${backendUrl}/api/reservas/${secondReservaId}`,
-        headers: () => ({ 
+        headers: () => ({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${artistToken}`
+          Authorization: `Bearer ${artistToken}`,
         }),
         body: () => ({
-          hora_inicio: "15:00",
-          hora_fim: "16:00" // Overlaps with first reservation (14:00-15:30)
+          hora_inicio: '15:00',
+          hora_fim: '16:00', // Overlaps with first reservation (14:00-15:30)
         }),
         expectedStatus: 409,
         assertion: (status, body) => {
-          return status === 409 && JSON.stringify(body).toLowerCase().includes("já existe uma reserva neste horário");
-        }
-      }
-    ];
+          return (
+            status === 409 &&
+            JSON.stringify(body).toLowerCase().includes('já existe uma reserva neste horário')
+          )
+        },
+      },
+    ]
 
-    console.log("[*] Running API conflict tests...");
+    console.log('[*] Running API conflict tests...')
     for (const tc of testCases) {
       if (tc.isMeta) {
-        await tc.action();
-        continue;
+        await tc.action()
+        continue
       }
-      
-      console.log(`\n[*] Running: ${tc.name}`);
-      const targetUrl = typeof tc.url === 'function' ? tc.url() : tc.url;
-      const targetHeaders = typeof tc.headers === 'function' ? tc.headers() : (tc.headers || {});
-      const targetBody = typeof tc.body === 'function' ? tc.body() : tc.body;
-      
+
+      console.log(`\n[*] Running: ${tc.name}`)
+      const targetUrl = typeof tc.url === 'function' ? tc.url() : tc.url
+      const targetHeaders = typeof tc.headers === 'function' ? tc.headers() : tc.headers || {}
+      const targetBody = typeof tc.body === 'function' ? tc.body() : tc.body
+
       try {
         const fetchOptions = {
           method: tc.method,
-          headers: targetHeaders
-        };
-        if (targetBody) {
-          fetchOptions.body = JSON.stringify(targetBody);
+          headers: targetHeaders,
         }
-        
-        const res = await fetch(targetUrl, fetchOptions);
-        const status = res.status;
-        const responseBody = await res.json();
-        
-        const passed = tc.assertion(status, responseBody);
-        console.log(passed ? `[+] PASSED (Status: ${status})` : `[-] FAILED (Status: ${status})`);
-        
+        if (targetBody) {
+          fetchOptions.body = JSON.stringify(targetBody)
+        }
+
+        const res = await fetch(targetUrl, fetchOptions)
+        const status = res.status
+        const responseBody = await res.json()
+
+        const passed = tc.assertion(status, responseBody)
+        console.log(passed ? `[+] PASSED (Status: ${status})` : `[-] FAILED (Status: ${status})`)
+
         testResults.push({
           name: tc.name,
           method: tc.method,
@@ -406,57 +413,56 @@ async function main() {
           requestBody: targetBody,
           status: status,
           response: responseBody,
-          passed: passed
-        });
+          passed: passed,
+        })
       } catch (e) {
-        console.error(`[-] Test failed with error:`, e.message);
+        console.error(`[-] Test failed with error:`, e.message)
         testResults.push({
           name: tc.name,
           method: tc.method,
           url: targetUrl,
           requestBody: targetBody,
-          status: "Error",
+          status: 'Error',
           response: { error: e.message },
-          passed: false
-        });
+          passed: false,
+        })
       }
     }
 
     // Cleanup created test records
-    console.log("\n[*] Tearing down database fixtures...");
+    console.log('\n[*] Tearing down database fixtures...')
     if (firstReservaId) {
-      await Reserva.destroy({ where: { id_reserva: firstReservaId } }).catch(() => {});
+      await Reserva.destroy({ where: { id_reserva: firstReservaId } }).catch(() => {})
     }
     if (secondReservaId) {
-      await Reserva.destroy({ where: { id_reserva: secondReservaId } }).catch(() => {});
+      await Reserva.destroy({ where: { id_reserva: secondReservaId } }).catch(() => {})
     }
     if (tempSpot) {
-      await Spot.destroy({ where: { id_spot: tempSpot.id_spot } }).catch(() => {});
+      await Spot.destroy({ where: { id_spot: tempSpot.id_spot } }).catch(() => {})
     }
     if (tempArtistUser) {
-      await tempArtistUser.destroy().catch(() => {});
+      await tempArtistUser.destroy().catch(() => {})
     }
     if (tempArtist) {
-      await tempArtist.destroy().catch(() => {});
+      await tempArtist.destroy().catch(() => {})
     }
     if (tempCategory) {
-      await tempCategory.destroy().catch(() => {});
+      await tempCategory.destroy().catch(() => {})
     }
-    console.log("[+] Database clean.");
-
+    console.log('[+] Database clean.')
   } catch (err) {
-    console.error("[-] Error during test execution setup/teardown:", err);
+    console.error('[-] Error during test execution setup/teardown:', err)
   } finally {
     // Close the database connection
-    await sequelize.close();
+    await sequelize.close()
   }
 
   // Generate beautiful HTML report
-  const reportHtmlPath = path.join(__dirname, "api_test_report.html");
-  const screenshotPath = path.join(__dirname, "api_test_report_screenshot.png");
-  
-  const passedCount = testResults.filter(r => r.passed).length;
-  const failedCount = testResults.length - passedCount;
+  const reportHtmlPath = path.join(__dirname, 'api_test_report.html')
+  const screenshotPath = path.join(__dirname, 'api_test_report_screenshot.png')
+
+  const passedCount = testResults.filter((r) => r.passed).length
+  const failedCount = testResults.length - passedCount
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -477,7 +483,7 @@ async function main() {
       --primary: #8b5cf6;
       --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -676,7 +682,9 @@ async function main() {
     </div>
 
     <div class="results-container">
-      ${testResults.map((r, i) => `
+      ${testResults
+        .map(
+          (r, i) => `
         <div class="test-card ${r.passed ? 'passed' : 'failed'}">
           <div class="test-header">
             <div class="test-title">${r.name}</div>
@@ -685,50 +693,58 @@ async function main() {
           <div class="test-details">
             <span>${r.method}</span> ${r.url} &bull; HTTP Status: <strong>${r.status}</strong>
           </div>
-          
-          ${r.requestBody ? `
+
+          ${
+            r.requestBody
+              ? `
             <div class="code-block-title">Request Body</div>
             <pre>${JSON.stringify(r.requestBody, null, 2)}</pre>
-          ` : ''}
-          
+          `
+              : ''
+          }
+
           <div class="code-block-title">Response JSON</div>
           <pre>${JSON.stringify(r.response, null, 2)}</pre>
         </div>
-      `).join('')}
+      `,
+        )
+        .join('')}
     </div>
   </div>
 </body>
 </html>
-  `;
+  `
 
-  fs.writeFileSync(reportHtmlPath, htmlContent, 'utf-8');
-  console.log(`[+] HTML test report generated at: ${reportHtmlPath}`);
+  fs.writeFileSync(reportHtmlPath, htmlContent, 'utf-8')
+  console.log(`[+] HTML test report generated at: ${reportHtmlPath}`)
 
   // Headless Browser Screenshot
-  console.log("[*] Launching Selenium in headless mode to capture screenshot...");
-  
-  let options = new chrome.Options();
-  options.setChromeBinaryPath(browserPath);
-  options.addArguments('--headless');
-  options.addArguments('--disable-gpu');
-  options.windowSize({ width: 1000, height: 1400 });
+  console.log('[*] Launching Selenium in headless mode to capture screenshot...')
 
-  const service = new chrome.ServiceBuilder().addArguments('--disable-build-check');
+  let options = new chrome.Options()
+  options.setChromeBinaryPath(browserPath)
+  options.addArguments('--headless')
+  options.addArguments('--disable-gpu')
+  options.addArguments('--allow-file-access-from-files')
+  options.addArguments('--remote-allow-origins=*')
+  options.windowSize({ width: 1920, height: 1600 })
 
-  let driver;
+  const service = new chrome.ServiceBuilder().addArguments('--disable-build-check')
+
+  let driver
   try {
     driver = await new Builder()
       .forBrowser('chrome')
       .setChromeOptions(options)
       .setChromeService(service)
-      .build();
+      .build()
 
-    const fileUrl = pathToFileURL(reportHtmlPath).toString();
-    console.log(`[*] Loading report URL: ${fileUrl}`);
-    await driver.get(fileUrl);
+    const fileUrl = pathToFileURL(reportHtmlPath).toString()
+    console.log(`[*] Loading report URL: ${fileUrl}`)
+    await driver.get(fileUrl)
 
-    console.log("[*] Waiting for report to render...");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    console.log('[*] Waiting for report to render...')
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     // Get page height dynamically
     const scrollHeight = await driver.executeScript(() => {
@@ -737,26 +753,25 @@ async function main() {
         document.documentElement.scrollHeight,
         document.body.offsetHeight,
         document.documentElement.offsetHeight,
-        document.documentElement.clientHeight
-      );
-    });
-    console.log(`[*] Adjusting browser window size to: 1000x${scrollHeight}`);
-    await driver.manage().window().setSize({ width: 1000, height: scrollHeight });
-    await new Promise((resolve) => setTimeout(resolve, 500));
+        document.documentElement.clientHeight,
+      )
+    })
+    console.log(`[*] Adjusting browser window size to: 1920x${scrollHeight}`)
+    await driver.manage().window().setSize({ width: 1920, height: scrollHeight })
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     // Capture screenshot
-    const screenshot = await driver.takeScreenshot();
-    fs.writeFileSync(screenshotPath, screenshot, 'base64');
-    console.log(`[+] Screenshot successfully saved to: ${screenshotPath}`);
-
+    const screenshot = await driver.takeScreenshot()
+    fs.writeFileSync(screenshotPath, screenshot, 'base64')
+    console.log(`[+] Screenshot successfully saved to: ${screenshotPath}`)
   } catch (err) {
-    console.error("[-] Selenium execution failed:", err);
+    console.error('[-] Selenium execution failed:', err)
   } finally {
     if (driver) {
-      await driver.quit();
-      console.log("[*] Browser closed.");
+      await driver.quit()
+      console.log('[*] Browser closed.')
     }
   }
 }
 
-main();
+main()
